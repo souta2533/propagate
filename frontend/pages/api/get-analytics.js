@@ -2,7 +2,7 @@
 import { google } from 'googleapis';
 
 var START_DATE = '2024-08-01';
-var END_DATE = '2024-08-12';
+var END_DATE = '2024-08-14';
 
 /**
  * 課題: 1つのpropertyIDからのみデータを取得しているため，複数のpropertyIDからデータを取得するように修正あり
@@ -38,7 +38,8 @@ export default async function handler(req, res) {
 
     // 初期データを反映
     const initialDateMap = allDates.reduce((acc, date)=> {
-      acc[date] = {
+      acc[date] = {};
+      acc[date]['/'] = {
         pageLocation: '',
         pagePath: '/',
         date: date,
@@ -98,12 +99,13 @@ export default async function handler(req, res) {
       response.data.rows.forEach(row => {
         const dimensions = row.dimensionValues.map(dim => dim.value);
         const metrics = row.metricValues.map(metric => Number(metric.value));
+        const pagePath = dimensions[1];
         const date = dimensions[2];
-        // console.log(date, dimensions);
-
         // console.log(dimensions);
 
-        initialDateMap[date] = {
+        // console.log(dimensions[1]);
+
+        initialDateMap[date][pagePath] = {
           pageLocation: dimensions[0],
           pagePath: dimensions[1],
           date: date,  

@@ -66,9 +66,10 @@ export default function Home() {
 
       // pagePathのリストを取得
       const pathList = Array.from(new Set(data
-        .map(item => item.pagePath)
-        .filter(path => path && path !== "/backend")));   // 空のパスを除去
+        .flatMap(dateObj => Object.keys(dateObj))
+        .filter(path => path)));   // 空のパスを除去
       setPathList(pathList);
+      // console.log(pathList)
       if(pathList.length > 0) {
         setSelectedPagePath(pathList[0]);
       }
