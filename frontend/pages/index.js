@@ -66,10 +66,9 @@ export default function Home() {
 
       // pagePathのリストを取得
       const pathList = Array.from(new Set(data
-        .flatMap(dateObj => Object.keys(dateObj))
-        .filter(path => path)));   // 空のパスを除去
+        .flatMap(dateObj => Object.keys(dateObj))));  
       setPathList(pathList);
-      // console.log(pathList)
+      // console.log("pagePathList: " + pathList); 
       if(pathList.length > 0) {
         setSelectedPagePath(pathList[0]);
       }
@@ -173,7 +172,8 @@ export default function Home() {
       ) : analyticsData ? (
         <div className="bg-white p-6 rounded-lg shadow-md">
           <DynamicAnalyticsChart 
-            data={analyticsData.filter(item => item.pagePath === selectedPagePath)} 
+            data={analyticsData}
+            selectedPagePath={selectedPagePath}
           />
         </div>
       ) : (

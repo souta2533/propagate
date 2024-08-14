@@ -10,17 +10,60 @@ const ResponsiveContainer = dynamic(
   { ssr: false }
 );
 
-const AnalyticsChart = ({ data }) => {
+/**
+  * data: data = {date: {pagePath: (pageLocation, pagePath, ...)}, {pagePath2: (...)}, .... }
+  * pagePathのフィルタリング
+  * グラフ描画に必要なデータ形式に変換
+ */
+const filteringAndTransformDataForChart = (data, selectedPagePath) => {
+  console.log(data);
+  console.log("selectedPagePath: " + selectedPagePath); 
+  const transformedData = [];
+
+  Object.keys(data).forEach(date => {
+    Object.keys(data[date]).forEach(pagePath => {
+      if (pagePath === selectedPagePath) {
+        transformedData.push({
+          pageLocation: data[date][pagePath].pageLocation,
+          pagePath: data[date][pagePath].pagePath,
+          date: data[date][pagePath].date,
+          deviceCategory: data[date][pagePath].deviceCategory,
+          sessionSource: data[date][pagePath].sessionSource,
+          city: data[date][pagePath].city,
+          firstUserSourceMedium: data[date][pagePath].firstUserSourceMedium,
+          screenPageViews: data[date][pagePath].screenPageViews,
+          conversions: data[date][pagePath].conversions,
+          activeUsers: data[date][pagePath].activeUsers,
+          sessions: data[date][pagePath].sessions,
+          engagedSessions: data[date][pagePath].engagedSessions,
+        });
+      }
+    });
+  });
+
+  return transformedData
+};
+
+const AnalyticsChart = ({ data, selectedPagePath }) => {
   const [isClient, setIsClient] = useState(false);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [filteredData, setFilteredData] = useState(data)
+  const [filteredData, setFilteredData] = useState(data);
+
+  // console.log(data);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
   useEffect(() => {
+    // pagePathでデータをフィルタリング
+    // const filterDataByPagePath = (data) => {
+    //   if (!selectedPagePath) return data;
+    //   return data.filter(item => item.pagePath === selectedDataPath);
+    // };
+
+    // データを日付範囲でフィルタリング
     const filterDataByDateRange = (data) => {
       // console.log(data);
       if (!startDate || !endDate) return data;
@@ -41,9 +84,13 @@ const AnalyticsChart = ({ data }) => {
         return itemDate >= start && itemDate <= end;
       });
     };
-
-    setFilteredData(filterDataByDateRange(data));
-  }, [startDate, endDate, data]);
+    // pagePathでデータをフィルタリングとグラフ用にデータを変換
+    let filteredAndTransformed = filteringAndTransformDataForChart(data, selectedPagePath);
+    setFilteredData(filterDataByDateRange(filteredAndTransformed));
+    // console.log(filteredAndTransformed);  
+    // console.log(filterDataByDateRange(filteredAndTransformed));
+    
+  }, [selectedPagePath, startDate, endDate, data]);
 
   // デバイスごとのデータを集計
   // useEffect(() => {
@@ -97,8 +144,6 @@ const AnalyticsChart = ({ data }) => {
           />
         </label>
       </div>
-
-      <h2>Analytics Data</h2>
 
       {/* Screen Page Views Section */}
       <div>

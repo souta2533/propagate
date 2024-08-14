@@ -4,6 +4,36 @@ import { google } from 'googleapis';
 var START_DATE = '2024-08-01';
 var END_DATE = '2024-08-14';
 
+// 日付ごとにpagePathをキーとしてデータを初期化する関数
+/**
+ * 
+ *     const allDates = [];
+    for (let d = new Date(START_DATE); d <= new Date(END_DATE); d.setDate(d.getDate() + 1)) {
+      allDates.push(new Date(d).toISOString().split('T')[0].replace(/-/g, ''));
+    }
+ */
+function initialDateMapForNewPagePath(dateMap, allDates, newPagePath) {
+  allDates.forEach(date => {
+    if (!dateMap[date][newPagePath]) {
+      dateMap[date][newPagePath] = {
+        pageLocation: '',
+        pagePath: newPagePath,
+        date: date,
+        deviceCategory: '',
+        sessionSource: '',
+        city: '',
+        firstUserSourceMedium: '',
+        screenPageViews: 0,
+        conversions: 0,
+        activeUsers: 0,
+        sessions: 0,
+        engagedSessions: 0,
+      };
+    }
+  });
+  return dateMap;
+}
+
 /**
  * 課題: 1つのpropertyIDからのみデータを取得しているため，複数のpropertyIDからデータを取得するように修正あり
  */
@@ -37,7 +67,7 @@ export default async function handler(req, res) {
     }
 
     // 初期データを反映
-    const initialDateMap = allDates.reduce((acc, date)=> {
+    let initialDateMap = allDates.reduce((acc, date)=> {
       acc[date] = {};
       acc[date]['/'] = {
         pageLocation: '',
@@ -104,6 +134,11 @@ export default async function handler(req, res) {
         // console.log(dimensions);
 
         // console.log(dimensions[1]);
+        
+        // 初見のpagePathだった場合，初期データを反映
+        if (!initialDateMap[date][pagePath]) {
+          initialDateMap = initialDateMapForNewPagePath(initialDateMap, allDates, pagePath);
+        }
 
         initialDateMap[date][pagePath] = {
           pageLocation: dimensions[0],
