@@ -16,31 +16,32 @@ const ResponsiveContainer = dynamic(
   * グラフ描画に必要なデータ形式に変換
  */
 const filteringAndTransformDataForChart = (data, selectedPagePath) => {
-  console.log(data);
-  console.log("selectedPagePath: " + selectedPagePath); 
+  // console.log(data);
+  // console.log("selectedPagePath: " + selectedPagePath); 
   const transformedData = [];
 
-  Object.keys(data).forEach(date => {
-    Object.keys(data[date]).forEach(pagePath => {
-      if (pagePath === selectedPagePath) {
+  data.forEach(entry => {
+    // console.log(entry.pagePath);
+    // console.log(selectedPagePath);
+    if (entry.pagePath === selectedPagePath) {
         transformedData.push({
-          pageLocation: data[date][pagePath].pageLocation,
-          pagePath: data[date][pagePath].pagePath,
-          date: data[date][pagePath].date,
-          deviceCategory: data[date][pagePath].deviceCategory,
-          sessionSource: data[date][pagePath].sessionSource,
-          city: data[date][pagePath].city,
-          firstUserSourceMedium: data[date][pagePath].firstUserSourceMedium,
-          screenPageViews: data[date][pagePath].screenPageViews,
-          conversions: data[date][pagePath].conversions,
-          activeUsers: data[date][pagePath].activeUsers,
-          sessions: data[date][pagePath].sessions,
-          engagedSessions: data[date][pagePath].engagedSessions,
-        });
-      }
-    });
+        pageLocation: entry.pageLocation,
+        pagePath: entry.pagePath,
+        date: entry.date,
+        deviceCategory: entry.deviceCategory,
+        sessionSource: entry.sessionSource,
+        city: entry.city,
+        firstUserSourceMedium: entry.firstUserSourceMedium,
+        screenPageViews: entry.screenPageViews,
+        conversions: entry.conversions,
+        activeUsers: entry.activeUsers,
+        sessions: entry.sessions,
+        engagedSessions: entry.engagedSessions,
+      });
+    }
   });
 
+  console.log(transformedData);
   return transformedData
 };
 

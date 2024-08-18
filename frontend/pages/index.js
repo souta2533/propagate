@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSession, signIn, signOut } from "next-auth/react";
 import dynamic from 'next/dynamic';
+require('dotenv').config({ path: '.env.local' });
 // import { start } from 'repl';
 
 
@@ -29,11 +30,16 @@ export default function Home() {
   const fetchAnalyticsProperties = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/get-analytics-properties', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+      
+      const response = await fetch(`${apiUrl}/get-properties`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ accessToken: session.accessToken })
       });
+
+      // console.log(response.json());
+
       const properties = await response.json();
       setAnalyticsProperties(properties);
       if (properties.length > 0) {
@@ -51,7 +57,8 @@ export default function Home() {
     if (!selectedProperty) return;
     setLoading(true);
     try {
-      const response = await fetch('/api/get-analytics', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+      const response = await fetch(`${apiUrl}/get-analytics`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -60,21 +67,18 @@ export default function Home() {
           propertyId: selectedProperty.propertyId
         })
       });
-
-      const data = await response.json();
+      
+      const json_data = await response.json();
       // console.log(data);
 
-      // pagePathのリストを取得
-      const pathList = Array.from(new Set(data
-        .flatMap(dateObj => Object.keys(dateObj))));  
+      // pagePathのリストを取得(ここ無駄)
+      const pathList = Array.from(new Set(
+        json_data.map(entry => entry.pagePath)
+      ));
       setPathList(pathList);
-      // console.log("pagePathList: " + pathList); 
-      if(pathList.length > 0) {
-        setSelectedPagePath(pathList[0]);
-      }
-      // console.log(data);
+      setSelectedPagePath(pathList[0]);
 
-      setAnalyticsData(data);
+      setAnalyticsData(json_data);
     } catch (error) {
       console.error('Error fetching analytics data:', error);
       alert('Failed to fetch analytics data. Please try again later.');

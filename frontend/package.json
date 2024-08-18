@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "axios": "^1.7.2",
+    "dotenv": "^16.4.5",
     "goog": "^0.2.1",
     "googleapi": "^1.0.2",
     "googleapis": "^140.0.1",
