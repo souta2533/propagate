@@ -49,12 +49,6 @@ async def get_analytics(data: AnalyticsRequest):
         print(f"Result is None: {result}")
         raise HTTPException(status_code=500, detail="Failed to get analytics data")
     
-    # try:
-    #     result_json = json.loads(result)
-    # except:
-    #     print(f"Failed to parse analytics data")
-    #     raise HTTPException(status_code=500, detail="Failed to parse analytics data")
-    # print(result)
     return result
 
 @app.get("/")
