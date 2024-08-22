@@ -41,7 +41,7 @@ const filteringAndTransformDataForChart = (data, selectedPagePath) => {
     }
   });
 
-  console.log(transformedData);
+  // console.log(transformedData);
   return transformedData
 };
 

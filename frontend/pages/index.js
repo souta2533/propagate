@@ -4,6 +4,9 @@ import dynamic from 'next/dynamic';
 require('dotenv').config({ path: '.env.local' });
 // import { start } from 'repl';
 
+const EMAIL_PROPAGATE = "egnpropagate85@gmail.com";  // 事前に作成しておくPropagateのメールアドレス
+const EMAIL_CUSTOMER = "customer@gmail.com";    // 顧客が入力するメールアドレス
+
 
 const DynamicAnalyticsChart = dynamic(() => import('../components/AnalyticsChart'), { ssr: false });
 
@@ -24,8 +27,18 @@ export default function Home() {
   const [selectedPagePath, setSelectedPagePath] = useState(''); // 選択されたpagePathの状態を管理
 
   useEffect(() => {
-    if (session) fetchAnalyticsProperties();
+    if (session) {
+      fetchAnalyticsProperties();
+      // sendInfoToBackend(session.user.email, analyticsProperties.accountId, analyticsProperties.propertyId, analyticsProperties.propertyName);
+    }
   }, [session]);
+
+  // analyticsPropertiesが更新された後に, バックエンドに送信
+  // useEffect(() => {
+  //   if (session && analyticsProperties) {
+  //     sendInfoToBackend(session.user.email, analyticsProperties.accountId, analyticsProperties.propertyId, analyticsProperties.propertyName);
+  //   }
+  // }, [session, analyticsProperties]);
 
   const fetchAnalyticsProperties = async () => {
     setLoading(true);
@@ -42,14 +55,53 @@ export default function Home() {
 
       const properties = await response.json();
       setAnalyticsProperties(properties);
+
       if (properties.length > 0) {
         setSelectedProperty(properties[0]);
       }
+
+      // console.log(properties);
+
+      // 全てのプロパティをまとめる
+      const propertiesList = properties.map(property => ({
+        accountId: property.accountId,
+        propertyId: property.propertyId,
+        propertyName: property.propertyName
+      }));
+
+      // バックエンドにデータを送信
+      sendInfoToBackend(propertiesList);
     } catch (error) {
       console.error('Error fetching analytics properties:', error);
       alert('Failed to fetch analytics properties. Please try again later.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Email, accountId, propertyIdをバックエンドに送信
+  const sendInfoToBackend = async (properties) => {
+    try {
+      // console.log(properties);
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+      const response = await fetch(`${apiUrl}/send-info`, {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ 
+          properties: properties, 
+          email_propagate: EMAIL_PROPAGATE,
+          email_customer: EMAIL_CUSTOMER,
+          // email: session.user.email
+         }),
+      });
+
+      if (!response.ok){
+        throw new Error('Failed to send information to backend');
+      }
+    } catch (error) {
+      console.error('Error:', error);
     }
   };
 
@@ -78,7 +130,12 @@ export default function Home() {
       setPathList(pathList);
       setSelectedPagePath(pathList[0]);
 
+      // console.log(json_data);
+
       setAnalyticsData(json_data);
+
+      // バックエンドにデータを送信
+      sendAnalyticsData(json_data);
     } catch (error) {
       console.error('Error fetching analytics data:', error);
       alert('Failed to fetch analytics data. Please try again later.');
@@ -86,6 +143,30 @@ export default function Home() {
       setLoading(false);
     }
   };
+
+  const sendAnalyticsData = async (analyticsJsonData) => {
+    if (!selectedProperty) return;
+
+    try {      
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+      const response = await fetch(`${apiUrl}/send-analytics/${selectedProperty.propertyId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          analyticsData: analyticsJsonData,
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send analutics data');
+      }
+
+      const result = await response.json();
+      // console.log(result);
+    } catch (error) {
+      console.log('Error sending analytics data:', error);
+    }
+  }
 
   // 特定の条件を満たした際に，呼び出される
   // 第2引数（[selectedProperty]）に指定した変数が変更された際に，呼び出される
