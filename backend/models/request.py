@@ -1,14 +1,11 @@
 # models/requests.py
 from pydantic import BaseModel, EmailStr
-from typing import List, Dict, Any, Optional
+from typing import List, Optional
 
 class AnalyticsRequest(BaseModel):
     accessToken: str
     accountId: str = None
     propertyId: str = None
-
-# class EmailRequest(BaseModel):
-#     email: EmailStr
 
 class CustomerEmailRequest(BaseModel):
     email_propagate: str
