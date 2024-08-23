@@ -8,7 +8,7 @@ class AnalyticsRequest(BaseModel):
     propertyId: str = None
 
 class CustomerEmailRequest(BaseModel):
-    email_propagate: str
+    email_propagate_id: int
     email_customer: str
 
 class InfoRequest(BaseModel):
@@ -18,7 +18,7 @@ class InfoRequest(BaseModel):
 
 class InfoRequestForDB(BaseModel):
     properties: List[InfoRequest]
-    email_propagate: EmailStr
+    email_propagate_id: int
     email_customer: EmailStr
 
 class AnalyticsDataItem(BaseModel):

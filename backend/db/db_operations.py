@@ -9,28 +9,43 @@ import logging
     ここに新しいEmail Propagateの情報を保存する関数が必要
 
 """
+def make_email_propagate(email_propagate):
+    """
+        同じemail_propagateがすでに存在するかを確認する必要がある
+    """
+    response = supabase.table("PropagateAccountTable").insert({
+        "email_propagate": email_propagate,
+    }).execute()
+
+    # エラーが含まれているかをチェック
+    if 'error' in response:
+        print(f"Error: {response.error}")
+    else:
+        pass
+        # print("Data inserted successfully")
+        # print(f"Inserted data: {response.data}")
+    return response.data[0]['id']
 
 
 """
-    Propagate Account Table 
+    CustomerEmailsTable
         - id
-        - email_propagate
+        - email_propagate_id
         - email_customer
 """
-def save_email_customer(email_propagate, email_customer):
+def save_email_customer(email_propagate_id, email_customer):
     # email_customerがすでに存在するかを確認({{'data': {'id': 'xxx', ...}, 'error}: (), 'status_code': ())
-    response = supabase.table("PropagateAccountTable").select("email_customer").eq("email_customer", email_customer).execute()
+    response = supabase.table("CustomerEmailsTable").select("email_customer").eq("email_customer", email_customer).execute()
     existing_user = response.data
     
     if existing_user and existing_user[0]['email_customer']:
-        print(existing_user)
         # email_customerがすでに存在する場合
         return existing_user[0]['email_customer']
     
     else:
         # メールが存在しない場合, 新しいユーザーを作成
-        response = supabase.table("PropagateAccountTable").insert({
-            "email_propagate": email_propagate,
+        response = supabase.table("CustomerEmailsTable").insert({
+            "email_propagate_id": email_propagate_id,
             "email_customer": email_customer    
         }).execute()
 
@@ -44,16 +59,15 @@ def save_email_customer(email_propagate, email_customer):
         return response.data[0]['email_customer']
 
 """
-    Customer Table
+    CustomerDetailsTable
         - id
         - email_customer
         - accounts_id
         - created_at
-        - password
 """
 def save_account_data(email_customer, account_id):
     try:
-        response = supabase.table("CustomerTable").insert({
+        response = supabase.table("CustomerDetailsTable").insert({
             "email_customer": email_customer,
             "accounts_id": account_id,
         }).execute()
@@ -144,6 +158,21 @@ def save_analytics_data(property_id, data):
 
 
 if __name__ == "__main__":
+
+    """ 
+        以下はホストページから処理する内容
+    """
+    email_propagate = "propagate1@gmail.com"
+    # email_propagate_id = make_email_propagate(email_propagate)
+
+    email_customer = "egn1@gmail.com"
+    save_email_customer(email_propagate_id=33, email_customer=email_customer)
+
+
+    """
+        ここからはUserが登録またはログイン後に動作する内容?
+    """
+
     # id = save_user_data("kk11@gmail.com")
 
     # save_account_data(id, account_id="1234")

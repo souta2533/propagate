@@ -16,7 +16,7 @@ export default async function handler(req, res) {
         }
 
         // 認証成功の場合，JWTトークンなどをクライアントに返す
-        return res.status(200).json({ message: 'Login successful', data});
+        return res.status(200).json({ message: 'Login successful', session: data.session});
     } else {
         res.status(405).json({ message: 'Method not allowed' });
     }

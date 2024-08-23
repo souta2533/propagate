@@ -4,8 +4,8 @@ import dynamic from 'next/dynamic';
 require('dotenv').config({ path: '.env.local' });
 // import { start } from 'repl';
 
-const EMAIL_PROPAGATE = "egnpropagate85@gmail.com";  // 事前に作成しておくPropagateのメールアドレス
-const EMAIL_CUSTOMER = "customer@gmail.com";    // 顧客が入力するメールアドレス
+const EMAIL_PROPAGATE_ID = 33;  // 事前に作成しておくPropagateのメールアドレス
+const EMAIL_CUSTOMER = "egnpropagate85@gmail.com";    // 顧客が入力するメールアドレス
 
 
 const DynamicAnalyticsChart = dynamic(() => import('../components/AnalyticsChart'), { ssr: false });
@@ -91,7 +91,7 @@ export default function Home() {
         },
         body: JSON.stringify({ 
           properties: properties, 
-          email_propagate: EMAIL_PROPAGATE,
+          email_propagate_id: EMAIL_PROPAGATE_ID,
           email_customer: EMAIL_CUSTOMER,
           // email: session.user.email
          }),
