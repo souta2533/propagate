@@ -6,9 +6,15 @@ import { supabase } from '../lib/supabaseClient';
 const Dashboard = () => {
     const router = useRouter();
     const [session, setSession] = useState(null);
-    const [accountIds, setAccountIds] = useState(null);
+    const [accountIds, setAccountIds] = useState([]);
     const [propertyIds, setPropertyIds] = useState([]);
+    const [filteredProperties, setFilteredProperties] = useState([]);
     const [analyticsData, setAnalyticsData]= useState([]);
+
+    const [selectedAccountId, setSelectedAccountId] = useState(null);
+    const [selectedProperty, setSelectedProperty] = useState(null);
+    const [pathList, setPathList] = useState([]); // pathListの状態を管理
+    const [selectedPagePath, setSelectedPagePath] = useState('');
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -39,8 +45,12 @@ const Dashboard = () => {
             }
 
             const accountIds = customerDetailsData.map(item => item.accounts_id);
-            setAccountIds(accountIds);
-            // console.log('AccountIds: ', accountIds);
+            setAccountIds(accountIds);      // ['1', '2']
+            console.log('AccountIds: ', accountIds);
+
+            if (accountIds.length > 0) {
+                setSelectedAccountId(accountIds[0]);
+            }
 
             // 4. PropertyTableからpropertyIdを取得
             const {data: allProperties, error: propertyError } = await supabase
@@ -54,7 +64,18 @@ const Dashboard = () => {
             }
             console.log('Properties: ', allProperties);
 
-            setPropertyIds(allProperties);
+            setPropertyIds(allProperties);      // [{account_id, properties_id, properties_name}]
+
+            // 最初のaccountIdに紐づくpropertyIdを取得
+            if (accountIds.length > 0) {
+                const initialFilteredProperties = allProperties.filter(
+                    p => p.account_id === accountIds[0]
+                );
+                setFilteredProperties(initialFilteredProperties);   
+                if (initialFilteredProperties.length > 0) {
+                    setSelectedProperty(initialFilteredProperties[0]);     // {account_id, properties_id, properties_name}   
+                }
+            }
 
             // 5. GoogleAnalyticsDataのデータを取得
             const propertyIds = allProperties.map(p => p.properties_id);
@@ -69,61 +90,72 @@ const Dashboard = () => {
             }
 
             setAnalyticsData(allAnalytics);
-            console.log("Analytics: ", allAnalytics);
+            // console.log("Analytics: ", allAnalytics);
         };
 
         fetchUserData();
     }, [router]);
 
+    const handleAccountChange = (e) => {
+        const selectedAccountId = e.target.value;
+        setSelectedAccountId(selectedAccountId);
+
+        // 選択されたaccountIdに紐づくpropertyIdを取得
+        const newFilteredProperties = propertyIds.filter(property => property.account_id === selectedAccountId);
+        setFilteredProperties(newFilteredProperties);
+
+        if (newFilteredProperties.length > 0) {
+            setSelectedProperty(newFilteredProperties[0]);
+        } else {
+            setSelectedProperty(null);
+        }
+    };
+
+    const handlePropertyChange = (e) => {
+        const selectedPropertyId = e.target.value;
+        const property = filteredProperties.find(p => p.properties_id === selectedPropertyId);
+        selectedProperty(property);
+    }
+
     // ダッシュボードの内容を記載
-    
     return (
-        <div className="container mx-auto p-6 bg-gray-50 min-h-screen">
-            {pathList.length > 0 && (
-                <div className="page-path-section bg-white p-6 rounded-lg shadow-md mb-6">
-                    <h2 className="text-lg font-semibold mb-4">Page Paths:</h2>
-                    <div className="relative">
-                        <select 
-                            value={selectedPagePath}
-                            onChange={(e) => setSelectedPagePath(e.target.value)}
-                            className="block w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                            {pathList.map(path => (
-                                <option key={path} value={path}>
-                                    {path}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+        <div>
+            <h1>Dashboard</h1>
+
+            {/* Account ID の選択ドロップダウン */}
+            {accountIds.length > 0 && (
+                <div className="mb-4">
+                    <label htmlFor="accountId" className="block text-gray-700">Select Account ID</label>
+                    <select 
+                        id="accountId"
+                        value={selectedAccountId || ''}
+                        onChange={handleAccountChange}
+                        className="block w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                        {accountIds.map(accountId => (
+                            <option key={accountId} value={accountId}>
+                                {accountId}
+                            </option>
+                        ))}
+                    </select>
                 </div>
             )}
 
-            <header className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold">Welcome, {session?.user?.email}</h1>
-                <button 
-                    onClick={() => supabase.auth.signOut()} 
-                    className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-                >
-                    Sign out
-                </button>
-            </header>
-            
-            {propertyData.length > 0 ? (
+            {/* Property ID の選択ドロップダウン */}
+            {filteredProperties.length > 0 ? (
                 <div className="analytics-section bg-white p-6 rounded-lg shadow-md mb-6">
                     <h2 className="text-lg font-semibold mb-4">Analytics Properties:</h2>
                     <div className="relative">
+                        <label htmlFor="propertyId" className="block text-gray-700">Select Property ID</label>
                         <select 
-                            value={selectedProperty ? `${selectedProperty.accountId}|${selectedProperty.propertyId}` : ''}
-                            onChange={(e) => {
-                                const [accountId, propertyId] = e.target.value.split('|');
-                                const property = propertyData.find(p => p.accountId === accountId && p.propertyId === propertyId);
-                                setSelectedProperty(property);
-                            }}
+                            id="propertyId"
+                            value={selectedProperty ? selectedProperty.properties_id : ''}
+                            onChange={handlePropertyChange}
                             className="block w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
-                            {propertyData.map(prop => (
-                                <option key={`${prop.accountId}|${prop.propertyId}`} value={`${prop.accountId}|${prop.propertyId}`}>
-                                    {prop.accountName} - {prop.propertyName}
+                            {filteredProperties.map(prop => (
+                                <option key={prop.properties_id} value={prop.properties_id}>
+                                    {prop.properties_name}
                                 </option>
                             ))}
                         </select>
@@ -131,26 +163,13 @@ const Dashboard = () => {
                     
                     {selectedProperty && (
                         <div className="mt-4">
-                            <p><strong>Selected Account ID:</strong> {selectedProperty.accountId}</p>
-                            <p><strong>Selected Property ID:</strong> {selectedProperty.propertyId}</p>
+                            <p><strong>Selected Account ID:</strong> {selectedProperty.account_id}</p>
+                            <p><strong>Selected Property ID:</strong> {selectedProperty.properties_id}</p>
                         </div>
                     )}
                 </div>
             ) : (
                 <p className="text-gray-600">No Analytics properties found for this account.</p>
-            )}
-            
-            {loading ? (
-                <LoadingSpinner />  // 読み込み中に表示するスピナー（仮）
-            ) : analyticsData ? (
-                <div className="bg-white p-6 rounded-lg shadow-md">
-                    <DynamicAnalyticsChart 
-                        data={analyticsData}
-                        selectedPagePath={selectedPagePath}
-                    />
-                </div>
-            ) : (
-                <p className="text-gray-600">No analytics data available</p>
             )}
         </div>
     );
