@@ -42,10 +42,10 @@ def get_info_for_db(request: InfoRequestForDB):
         property_name = property_data.propertyName
 
         # Account TableにAccountIDを保存
-        # save_account_data(email_customer, accountId)
+        save_account_data(email_customer, accountId)
 
         # Property TableにPropertyIDとPropertyNameを保存
-        # save_property_data(accountId, propertyId, property_name)
+        save_property_data(accountId, propertyId, property_name)
 
 """
     Google Analyticsからデータを取得したのち, その情報をDBに保存するエンドポイント
@@ -55,4 +55,4 @@ def get_analytics_data(request: AnalyticsDataRequest, propertyId: str):
     analytics_data = request.analyticsData
     
     # Google AnalyticsのデータをDBに保存
-    # save_analytics_data(propertyId, analytics_data)
+    save_analytics_data(propertyId, analytics_data)

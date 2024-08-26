@@ -5,8 +5,8 @@ const { google } = require('googleapis');
 const { json } = require('stream/consumers');
 const fs = require('fs');
 
-var START_DATE = '2024-08-01';
-var END_DATE = '2024-08-18';
+var START_DATE = '2024-07-30';
+var END_DATE = '2024-08-26';
 
 // 日付ごとにpagePathをキーとしてデータを初期化する関数
 function initialDateMapForNewPagePath(dateMap, allDates, newPagePath) {

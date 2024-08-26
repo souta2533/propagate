@@ -90,7 +90,11 @@ const Dashboard = () => {
             }
 
             setAnalyticsData(allAnalytics);
-            // console.log("Analytics: ", allAnalytics);
+            console.log("Analytics: ", allAnalytics);
+
+            // pagePathのリストを取得
+            const pathList = new Set(allAnalytics.map(item => item.page_path));
+            console.log("PathList: ", pathList);
         };
 
         fetchUserData();
@@ -114,7 +118,7 @@ const Dashboard = () => {
     const handlePropertyChange = (e) => {
         const selectedPropertyId = e.target.value;
         const property = filteredProperties.find(p => p.properties_id === selectedPropertyId);
-        selectedProperty(property);
+        setSelectedProperty(property);
     }
 
     // ダッシュボードの内容を記載

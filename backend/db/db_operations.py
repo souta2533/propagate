@@ -1,7 +1,9 @@
 from postgrest.exceptions import APIError   
 from db.supabase_client import supabase
-import json
 import logging
+
+from utils.batch import batch_process
+
 
 
 """
@@ -13,6 +15,13 @@ def make_email_propagate(email_propagate):
     """
         同じemail_propagateがすでに存在するかを確認する必要がある
     """
+    existing_response = supabase.table("PropagateAccountTable").select("id").eq("email_propagate", email_propagate).execute()
+
+    if existing_response.data:
+        print(f"Email propagate already exists: {existing_response.data}")
+        return existing_response.data[0]['id']
+    
+    # email_propagateがすでに存在しない場合, 新しいユーザーを作成
     response = supabase.table("PropagateAccountTable").insert({
         "email_propagate": email_propagate,
     }).execute()
@@ -126,12 +135,29 @@ def save_property_data(account_id, property_id, property_name):
 
     data: {"pageLocation": x, ...}
 """
-def save_analytics_data(property_id, data):
+def save_batch(batch, property_id):
     try:
-        for item in data:
+        for item in batch:
             # 重複データがないかを確認
-            existing_data = supabase.table("AnalyticsData").select("id").eq("property_id", property_id).eq("date", item.date).execute()
-
+            existing_data = (
+                supabase.table("AnalyticsData")
+                .select("id")
+                .eq("property_id", property_id)
+                .eq("date", item.date)
+                .eq("page_location", item.pageLocation)
+                .eq("page_path", item.pagePath)
+                .eq("device_category", item.deviceCategory)
+                .eq("session_source", item.sessionSource)
+                .eq("city", item.city)
+                .eq("first_user_source_medium", item.firstUserSourceMedium)
+                .eq("screen_page_views", item.screenPageViews)
+                .eq("conversions", item.conversions)
+                .eq("active_users", item.activeUsers)
+                .eq("sessions", item.sessions)
+                .eq("engaged_sessions", item.engagedSessions)
+                .execute()
+                )
+            print(f"Date: {item.date}")
             if existing_data.data:
                 print(f"Data already exists: {existing_data.data}")
                 continue
@@ -154,6 +180,13 @@ def save_analytics_data(property_id, data):
     except APIError as e:
         error_info = e.args[0]
         print(e)
+        print(f"Error to save analytics data: {error_info}")
+
+def save_analytics_data(property_id, data, batch_size=50):
+    try:
+        batch_process(data, batch_size, save_batch, property_id)
+    except APIError as e:
+        error_info = e.args[0]
         print(f"Error to save analytics data: {error_info}")
 
 
