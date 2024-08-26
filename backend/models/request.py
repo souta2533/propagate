@@ -37,3 +37,17 @@ class AnalyticsDataItem(BaseModel):
 
 class AnalyticsDataRequest(BaseModel):
     analyticsData: List[AnalyticsDataItem]
+
+class SearchConsoleRequest(BaseModel):
+    accessToken: str
+
+class SearchConsoleItem(BaseModel):
+    pass
+
+class SearchConsoleDataRequest(BaseModel):
+    searchConsoleData: List[SearchConsoleItem]
+
+# URLを受け取る
+class URLRequest(BaseModel):
+    customerEmail: str
+    url: str

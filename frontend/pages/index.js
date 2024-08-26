@@ -166,12 +166,40 @@ export default function Home() {
     } catch (error) {
       console.log('Error sending analytics data:', error);
     }
-  }
+  };
+
+  const fetchSearchConsoleData = async () => {
+    if (!selectedProperty) return;
+    setLoading(true);
+
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+      const response = await fetch(`${apiUrl}/get-search-console`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accessToken: session.accessToken })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch search console data');
+      }
+
+      const result = await response.json();
+      console.log('Search Console Data: ', result);
+    } catch (error) {
+      console.error('Error fetching search console data:', error);
+      alert('Failed to fetch search console data. Please try again later.');
+    }
+  };
 
   // 特定の条件を満たした際に，呼び出される
   // 第2引数（[selectedProperty]）に指定した変数が変更された際に，呼び出される
   useEffect(() => {
-    if (selectedProperty) fetchAnalyticsData();
+    if (selectedProperty) {
+      fetchAnalyticsData();
+      fetchSearchConsoleData();
+    }
   }, [selectedProperty]);
 
   if (!session) {

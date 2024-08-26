@@ -2,6 +2,7 @@ import React from 'react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
+import { handlerUrlSubmit } from '../lib/submitHandler';
 
 const Dashboard = () => {
     const router = useRouter();
@@ -15,6 +16,8 @@ const Dashboard = () => {
     const [selectedProperty, setSelectedProperty] = useState(null);
     const [pathList, setPathList] = useState([]); // pathListの状態を管理
     const [selectedPagePath, setSelectedPagePath] = useState('');
+
+    const [url, setUrl] = useState('');     // URLの状態を管理
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -121,6 +124,12 @@ const Dashboard = () => {
         setSelectedProperty(property);
     }
 
+    // URLの送信処理
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        handlerUrlSubmit(session.user.email, url, setUrl);
+    };
+
     // ダッシュボードの内容を記載
     return (
         <div>
@@ -175,6 +184,28 @@ const Dashboard = () => {
             ) : (
                 <p className="text-gray-600">No Analytics properties found for this account.</p>
             )}
+            {/* URL入力と送信ボタン */}
+            <div className="url-submission-section bg-white p-6 rounded-lg shadow-md mt-6">
+                <h2 className="text-lg font-semibold mb-4">Submit a URL:</h2>
+                <form onSubmit={handleSubmit}>
+                    <label htmlFor="url" className="block text-gray-700">Enter URL</label>
+                    <input
+                        id="url"
+                        type="text"
+                        value={url}
+                        onChange={(e) => setUrl(e.target.value)}
+                        className="block w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+                        placeholder="https://example.com"
+                        required
+                    />
+                    <button
+                        type="submit"
+                        className="px-4 py-2 bg-blue-500 text-white rounded-md shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                        Submit URL
+                    </button>
+                </form>
+            </div>
         </div>
     );
 }

@@ -35,6 +35,26 @@ def make_email_propagate(email_propagate):
         # print(f"Inserted data: {response.data}")
     return response.data[0]['id']
 
+"""
+    Userが入力したURLを保存する関数
+"""
+def save_customer_url(customer_email, url):
+    response = supabase.table("CustomerUrlTable").select("email_customer").eq("customer_url", url).execute()
+    existing_url = response.data
+
+    if existing_url and existing_url[0]['customer_url']:
+        return existing_url[0]['customer_url']
+    else:
+        response = supabase.table("CustomerUrlTable").insert({
+            "email_customer": customer_email,
+            "customer_url": url
+        }).execute()
+
+        if 'error' in response:
+            print(f"Error: {response.error}")
+        
+        return response.data[0]['customer_url']
+
 
 """
     CustomerEmailsTable
