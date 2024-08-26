@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSession, signIn, signOut } from "next-auth/react";
 import dynamic from 'next/dynamic';
 require('dotenv').config({ path: '.env.local' });
-// import { start } from 'repl';
+import { supabase } from '../lib/supabaseClient';
 
 const EMAIL_PROPAGATE_ID = 33;  // 事前に作成しておくPropagateのメールアドレス
 const EMAIL_CUSTOMER = "egnpropagate85@gmail.com";    // 顧客が入力するメールアドレス
@@ -25,6 +25,8 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [pathList, setPathList] = useState([]); // pathListの状態を管理
   const [selectedPagePath, setSelectedPagePath] = useState(''); // 選択されたpagePathの状態を管理
+
+  const [customerUrls, setCustomerUrls] = useState([]); // 顧客のURLの状態を管理
 
   useEffect(() => {
     if (session) {
@@ -168,6 +170,42 @@ export default function Home() {
     }
   };
 
+  const getCustomerUrls = async () => {
+    // 1. CustomerEmailsTableからemail_customerを取得
+    const { data: customerEmails, error: customerEmailsError } = await supabase
+      .from('CustomerEmailsTable')
+      .select('email_customer');
+
+    if (customerEmailsError) {
+      console.error('Error fetching customer emails:', customerEmailsError);
+      return;
+    }
+
+    // 2. CustomerUrlTableからemail_customerに一致するURLを取得
+    const customerUrls = {};
+
+    for (let customer of customerEmails) {
+      const email = customer.email_customer;
+
+      // CustomerUrlsTableからemail_customerに一致するURLを取得
+      const {data: urls, error: urlsError } = await supabase  
+        .from('CustomerUrlTable')
+        .select('customer_url')
+        .eq('email_customer', email);
+      
+      if (urlsError) {
+        console.error('Error fetching customer urls:', urlsError);
+        continue;
+      }
+
+      // 取得したURLを辞書形式で保存
+      customerUrls[email] = urls.map(urlObj => urlObj.customer_url);
+    }
+
+    console.log("Email to URL: ", customerUrls);
+
+  }
+
   const fetchSearchConsoleData = async () => {
     if (!selectedProperty) return;
     setLoading(true);
@@ -198,7 +236,8 @@ export default function Home() {
   useEffect(() => {
     if (selectedProperty) {
       fetchAnalyticsData();
-      fetchSearchConsoleData();
+      getCustomerUrls();
+      // fetchSearchConsoleData();
     }
   }, [selectedProperty]);
 

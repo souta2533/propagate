@@ -24,17 +24,6 @@ def get_email_from_customer(request: CustomerEmailRequest):
     return {"email_propagate": email_propagate_id, "email_customer": email_customer}
 
 """
-    Userが入力したURLを取得するエンドポイント
-"""
-@router.post("/submit-url")
-async def submit_url(data: URLRequest):
-    customer_email = data.customerEmail
-    url = data.url
-
-    # URLをDBに保存
-    save_customer_url(customer_email, url)
-
-"""
     Propertyを取得したのち, その情報からDBを更新するエンドポイント
 """
 @router.post("/send-info")
@@ -67,3 +56,15 @@ def get_analytics_data(request: AnalyticsDataRequest, propertyId: str):
     
     # Google AnalyticsのデータをDBに保存
     # save_analytics_data(propertyId, analytics_data)
+
+
+"""
+    Userが入力したURLを取得するエンドポイント
+"""
+@router.post("/submit-url")
+async def submit_url(data: URLRequest):
+    customer_email = data.customerEmail
+    url = data.url
+
+    # URLをDBに保存
+    save_customer_url(customer_email, url)
