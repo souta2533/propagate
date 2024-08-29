@@ -21,26 +21,11 @@ async function getSearchConsoleData(auth, siteURL) {
                 rowLimit: 1000
             }
         });
-        // const response = await fetch('https://www.googleapis.com/webmasters/v3/sites/https://www.example.com/searchAnalytics/query', {
-        //     method: 'POST',
-        //     headers: {
-        //       'Authorization': `Bearer ${session.accessToken}`,
-        //       'Content-Type': 'application/json'
-        //     },
-        //     body: JSON.stringify({
-        //       startDate: '2024-08-20',
-        //       endDate: '2024-08-21',
-        //       dimensions: ['date', 'query', 'page', 'country', 'device'],
-        //       rowLimit: 1000
-        //     })
-        //   });
-          
-        // console.log('Full API Response:', response.data);
 
-        if (response.data.rows && Array.isArray(response.data.rows)) {
+        if (response && response.data && response.data.rows && Array.isArray(response.data.rows)) {
             return response.data.rows;
         } else {
-            console.log("No data of Search Console");
+            console.log("NoData");
             return [];
         }
     } catch (error) {
@@ -76,6 +61,9 @@ async function handler(req, res) {
         // Google Search Consoleからデータを取得
         const rows = await getSearchConsoleData(auth, url);
         // console.log('Rows: ', rows);
+
+        // データが空だった場合，終了
+        if (rows.length == 0) return;
 
         const dataMap = {};
         rows.forEach(row => {

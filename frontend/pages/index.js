@@ -208,7 +208,10 @@ export default function Home() {
     try {
       // console.log("CustomerUrls: ", customerUrls[1]);  
       const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-      const testUrl = "https://www.propagateinc.com/";
+
+
+      // const testUrl = "https://www.propagateinc.com/";
+      const testUrl = customerUrls[0];
 
       console.log("CustomerUrls: ", testUrl);
 
@@ -222,20 +225,19 @@ export default function Home() {
           url: testUrl
         })
       });
-
-      // Access Tokenの確認
-      // response = await fetch(`https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${session.accessToken}`);
-      // const tokenInfo = await response.json();
-      // console.log(tokenInfo);
     
       // レスポンスの確認
       if (response.ok) {
-        const data = await response.json();
-        console.log("Success! Received data:", data);
+        if (response.status === 204) {
+          console.warn("No data available from Search Console");
+          alert("No data available from Search Console");
+        } else {
+          const data = await response.json();
+          console.log("Success! Received data:", data);
+        }
       } else {
-        console.error("Failed to fetch data. Status:", response.status);
-        const errorData = await response.json();
-        console.error("Error details:", errorData);
+        console.error('Failed to fetch search console data. Status: ', response.status);
+        error('Failed to fetch search console data');
       }
 
       // const results = await Promise.all(customerUrls.map(async (url) => {

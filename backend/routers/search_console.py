@@ -29,7 +29,9 @@ async def get_search_console(data: SearchConsoleRequest):
     result = run_js_script("./js/get_search_console.js", data.model_dump())
     # print(f"result: {result}")
     if result is None:
-        raise HTTPException(status_code=500, detail='Failed to get search console data')
+        raise HTTPException(status_code=500, detail='Failed to get Search Console data')
+    elif result == "NoData":
+        raise HTTPException(status_code=204, detail='No data available from Search Console')
     else:
         # URLからPropertyIDを取得
         property_id = get_property_id_by_url(data.url)

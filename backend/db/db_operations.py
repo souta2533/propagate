@@ -4,7 +4,7 @@ import logging
 
 from utils.batch import batch_process
 
-
+NUM_DATA = 100
 
 """
 
@@ -285,7 +285,7 @@ def save_search_console_data(property_id, data, batch_size=50):
     try:
         print(f"Total data: {len(data)}")
         # バッチ処理
-        for i in range(0, 100, batch_size):
+        for i in range(0, NUM_DATA, batch_size):
             print(f"Processing batch {i} to {i + batch_size}")
             batch = data[i:i + batch_size]
             save_batch_search_console_data(batch, property_id)
