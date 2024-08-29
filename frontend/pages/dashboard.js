@@ -11,9 +11,11 @@ const Dashboard = () => {
     const [propertyIds, setPropertyIds] = useState([]);
     const [filteredProperties, setFilteredProperties] = useState([]);
     const [analyticsData, setAnalyticsData]= useState([]);
+    const [searchConsoleData, setSearchConsoleData] = useState([]);
 
     const [selectedAccountId, setSelectedAccountId] = useState(null);
     const [selectedProperty, setSelectedProperty] = useState(null);
+    // ここにセットされるデータ（必要かも？）
     const [pathList, setPathList] = useState([]); // pathListの状態を管理
     const [selectedPagePath, setSelectedPagePath] = useState('');
 
@@ -21,7 +23,7 @@ const Dashboard = () => {
     const [url, setUrl] = useState('');     // URLの状態を管理
 
     useEffect(() => {
-        const fetchUserData = async () => {
+        const fetchAnalyticsData = async () => {
             // 1. localStorageからセッションを取得
             // const {data: session } = await supabase.auth.getSession();
             const storedSession = localStorage.getItem('supabaseSession');
@@ -66,7 +68,7 @@ const Dashboard = () => {
                 console.error('Error fetching property ids:', propertyError);
                 return;
             }
-            console.log('Properties: ', allProperties);
+            // console.log('Properties: ', allProperties);
 
             setPropertyIds(allProperties);      // [{account_id, properties_id, properties_name}]
 
@@ -101,12 +103,45 @@ const Dashboard = () => {
             console.log("PathList: ", pathList);
         };
 
+        fetchAnalyticsData();
+    }, [router]);
+
+    useEffect(() => {
         /**
          *  以下ではGoogle Search Consoleのデータを取得する処理を追加
          */
+        const fetchSearchConsoleData = async () => {
+            try {
+                console.log('PropertyIds: ', propertyIds);  
+                // 全てのPropertyIDからSearch Consoleのデータを取得
+                let allSearchConsoleData = {};
 
-        fetchUserData();
-    }, [router]);
+                for (const property of propertyIds) {
+                    const { properties_id } = property;
+
+                    const { data, error: searchConsoleError } = await supabase
+                        .from('SearchConsoleDataTable')
+                        .select('*')
+                        .eq('property_id', properties_id)
+                        .limit(1000);
+                    
+                        if (searchConsoleError) {
+                            console.error('Error fetching search console data:', searchConsoleError);
+                            continue; 
+                        }
+                    
+                        // 取得したデータを辞書形式に追加
+                        allSearchConsoleData[properties_id] = data;
+                }
+                console.log('Search Console Data: ', allSearchConsoleData);
+
+                setSearchConsoleData(allSearchConsoleData);
+            } catch (error) {
+                console.error('Error fetching search console data:', error);
+            }
+        };
+        fetchSearchConsoleData();
+    }, [propertyIds]);
 
     const handleAccountChange = (e) => {
         const selectedAccountId = e.target.value;
