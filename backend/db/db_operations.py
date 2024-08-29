@@ -283,6 +283,7 @@ def save_batch_search_console_data(batch, property_id):
 
 def save_search_console_data(property_id, data, batch_size=50):
     try:
+        print(f"Property ID: {property_id}")
         print(f"Total data: {len(data)}")
         # バッチ処理
         for i in range(0, NUM_DATA, batch_size):
@@ -291,6 +292,7 @@ def save_search_console_data(property_id, data, batch_size=50):
             save_batch_search_console_data(batch, property_id)
     except Exception as e:
         print(f"Error to save search console data: {e}")
+
 
 if __name__ == "__main__":
 

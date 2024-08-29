@@ -213,52 +213,46 @@ export default function Home() {
       // const testUrl = "https://www.propagateinc.com/";
       const testUrl = customerUrls[0];
 
-      console.log("CustomerUrls: ", testUrl);
+      // console.log("CustomerUrls: ", testUrl);
 
-      const response = await fetch(`${apiUrl}/get-search-console`, {
-        method: 'POST', 
-        headers: { 
-          'Content-Type': 'application/json' 
-        },
-        body: JSON.stringify({
-          accessToken: session.accessToken,  // 事前にセッションからトークンを取得しておく
-          url: testUrl
-        })
-      });
-    
-      // レスポンスの確認
-      if (response.ok) {
-        if (response.status === 204) {
-          console.warn("No data available from Search Console");
-          alert("No data available from Search Console");
+      // const response = await fetch(`${apiUrl}/get-search-console`, {
+      //   method: 'POST', 
+      //   headers: { 
+      //     'Content-Type': 'application/json' 
+      //   },
+      //   body: JSON.stringify({
+      //     accessToken: session.accessToken,  // 事前にセッションからトークンを取得しておく
+      //     url: testUrl
+      //   })
+      // });
+
+      const results = await Promise.all(customerUrls.map(async (url) => {
+        const response = await fetch(`${apiUrl}/get-search-console`, {
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            accessToken: session.accessToken,
+            url: url
+          })
+        });
+        // レスポンスの確認
+        if (response.ok) {
+          if (response.status === 204) {
+            console.warn("No data available from Search Console. URL: ", url);
+            alert("No data available from Search Console");
+            return { url ,data: null};
+          } else {
+            const data = await response.json();
+            console.log("Success! Received data:", data);
+            return { url, data: data };
+          }
         } else {
-          const data = await response.json();
-          console.log("Success! Received data:", data);
+          console.error('Failed to fetch search console data. Status: ', response.status);
+          throw new Error('Failed to fetch search console data');
         }
-      } else {
-        console.error('Failed to fetch search console data. Status: ', response.status);
-        error('Failed to fetch search console data');
-      }
+      }));
 
-      // const results = await Promise.all(customerUrls.map(async (url) => {
-      //   const response = await fetch(`${apiUrl}/get-search-console`, {
-      //     method: 'POST', 
-      //     headers: { 'Content-Type': 'application/json' },
-      //     body: JSON.stringify({
-      //       accessToken: session.accessToken,
-      //       url: url
-      //     })
-      //   });
-
-      //   if (!response.ok) {
-      //     throw new Error('Failed to fetch search console data');
-      //   }
-
-      //   const result = await response.json();
-      //   return { url, data: result };
-      // }));
-
-      // console.log('Search Console Data by URL: ', results);
+      console.log('Search Console Data by URL: ', results);
     } catch (error) {
       console.error('Error fetching search console data:', error);
       alert('Failed to fetch search console data. Please try again later.');
