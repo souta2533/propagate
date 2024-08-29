@@ -1,7 +1,9 @@
+import { setPriority } from 'os';
+
 require('dotenv').config({ path: '.env.local' });
 
 
-export const handlerUrlSubmit = async (customerEmail, url, setUrl) => {
+export const handlerUrlSubmit = async (customerEmail, propertyId, url, setUrl) => {
     try {
         const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;    //await fetch(`${apiUrl}/get-properties`
         const response = await fetch(`${apiUrl}/submit-url`, {
@@ -11,12 +13,14 @@ export const handlerUrlSubmit = async (customerEmail, url, setUrl) => {
             },
             body: JSON.stringify({ 
                 customerEmail: customerEmail,
+                propertyId: propertyId,
                 url: url}),
         });
 
         if (response.ok) {
             alert('URL submitted successfully!');
-            setUrl('');     // フォームをクリア
+            setPriority('');        // フォームをクリア
+            setUrl('');    
         } else {
             alert('Failed to submit URL');
         }

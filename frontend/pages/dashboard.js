@@ -17,6 +17,7 @@ const Dashboard = () => {
     const [pathList, setPathList] = useState([]); // pathListの状態を管理
     const [selectedPagePath, setSelectedPagePath] = useState('');
 
+    const [propertyId, setPropertyId] = useState('');     // Property ID(URLと一生に送信する用)の状態を管理
     const [url, setUrl] = useState('');     // URLの状態を管理
 
     useEffect(() => {
@@ -100,6 +101,10 @@ const Dashboard = () => {
             console.log("PathList: ", pathList);
         };
 
+        /**
+         *  以下ではGoogle Search Consoleのデータを取得する処理を追加
+         */
+
         fetchUserData();
     }, [router]);
 
@@ -127,7 +132,7 @@ const Dashboard = () => {
     // URLの送信処理
     const handleSubmit = (e) => {
         e.preventDefault();
-        handlerUrlSubmit(session.user.email, url, setUrl);
+        handlerUrlSubmit(session.user.email, propertyId, url, setPropertyId, setUrl);
     };
 
     // ダッシュボードの内容を記載
@@ -184,28 +189,41 @@ const Dashboard = () => {
             ) : (
                 <p className="text-gray-600">No Analytics properties found for this account.</p>
             )}
-            {/* URL入力と送信ボタン */}
-            <div className="url-submission-section bg-white p-6 rounded-lg shadow-md mt-6">
-                <h2 className="text-lg font-semibold mb-4">Submit a URL:</h2>
-                <form onSubmit={handleSubmit}>
-                    <label htmlFor="url" className="block text-gray-700">Enter URL</label>
-                    <input
-                        id="url"
-                        type="text"
-                        value={url}
-                        onChange={(e) => setUrl(e.target.value)}
-                        className="block w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
-                        placeholder="https://example.com"
-                        required
-                    />
-                    <button
-                        type="submit"
-                        className="px-4 py-2 bg-blue-500 text-white rounded-md shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                        Submit URL
-                    </button>
-                </form>
-            </div>
+            {/* URLとProperty IDの入力と送信ボタン */}
+<div className="url-submission-section bg-white p-6 rounded-lg shadow-md mt-6">
+    <h2 className="text-lg font-semibold mb-4">Submit Property ID and URL:</h2>
+    <form onSubmit={handleSubmit}>
+        <label htmlFor="propertyId" className="block text-gray-700">Enter Property ID</label>
+        <input
+            id="propertyId"
+            type="text"
+            value={propertyId}
+            onChange={(e) => setPropertyId(e.target.value)}
+            className="block w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+            placeholder="Property ID"
+            required
+        />
+
+        <label htmlFor="url" className="block text-gray-700">Enter URL</label>
+        <input
+            id="url"
+            type="text"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            className="block w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+            placeholder="https://example.com"
+            required
+        />
+
+        <button
+            type="submit"
+            className="px-4 py-2 bg-blue-500 text-white rounded-md shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+            Submit
+        </button>
+    </form>
+</div>
+
         </div>
     );
 }

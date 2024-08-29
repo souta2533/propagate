@@ -38,15 +38,17 @@ def make_email_propagate(email_propagate):
 """
     Userが入力したURLを保存する関数
 """
-def save_customer_url(customer_email, url):
-    response = supabase.table("CustomerUrlTable").select("email_customer").eq("customer_url", url).execute()
+def save_customer_url(customer_email, property_id, url):
+    response = supabase.table("CustomerUrlTable").select("customer_url").eq("customer_url", url).execute()
     existing_url = response.data
+    print(existing_url)
 
     if existing_url and existing_url[0]['customer_url']:
         return existing_url[0]['customer_url']
     else:
         response = supabase.table("CustomerUrlTable").insert({
             "email_customer": customer_email,
+            "property_id": property_id,
             "customer_url": url
         }).execute()
 
@@ -54,7 +56,6 @@ def save_customer_url(customer_email, url):
             print(f"Error: {response.error}")
         
         return response.data[0]['customer_url']
-
 
 """
     CustomerEmailsTable
@@ -140,8 +141,6 @@ def save_property_data(account_id, property_id, property_name):
         - date
         - page_location
         - page_path
-        - date
-        - date
         - device_category
         - session_source
         - city
@@ -155,7 +154,7 @@ def save_property_data(account_id, property_id, property_name):
 
     data: {"pageLocation": x, ...}
 """
-def save_batch(batch, property_id):
+def save_batch_analytics_data(batch, property_id):
     try:
         for item in batch:
             # 重複データがないかを確認
@@ -204,11 +203,94 @@ def save_batch(batch, property_id):
 
 def save_analytics_data(property_id, data, batch_size=50):
     try:
-        batch_process(data, batch_size, save_batch, property_id)
+        batch_process(data, batch_size, save_batch_analytics_data, property_id)
     except APIError as e:
         error_info = e.args[0]
         print(f"Error to save analytics data: {error_info}")
 
+"""
+    URLをKeyとして, PropertyIDを取得する関数
+"""
+def get_property_id_by_url(customer_url):
+    try:
+        response = (
+            supabase.table("CustomerUrlTable")
+            .select("property_id")
+            .eq("customer_url", customer_url)
+            .execute()
+        )
+
+        if response.data:
+            return response.data[0]['property_id']
+        else:
+            print(f"No property ID found for URL: {customer_url}")
+            return None
+    except Exception as e:
+        print(f"Error to get property ID: {e}")
+        return None
+
+"""
+    Search Console Data Table
+    - id
+    - property_id
+    - date
+    - query
+    - page
+    - country
+    - device
+    - clicks
+    - impressions
+    - ctr
+    - position
+"""
+def save_batch_search_console_data(batch, property_id):
+    try:
+        for item in batch:
+            # 重複データの確認
+            existing_data = (
+                supabase.table("SearchConsoleDataTable")
+                .select("id")
+                .eq("property_id", property_id)
+                .eq("date", item['date'])
+                .eq("query", item['query'])
+                .eq("page", item['page'])
+                .eq("country", item['country'])
+                .eq("device", item['device'])
+                .execute()
+            )
+        
+            if existing_data.data:
+                print(f"Data already exists: {existing_data.data}")
+                continue
+            
+            # データの挿入
+            response = supabase.table("SearchConsoleDataTable").insert({
+                "property_id": property_id,
+                "date": item['date'],
+                "query": item['query'],
+                "page": item['page'],
+                "country": item['country'],
+                "device": item['device'],
+                "click": int(item['clicks']),
+                "impression": int(item['impressions']),
+                "ctr": float(item['ctr']),
+                "position": int(round(item['position']))
+            }).execute()
+
+    except Exception as e:
+        print(f"data: {item}")
+        print(f"Error to save search console data: {e}")
+
+def save_search_console_data(property_id, data, batch_size=50):
+    try:
+        print(f"Total data: {len(data)}")
+        # バッチ処理
+        for i in range(0, 100, batch_size):
+            print(f"Processing batch {i} to {i + batch_size}")
+            batch = data[i:i + batch_size]
+            save_batch_search_console_data(batch, property_id)
+    except Exception as e:
+        print(f"Error to save search console data: {e}")
 
 if __name__ == "__main__":
 

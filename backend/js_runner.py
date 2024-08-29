@@ -16,6 +16,8 @@ def run_js_script(script_name, input_data):
         )
 
         # 入力データをJSON形式に変換
+        # print('Input data to Node.js script: ', input_data)
+        # print(json.dumps(input_data))
         stdout, stderr = process.communicate(json.dumps(input_data).encode())
 
         if stderr:
@@ -26,7 +28,7 @@ def run_js_script(script_name, input_data):
             raise Exception("No output received from JavaScript")
         
         # 出力結果をJSON形式に変換
-        # print('OOKKKKKK')
+        # print('Raw stdout from Node.hs script: ', stdout.decode())
         # print(json.loads(stdout.decode()))
         
         return json.loads(stdout.decode())

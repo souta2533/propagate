@@ -64,7 +64,8 @@ def get_analytics_data(request: AnalyticsDataRequest, propertyId: str):
 @router.post("/submit-url")
 async def submit_url(data: URLRequest):
     customer_email = data.customerEmail
+    property_id = data.propertyId
     url = data.url
 
     # URLをDBに保存
-    save_customer_url(customer_email, url)
+    save_customer_url(customer_email, property_id, url)

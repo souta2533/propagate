@@ -3,8 +3,12 @@ import { useSession, signIn, signOut } from "next-auth/react";
 import dynamic from 'next/dynamic';
 require('dotenv').config({ path: '.env.local' });
 import { supabase } from '../lib/supabaseClient';
+// const jwtDecode = require('jwt-decode');
+// import {default as jwtDecode } from 'jwt-decode';
+import {jwtDecode} from 'jwt-decode';
 
-const EMAIL_PROPAGATE_ID = 33;  // 事前に作成しておくPropagateのメールアドレス
+
+const EMAIL_PROPAGATE_ID = 35;  // 事前に作成しておくPropagateのメールアドレス
 const EMAIL_CUSTOMER = "egnpropagate85@gmail.com";    // 顧客が入力するメールアドレス
 
 
@@ -31,16 +35,9 @@ export default function Home() {
   useEffect(() => {
     if (session) {
       fetchAnalyticsProperties();
-      // sendInfoToBackend(session.user.email, analyticsProperties.accountId, analyticsProperties.propertyId, analyticsProperties.propertyName);
+      getCustomerUrls();
     }
   }, [session]);
-
-  // analyticsPropertiesが更新された後に, バックエンドに送信
-  // useEffect(() => {
-  //   if (session && analyticsProperties) {
-  //     sendInfoToBackend(session.user.email, analyticsProperties.accountId, analyticsProperties.propertyId, analyticsProperties.propertyName);
-  //   }
-  // }, [session, analyticsProperties]);
 
   const fetchAnalyticsProperties = async () => {
     setLoading(true);
@@ -95,7 +92,6 @@ export default function Home() {
           properties: properties, 
           email_propagate_id: EMAIL_PROPAGATE_ID,
           email_customer: EMAIL_CUSTOMER,
-          // email: session.user.email
          }),
       });
 
@@ -181,16 +177,16 @@ export default function Home() {
       return;
     }
 
-    // 2. CustomerUrlTableからemail_customerに一致するURLを取得
-    const customerUrls = {};
+    // 2. CustomerUrlTableからemail_customerに一致するpropertyIDとURLを取得
+    const customerUrls = [];
 
     for (let customer of customerEmails) {
       const email = customer.email_customer;
 
       // CustomerUrlsTableからemail_customerに一致するURLを取得
-      const {data: urls, error: urlsError } = await supabase  
+      const {data: propertyIdsAndUrls, error: urlsError } = await supabase  
         .from('CustomerUrlTable')
-        .select('customer_url')
+        .select('property_id, customer_url')
         .eq('email_customer', email);
       
       if (urlsError) {
@@ -199,32 +195,68 @@ export default function Home() {
       }
 
       // 取得したURLを辞書形式で保存
-      customerUrls[email] = urls.map(urlObj => urlObj.customer_url);
+      propertyIdsAndUrls.forEach(propertyIdAndUrlObj => {
+        customerUrls.push(propertyIdAndUrlObj.customer_url);
+      });
     }
-
-    console.log("Email to URL: ", customerUrls);
-
+    setCustomerUrls(customerUrls);
   }
 
   const fetchSearchConsoleData = async () => {
-    if (!selectedProperty) return;
     setLoading(true);
 
     try {
+      // console.log("CustomerUrls: ", customerUrls[1]);  
       const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+      const testUrl = "https://www.propagateinc.com/";
+
+      console.log("CustomerUrls: ", testUrl);
 
       const response = await fetch(`${apiUrl}/get-search-console`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accessToken: session.accessToken })
+        method: 'POST', 
+        headers: { 
+          'Content-Type': 'application/json' 
+        },
+        body: JSON.stringify({
+          accessToken: session.accessToken,  // 事前にセッションからトークンを取得しておく
+          url: testUrl
+        })
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch search console data');
+      // Access Tokenの確認
+      // response = await fetch(`https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${session.accessToken}`);
+      // const tokenInfo = await response.json();
+      // console.log(tokenInfo);
+    
+      // レスポンスの確認
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Success! Received data:", data);
+      } else {
+        console.error("Failed to fetch data. Status:", response.status);
+        const errorData = await response.json();
+        console.error("Error details:", errorData);
       }
 
-      const result = await response.json();
-      console.log('Search Console Data: ', result);
+      // const results = await Promise.all(customerUrls.map(async (url) => {
+      //   const response = await fetch(`${apiUrl}/get-search-console`, {
+      //     method: 'POST', 
+      //     headers: { 'Content-Type': 'application/json' },
+      //     body: JSON.stringify({
+      //       accessToken: session.accessToken,
+      //       url: url
+      //     })
+      //   });
+
+      //   if (!response.ok) {
+      //     throw new Error('Failed to fetch search console data');
+      //   }
+
+      //   const result = await response.json();
+      //   return { url, data: result };
+      // }));
+
+      // console.log('Search Console Data by URL: ', results);
     } catch (error) {
       console.error('Error fetching search console data:', error);
       alert('Failed to fetch search console data. Please try again later.');
@@ -236,10 +268,17 @@ export default function Home() {
   useEffect(() => {
     if (selectedProperty) {
       fetchAnalyticsData();
-      getCustomerUrls();
+      // getCustomerUrls();
       // fetchSearchConsoleData();
     }
   }, [selectedProperty]);
+
+  // Search Consoleのデータを取得 [] -> 一度だけ実行される
+  useEffect(() => {
+    if (customerUrls.length > 0) {
+      fetchSearchConsoleData();
+    }
+  }, [customerUrls]);
 
   if (!session) {
     return (
