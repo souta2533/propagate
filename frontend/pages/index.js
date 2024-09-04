@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useSession, signIn, signOut } from "next-auth/react";
 import dynamic from 'next/dynamic';
-// import { start } from 'repl';
+require('dotenv').config({ path: '.env.local' });
+import { supabase } from '../lib/supabaseClient';
+
+const EMAIL_PROPAGATE_ID = 33;  // 事前に作成しておくPropagateのメールアドレス
+const EMAIL_CUSTOMER = "egnpropagate85@gmail.com";    // 顧客が入力するメールアドレス
 
 
 const DynamicAnalyticsChart = dynamic(() => import('../components/AnalyticsChart'), { ssr: false });
@@ -22,23 +26,53 @@ export default function Home() {
   const [pathList, setPathList] = useState([]); // pathListの状態を管理
   const [selectedPagePath, setSelectedPagePath] = useState(''); // 選択されたpagePathの状態を管理
 
+  const [customerUrls, setCustomerUrls] = useState([]); // 顧客のURLの状態を管理
+
   useEffect(() => {
-    if (session) fetchAnalyticsProperties();
+    if (session) {
+      fetchAnalyticsProperties();
+      // sendInfoToBackend(session.user.email, analyticsProperties.accountId, analyticsProperties.propertyId, analyticsProperties.propertyName);
+    }
   }, [session]);
+
+  // analyticsPropertiesが更新された後に, バックエンドに送信
+  // useEffect(() => {
+  //   if (session && analyticsProperties) {
+  //     sendInfoToBackend(session.user.email, analyticsProperties.accountId, analyticsProperties.propertyId, analyticsProperties.propertyName);
+  //   }
+  // }, [session, analyticsProperties]);
 
   const fetchAnalyticsProperties = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/get-analytics-properties', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+      
+      const response = await fetch(`${apiUrl}/get-properties`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ accessToken: session.accessToken })
       });
+
+      // console.log(response.json());
+
       const properties = await response.json();
       setAnalyticsProperties(properties);
+
       if (properties.length > 0) {
         setSelectedProperty(properties[0]);
       }
+
+      // console.log(properties);
+
+      // 全てのプロパティをまとめる
+      const propertiesList = properties.map(property => ({
+        accountId: property.accountId,
+        propertyId: property.propertyId,
+        propertyName: property.propertyName
+      }));
+
+      // バックエンドにデータを送信
+      sendInfoToBackend(propertiesList);
     } catch (error) {
       console.error('Error fetching analytics properties:', error);
       alert('Failed to fetch analytics properties. Please try again later.');
@@ -47,11 +81,38 @@ export default function Home() {
     }
   };
 
+  // Email, accountId, propertyIdをバックエンドに送信
+  const sendInfoToBackend = async (properties) => {
+    try {
+      // console.log(properties);
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+      const response = await fetch(`${apiUrl}/send-info`, {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ 
+          properties: properties, 
+          email_propagate_id: EMAIL_PROPAGATE_ID,
+          email_customer: EMAIL_CUSTOMER,
+          // email: session.user.email
+         }),
+      });
+
+      if (!response.ok){
+        throw new Error('Failed to send information to backend');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
   const fetchAnalyticsData = async () => {
     if (!selectedProperty) return;
     setLoading(true);
     try {
-      const response = await fetch('/api/get-analytics', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+      const response = await fetch(`${apiUrl}/get-analytics`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -60,21 +121,23 @@ export default function Home() {
           propertyId: selectedProperty.propertyId
         })
       });
-
-      const data = await response.json();
+      
+      const json_data = await response.json();
       // console.log(data);
 
-      // pagePathのリストを取得
-      const pathList = Array.from(new Set(data
-        .map(item => item.pagePath)
-        .filter(path => path && path !== "/backend")));   // 空のパスを除去
+      // pagePathのリストを取得(ここ無駄)
+      const pathList = Array.from(new Set(
+        json_data.map(entry => entry.pagePath)
+      ));
       setPathList(pathList);
-      if(pathList.length > 0) {
-        setSelectedPagePath(pathList[0]);
-      }
-      // console.log(data);
+      setSelectedPagePath(pathList[0]);
 
-      setAnalyticsData(data);
+      // console.log(json_data);
+
+      setAnalyticsData(json_data);
+
+      // バックエンドにデータを送信
+      sendAnalyticsData(json_data);
     } catch (error) {
       console.error('Error fetching analytics data:', error);
       alert('Failed to fetch analytics data. Please try again later.');
@@ -83,10 +146,99 @@ export default function Home() {
     }
   };
 
+  const sendAnalyticsData = async (analyticsJsonData) => {
+    if (!selectedProperty) return;
+
+    try {      
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+      const response = await fetch(`${apiUrl}/send-analytics/${selectedProperty.propertyId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          analyticsData: analyticsJsonData,
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send analutics data');
+      }
+
+      const result = await response.json();
+      // console.log(result);
+    } catch (error) {
+      console.log('Error sending analytics data:', error);
+    }
+  };
+
+  const getCustomerUrls = async () => {
+    // 1. CustomerEmailsTableからemail_customerを取得
+    const { data: customerEmails, error: customerEmailsError } = await supabase
+      .from('CustomerEmailsTable')
+      .select('email_customer');
+
+    if (customerEmailsError) {
+      console.error('Error fetching customer emails:', customerEmailsError);
+      return;
+    }
+
+    // 2. CustomerUrlTableからemail_customerに一致するURLを取得
+    const customerUrls = {};
+
+    for (let customer of customerEmails) {
+      const email = customer.email_customer;
+
+      // CustomerUrlsTableからemail_customerに一致するURLを取得
+      const {data: urls, error: urlsError } = await supabase  
+        .from('CustomerUrlTable')
+        .select('customer_url')
+        .eq('email_customer', email);
+      
+      if (urlsError) {
+        console.error('Error fetching customer urls:', urlsError);
+        continue;
+      }
+
+      // 取得したURLを辞書形式で保存
+      customerUrls[email] = urls.map(urlObj => urlObj.customer_url);
+    }
+
+    console.log("Email to URL: ", customerUrls);
+
+  }
+
+  const fetchSearchConsoleData = async () => {
+    if (!selectedProperty) return;
+    setLoading(true);
+
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+      const response = await fetch(`${apiUrl}/get-search-console`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accessToken: session.accessToken })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch search console data');
+      }
+
+      const result = await response.json();
+      console.log('Search Console Data: ', result);
+    } catch (error) {
+      console.error('Error fetching search console data:', error);
+      alert('Failed to fetch search console data. Please try again later.');
+    }
+  };
+
   // 特定の条件を満たした際に，呼び出される
   // 第2引数（[selectedProperty]）に指定した変数が変更された際に，呼び出される
   useEffect(() => {
-    if (selectedProperty) fetchAnalyticsData();
+    if (selectedProperty) {
+      fetchAnalyticsData();
+      getCustomerUrls();
+      // fetchSearchConsoleData();
+    }
   }, [selectedProperty]);
 
   if (!session) {
@@ -172,7 +324,8 @@ export default function Home() {
       ) : analyticsData ? (
         <div className="bg-white p-6 rounded-lg shadow-md">
           <DynamicAnalyticsChart 
-            data={analyticsData.filter(item => item.pagePath === selectedPagePath)} 
+            data={analyticsData}
+            selectedPagePath={selectedPagePath}
           />
         </div>
       ) : (

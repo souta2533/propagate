@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+      - db
+    environment:
+      NEXT_PUBLIC_SUPABASE_URL: https://wryboniejhiodfagqmzn.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndyeWJvbmllamhpb2RmYWdxbXpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjIxNDY4OTUsImV4cCI6MjAzNzcyMjg5NX0.hDIWyAYLe_csG9BNblJfj4twIk2zuNifo29V1D-LOuA
+      GOOGLE_CLIENT_ID: 385919126-agina4aoebrskeb9k94cbj5mde9saij0.apps.googleusercontent.com
+      GOOGLE_CLIENT_SECRET: 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
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: 任意の長い文字列（例：opensslで生成）
+      DB_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZibmZ1dmRyaWhiemt2ZXBnb2FyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjM2MTk2MDMsImV4cCI6MjAzOTE5NTYwM30.L8NxN3pIJIH2GhacaX2npju_neeSk9Gx1Ivg89vwrkg
+      NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:8000
+
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      SUPABASE_URL: aa
+      SUPABASE_KEY: aa
+  
+  db:
+    image: supabase/postgres:14.1.0
+    container_name: supabase-db
+    ports: 
+      - "5432:5432"
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf 
+    environment:
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - supabase-data:/var/lib/postgresql/data
+volumes:
+  supabase-data:
