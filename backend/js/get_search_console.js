@@ -4,7 +4,7 @@ const fs = require('fs');
 const START_DATE = '2024-08-20';
 const END_DATE = '2024-08-21';
 
-// Goolge Search Console APIからデータを取得する関数AIzaSyBrwNVHmybwm13OieTTbLcn9xAKbNQE6IA
+// Goolge Search Console APIからデータを取得する関数
 async function getSearchConsoleData(auth, siteURL) {
     const webmasters = google.webmasters({
         version: 'v3',
@@ -28,7 +28,6 @@ async function getSearchConsoleData(auth, siteURL) {
                 }
             });
         
-
             if (response && response.data && response.data.rows && Array.isArray(response.data.rows)) {
                 allRows = allRows.concat(response.data.rows);
 
@@ -77,7 +76,10 @@ async function handler(req, res) {
         // console.log('Rows: ', rows);
 
         // データが空だった場合，終了
-        if (rows.length == 0) return;
+        if (rows.length == 0) {
+            console.log("NoData");
+            return;
+        }
 
         const dataMap = {};
         rows.forEach(row => {
@@ -108,7 +110,7 @@ async function handler(req, res) {
 
         // json形式に変換
         const jsonData = Object.values(dataMap);
-        console.log(JSON.stringify(jsonData, null, 2));
+        console.log(JSON.stringify(jsonData, null, 2));          
     } catch (error) {
         console.error('Error fetching Search Console data:', error);
     }

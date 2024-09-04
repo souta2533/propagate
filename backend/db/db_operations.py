@@ -1,10 +1,43 @@
-from postgrest.exceptions import APIError   
+import datetime
+from postgrest.exceptions import APIError 
+from supabase import Client  
 from db.supabase_client import supabase
 import logging
 
 from utils.batch import batch_process
 
 NUM_DATA = 100
+
+
+"""
+    CustomerEmailsTable
+        - id
+        - email_propagate_id
+        - email_customer
+        - updated_at
+"""
+class CustomerEmailsTable:
+    def __init__(self, supabase_client: Client):
+        self.supabase = supabase_client 
+
+    async def update_updated_at(self, email_customer: str):
+        """指定されたemail_customerのupdated_atを更新する"""
+        try:
+            # 現在の日時を取得
+            current_time = datetime.datetime.utnow()
+            jst_time = current_time + datetime.timedelta(hours=9)
+
+            # email_customerに一致する行のupdated_atを更新
+            response = await self.supabase \
+                .table("CustomerEmailsTable").update({'updated_at': jst_time}) \
+                .eq('email_customer', email_customer) \
+                .execute()
+
+            if response.status_code == 200:
+                return True
+        except Exception as e:
+            return False
+            
 
 """
 

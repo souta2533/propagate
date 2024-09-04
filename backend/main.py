@@ -30,53 +30,6 @@ app.add_middleware(
     allow_headers=["*"],    # すべてのHTTPヘッダーを許可
 )
 
-# """
-#     ln -s ../frontend/node_modules node_modules : frontendディレクトリにシンボリックリンクを作成
-# """
-# class AnalyticsRequest(BaseModel):
-#     accessToken: str
-#     accountId: str = None
-#     propertyId: str = None
-
-# class EmailRequest(BaseModel):
-#     email: EmailStr
-
-# """
-#     プロパティ情報を取得するエンドポイント
-#         - accountId, accountName, propertyId, propertyName
-# """
-# @app.post("/get-properties")
-# async def get_properties(data: AnalyticsRequest):
-#     result = run_js_script("./js/get_properties.js", data.model_dump())
-#     if result is None:
-#         raise HTTPException(status_code=500, detail="Failed to get properties data")
-#     print(result[0])
-#     # 取得したaccountIdからAccount Tableを作成
-#     return result
-
-# """
-#     Userが入力したEmailを取得するエンドポイント
-# """
-# @app.post("/send-email")
-# def get_email(request: EmailRequest):
-#     email = request.email
-#     # save_user_data(email)
-#     print(email)
-#     return {"email": email}
-
-# # Google Analyticsのデータを取得するエンドポイント
-# @app.post("/get-analytics")
-# async def get_analytics(data: AnalyticsRequest):
-#     result = run_js_script("./js/get_analytics.js", data.model_dump())
-#     # print(result)
-#     # JSONファイルに保存する
-#     with open('analytics_result.json', 'w') as json_file:
-#         json.dump(result, json_file, indent=4, ensure_ascii=False)
-#     if result is None or result == '':
-#         print(f"Result is None: {result}")
-#         raise HTTPException(status_code=500, detail="Failed to get analytics data")
-    
-#     return result
 
 @app.get("/")
 def read_root():

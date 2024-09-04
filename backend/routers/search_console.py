@@ -3,6 +3,7 @@ import logging
 
 from js_runner import run_js_script
 from models.request import SearchConsoleRequest
+# from db.supabase_client import customer_emails_table
 from db.db_operations import get_property_id_by_url, save_search_console_data
 
 
@@ -28,10 +29,11 @@ async def get_search_console(data: SearchConsoleRequest):
 
     result = run_js_script("./js/get_search_console.js", data.model_dump())
     # print(f"result: {result}")
-    if result is None:
+    if result == "NoData":
+        return []
+        # raise HTTPException(status_code=204, detail='No data available from Search Console')
+    elif result is None:
         raise HTTPException(status_code=500, detail='Failed to get Search Console data')
-    elif result == "NoData":
-        raise HTTPException(status_code=204, detail='No data available from Search Console')
     else:
         # URLからPropertyIDを取得
         property_id = get_property_id_by_url(data.url)

@@ -31,13 +31,24 @@ export default function Home() {
   const [selectedPagePath, setSelectedPagePath] = useState(''); // 選択されたpagePathの状態を管理
 
   const [customerUrls, setCustomerUrls] = useState([]); // 顧客のURLの状態を管理
+  const [isAnalyticsFetched, setIsAnalyticsFetched] = useState(false);
+  const [isSearchConsoleFetched, setIsSearchConsoleFetched] = useState(false);
 
   useEffect(() => {
+    // sessionが存在する場合にのみ実行
     if (session) {
       fetchAnalyticsProperties();
-      getCustomerUrls();
+  
+      // getCustomerUrlsがすでに実行されたかどうかを記録するためのフラグを使う
+      let hasFetchedCustomerUrls = false;
+  
+      if (!hasFetchedCustomerUrls) {
+        getCustomerUrls();
+        hasFetchedCustomerUrls = true;  // 一度実行したらフラグをtrueにする
+      }
     }
   }, [session]);
+  
 
   const fetchAnalyticsProperties = async () => {
     setLoading(true);
@@ -134,6 +145,9 @@ export default function Home() {
 
       // バックエンドにデータを送信
       sendAnalyticsData(json_data);
+
+      // 成功した場合にステートを更新
+      setIsAnalyticsFetched(true);
     } catch (error) {
       console.error('Error fetching analytics data:', error);
       alert('Failed to fetch analytics data. Please try again later.');
@@ -206,27 +220,11 @@ export default function Home() {
     setLoading(true);
 
     try {
-      // console.log("CustomerUrls: ", customerUrls[1]);  
+      console.log("CustomerUrls: ", customerUrls);  
       const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-
-      // const testUrl = "https://www.propagateinc.com/";
-      const testUrl = customerUrls[0];
-
-      // console.log("CustomerUrls: ", testUrl);
-
-      // const response = await fetch(`${apiUrl}/get-search-console`, {
-      //   method: 'POST', 
-      //   headers: { 
-      //     'Content-Type': 'application/json' 
-      //   },
-      //   body: JSON.stringify({
-      //     accessToken: session.accessToken,  // 事前にセッションからトークンを取得しておく
-      //     url: testUrl
-      //   })
-      // });
-
       const results = await Promise.all(customerUrls.map(async (url) => {
+        // console.log("URL: ", url);
         const response = await fetch(`${apiUrl}/get-search-console`, {
           method: 'POST', 
           headers: { 'Content-Type': 'application/json' },
@@ -243,19 +241,22 @@ export default function Home() {
             return { url ,data: null};
           } else {
             const data = await response.json();
-            console.log("Success! Received data:", data);
+            // console.log(`Success! Received data:${data}\nURL: ${url}`);
             return { url, data: data };
           }
         } else {
-          console.error('Failed to fetch search console data. Status: ', response.status);
-          throw new Error('Failed to fetch search console data');
+          console.error(`Failed to fetch search console data. Status: ${response.status}  \nURL: ${url}`);
+          // throw new Error('Failed to fetch search console data');
         }
       }));
 
       console.log('Search Console Data by URL: ', results);
+
+      // 成功した場合にステートを更新
+      setIsSearchConsoleFetched(true);
     } catch (error) {
       console.error('Error fetching search console data:', error);
-      alert('Failed to fetch search console data. Please try again later.');
+      // alert('Failed to fetch search console data. Please try again later.');
     }
   };
 
@@ -264,8 +265,6 @@ export default function Home() {
   useEffect(() => {
     if (selectedProperty) {
       fetchAnalyticsData();
-      // getCustomerUrls();
-      // fetchSearchConsoleData();
     }
   }, [selectedProperty]);
 
@@ -275,6 +274,34 @@ export default function Home() {
       fetchSearchConsoleData();
     }
   }, [customerUrls]);
+
+  // AnlyticsとSearch Consoleのデータを取得したら，データの更新日時をDBに保存
+  useEffect(() => {
+    if (isAnalyticsFetched && isSearchConsoleFetched) {
+      updateCustomerEmailUpdateAt();
+    }
+  }, [isAnalyticsFetched, isSearchConsoleFetched]);
+
+  // CustomerEmailsTableのupdatedAtを更新
+  const updateCustomerEmailUpdateAt = async () => {
+    try {
+      // JSTの現在の時刻を取得
+      const currentTime = new Date();
+      const jstTime = new Date(currentTime.getTime() + 9 * 60 * 60 * 1000);
+
+      const { data, error } = await supabase
+        .from('CustomerEmailsTable')
+        .update({ updated_at: jstTime })
+        .eq('email_customer', EMAIL_CUSTOMER);
+
+      if (error) {
+        console.error("Error updating updatedAt:", error);
+      }
+      console.log("Success updating updatedAt:", data);
+    } catch (error) {
+      console.error('Error updating updatedAt:', error);
+    }
+  }
 
   if (!session) {
     return (
