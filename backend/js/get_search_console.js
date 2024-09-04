@@ -11,23 +11,37 @@ async function getSearchConsoleData(auth, siteURL) {
         auth
     });
 
-    try {
-        const response = await webmasters.searchanalytics.query({
-            siteUrl: siteURL,
-            requestBody: {
-                startDate: START_DATE,
-                endDate: END_DATE,
-                dimensions: ['date', 'query', 'page', 'country', 'device'],
-                rowLimit: 1000
-            }
-        });
+    let startRow = 0;
+    let allRows = [];
+    let hasMoreData = true;
 
-        if (response && response.data && response.data.rows && Array.isArray(response.data.rows)) {
-            return response.data.rows;
-        } else {
-            console.log("NoData");
-            return [];
+    try {
+        while(hasMoreData){
+            const response = await webmasters.searchanalytics.query({
+                siteUrl: siteURL,
+                requestBody: {
+                    startDate: START_DATE,
+                    endDate: END_DATE,
+                    dimensions: ['date', 'query', 'page', 'country', 'device'],
+                    rowLimit: 1000,
+                    startRow: startRow
+                }
+            });
+        
+
+            if (response && response.data && response.data.rows && Array.isArray(response.data.rows)) {
+                allRows = allRows.concat(response.data.rows);
+
+                if (response.data.rows.length < 1000) {
+                    hasMoreData = false;
+                } else {
+                    startRow += 1000;
+                }
+            } else {
+                hasMoreData = false;
+            }
         }
+        return allRows;
     } catch (error) {
         console.error('Error fetching Search Console data:', error);
         throw error;

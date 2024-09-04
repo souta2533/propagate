@@ -5,7 +5,7 @@ require('dotenv').config({ path: '.env.local' });
 import { supabase } from '../lib/supabaseClient';
 // const jwtDecode = require('jwt-decode');
 // import {default as jwtDecode } from 'jwt-decode';
-import {jwtDecode} from 'jwt-decode';
+// import {jwtDecode} from 'jwt-decode';
 
 
 const EMAIL_PROPAGATE_ID = 35;  // 事前に作成しておくPropagateのメールアドレス
