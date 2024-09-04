@@ -224,7 +224,7 @@ export default function Home() {
       const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
       const results = await Promise.all(customerUrls.map(async (url) => {
-        // console.log("URL: ", url);
+        console.log("URL: ", url);
         const response = await fetch(`${apiUrl}/get-search-console`, {
           method: 'POST', 
           headers: { 'Content-Type': 'application/json' },
