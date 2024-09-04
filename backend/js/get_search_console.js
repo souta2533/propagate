@@ -1,10 +1,10 @@
 const { google } = require('googleapis');
 const fs = require('fs');
 
-const START_DATE = '2024-07-30';
-const END_DATE = '2024-08-26';
+const START_DATE = '2024-08-20';
+const END_DATE = '2024-08-21';
 
-// Goolge Search Console APIからデータを取得する関数
+// Goolge Search Console APIからデータを取得する関数AIzaSyBrwNVHmybwm13OieTTbLcn9xAKbNQE6IA
 async function getSearchConsoleData(auth, siteURL) {
     const webmasters = google.webmasters({
         version: 'v3',
@@ -12,45 +12,26 @@ async function getSearchConsoleData(auth, siteURL) {
     });
 
     try {
-        const response = await searchconsole.searchanalytics.query({
+        const response = await webmasters.searchanalytics.query({
             siteUrl: siteURL,
             requestBody: {
                 startDate: START_DATE,
                 endDate: END_DATE,
-                dimensions: ['date', 'query'],
+                dimensions: ['date', 'query', 'page', 'country', 'device'],
                 rowLimit: 1000
             }
         });
 
-        if (response.data.rows && Array.isArray(response.data.rows)) {
+        if (response && response.data && response.data.rows && Array.isArray(response.data.rows)) {
             return response.data.rows;
         } else {
-            console.log("No data of Search Console");
+            console.log("NoData");
             return [];
         }
     } catch (error) {
         console.error('Error fetching Search Console data:', error);
         throw error;
     }
-}
-
-// データを初期化する関数
-function initializeDataStructure(dates, queries) {
-    const dataMap = {};
-    dates.forEach(date => {
-        dataMap[date] = {};
-        queries.forEach(query => {
-            dataMap[date] = {
-                date: date,
-                query: query,
-                clicks: 0,
-                impressions: 0,
-                ctr: 0,
-                position: 0
-            };
-        });
-    });
-    return dataMap;
 }
 
 // データをフラットなJSON形式に変換する関数
@@ -65,9 +46,9 @@ function flattenData(dataMap) {
 
 // メインの関数
 async function handler(req, res) {
-    const { accessToken, siteUrl } = req.body;
-
-    if (!accessToken || !siteUrl) {
+    const { accessToken, url } = req.body;
+    if (!accessToken || !url) {
+        console.log('AccesToken: ', accessToken, '\nSiteURL: ', url);
         console.error('Access token and site URL are required');
         return;
     }
@@ -77,30 +58,26 @@ async function handler(req, res) {
         const auth = new google.auth.OAuth2();
         auth.setCredentials({ access_token: accessToken });
 
-        // 全ての日付を初期化
-        const allDate = [];
-        for (let d = new Date(START_DATE); d <= new Date(END_DATE); d.setDate(d.getDate() + 1)) {
-            allDate.push(new Date(d).toISOString().split('T')[0]);
-        }
-
-        const allQueries = [];
-        let dataMap = initializeDataStructure(allDate, allQueries);
-
         // Google Search Consoleからデータを取得
-        const rows = await getSearchConsoleData(auth, siteUrl);
+        const rows = await getSearchConsoleData(auth, url);
+        // console.log('Rows: ', rows);
 
+        // データが空だった場合，終了
+        if (rows.length == 0) return;
+
+        const dataMap = {};
         rows.forEach(row => {
-            const query = row.keys[0];
-            const clicks = row.clicks;
-            const impressions = row.impressions;
-            const ctr = row.ctr;
-            const position = row.position;
-            const date = row.date;
+            const [date, query, page, country, device] = row.keys;
+            const { clicks, impressions, ctr, position } = row;
 
-            if (!dataMap[date]) {
-                dataMap[date] = {
+            const key = `${date}-${query}-${page}-${country}-${device}`;
+            if (!dataMap[key]) {
+                dataMap[key] = {
                     date: date,
                     query: query,
+                    page: page,
+                    country: country,
+                    device: device,
                     clicks: 0,
                     impressions: 0,
                     ctr: 0,
@@ -108,18 +85,15 @@ async function handler(req, res) {
                 };
             }
 
-            dataMap[date] = {
-                date: date,
-                query: query,
-                clicks: clicks,
-                impressions: impressions,
-                ctr: ctr,
-                position: position
-            };
+            // データの更新
+            dataMap[key].clicks += clicks;
+            dataMap[key].impressions += impressions;
+            dataMap[key].ctr += ctr;
+            dataMap[key].position += position;
         });
 
         // json形式に変換
-        jsonData = flattenData(dataMap);
+        const jsonData = Object.values(dataMap);
         console.log(JSON.stringify(jsonData, null, 2));
     } catch (error) {
         console.error('Error fetching Search Console data:', error);

@@ -40,6 +40,7 @@ class AnalyticsDataRequest(BaseModel):
 
 class SearchConsoleRequest(BaseModel):
     accessToken: str
+    url: str
 
 class SearchConsoleItem(BaseModel):
     pass
@@ -50,4 +51,5 @@ class SearchConsoleDataRequest(BaseModel):
 # URLを受け取る
 class URLRequest(BaseModel):
     customerEmail: str
+    propertyId: int
     url: str
