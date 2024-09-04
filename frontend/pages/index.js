@@ -236,7 +236,7 @@ export default function Home() {
   useEffect(() => {
     if (selectedProperty) {
       fetchAnalyticsData();
-      getCustomerUrls();
+      // getCustomerUrls();
       // fetchSearchConsoleData();
     }
   }, [selectedProperty]);

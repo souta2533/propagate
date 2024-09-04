@@ -23,3 +23,5 @@ yarn-error.log*
 # IDEやエディタの設定ファイルを無視する
 .vscode/
 .idea/
+
+backend/analytics_result.json
