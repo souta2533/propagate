@@ -6,8 +6,8 @@ const { json } = require('stream/consumers');
 const fs = require('fs');
 const { start } = require('repl');
 
-var START_DATE = '2024-07-30';
-var END_DATE = '2024-08-26';
+// var START_DATE = '2024-07-30';
+// var END_DATE = '2024-08-26';
 
 // 日付ごとにpagePathをキーとしてデータを初期化する関数
 function initialDateMapForNewPagePath(dateMap, allDates, newPagePath) {
@@ -71,7 +71,7 @@ async function handler(req, res) {
 
     // 全てのデータを初期化
     const allDates = [];
-    for (let d = new Date(START_DATE); d <= new Date(END_DATE); d.setDate(d.getDate() + 1)) {
+    for (let d = new Date(startDate); d <= new Date(endDate); d.setDate(d.getDate() + 1)) {
       allDates.push(new Date(d).toISOString().split('T')[0].replace(/-/g, ''));
     }
 

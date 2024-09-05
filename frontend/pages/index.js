@@ -22,13 +22,17 @@ export default function Home() {
   const { data: session, status } = useSession();
   const [analyticsData, setAnalyticsData] = useState(null);
   const [analyticsProperties, setAnalyticsProperties] = useState([]);
+  const [propertyList, setPropertyList] = useState([]); // accountId, propertyId, propertyNameをリスト形式で格納
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [loading, setLoading] = useState(false);
   const [pathList, setPathList] = useState([]); // pathListの状態を管理
   const [selectedPagePath, setSelectedPagePath] = useState(''); // 選択されたpagePathの状態を管理
 
   const [customerEmails, setCustomerEmails] = useState([]);
+  const [customerEmailsWithUpdatedAt, setCustomerEmailsWithUpdatedAt] = useState([]);
   const [customerUrls, setCustomerUrls] = useState([]); // 顧客のURLの状態を管理
+
+  const [customerInfo, setCusotmerInfo] = useState([]); // email: (updated_at, urls)
   const [isAnalyticsFetched, setIsAnalyticsFetched] = useState(false);  // Analyticsデータが取得されたかどうかを管理
   const [isSearchConsoleFetched, setIsSearchConsoleFetched] = useState(false);    // Search Consoleデータが取得されたかどうかを管理
   const [lastUpdatedAt, setLastUpdatedAt] = useState(null);  // 最終更新日時を管理
@@ -39,8 +43,7 @@ export default function Home() {
     }
     // sessionが存在する場合にのみ実行
     if (session) {
-      // console.log("Start fetching analytics properties ...");
-      fetchAnalyticsProperties();
+      // fetchAnalyticsProperties();
     } else {
       console.log("No session");
     }
@@ -52,30 +55,9 @@ export default function Home() {
    * 2. データの更新日時を取得
    */
   useEffect(() => {
-    getCustomerEmailsAndUrls();
-    fetchLastUpdatedAt();
+    getCustomerEmailsAndUpdatedAtAndUrls();
+    // fetchLastUpdatedAt();
   }, []);
-
-
-  // DBから更新日時を取得
-  const fetchLastUpdatedAt = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('CustomerEmailsTable')
-        .select('updated_at')
-        .eq('email_customer', EMAIL_CUSTOMER)
-        .single();
-        
-      if (error) {
-        console.error("Error fetching last updated at:", error) ;
-      } else if (data) {
-        console.log("Fetched upudated at:", data.updated_at); 
-        setLastUpdatedAt(data.updated_at);
-      } 
-    } catch (error) {
-      console.error('Error fetching last updated at:', error);
-    }
-  };
   
   const fetchAnalyticsProperties = async () => {
     setLoading(true);
@@ -87,8 +69,6 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ accessToken: session.accessToken })
       });
-
-      // console.log(response.json());
 
       const properties = await response.json();
       setAnalyticsProperties(properties);
@@ -106,8 +86,13 @@ export default function Home() {
         propertyName: property.propertyName
       }));
 
+      console.log("PropertiesList: ", propertiesList);
+
       // バックエンドにデータを送信
       sendInfoToBackend(propertiesList);
+
+      // プロパティリストを更新
+      setPropertyList(propertiesList);
     } catch (error) {
       console.error('Error fetching analytics properties:', error);
       // alert('Failed to fetch analytics properties. Please try again later.');
@@ -164,7 +149,7 @@ export default function Home() {
       });
       
       const json_data = await response.json();
-      console.log(json_data);
+      console.log("Anlytics: ", json_data);
 
       // pagePathのリストを取得(ここ無駄)
       const pathList = Array.from(new Set(
@@ -215,43 +200,75 @@ export default function Home() {
   };
 
   // CustomerEmailsTableからemail_customerを取得し，CustomerUrlTableからURLを取得
-  const getCustomerEmailsAndUrls = async () => {
-    // 1. CustomerEmailsTableからemail_customerを取得
-    const { data: customerEmails, error: customerEmailsError } = await supabase
+  const getCustomerEmailsAndUpdatedAtAndUrls = async () => {
+    // 1. CustomerEmailsTableからemail_customer, updated_atを取得
+    const { data: customerEmailsAndUpdatedAt, error: customerEmailsAndUpdatedAtError } = await supabase
       .from('CustomerEmailsTable')
-      .select('email_customer');
+      .select('email_customer, updated_at');
 
-    if (customerEmailsError) {
-      console.error('Error fetching customer emails:', customerEmailsError);
+    if (customerEmailsAndUpdatedAtError) {
+      console.error('Error fetching customer emails:', customerEmailsAndUpdatedAtError);
       return;
     } else {
-      setCustomerEmails(customerEmails);
-      console.log("CustomerEmails: ", customerEmails);
+      const customerInfoWithUpdatedAt = customerEmailsAndUpdatedAt.map((customer) => ({
+        email: customer.email_customer,
+        updated_at: customer.updated_at,
+        urls: [],
+      }));
+      setCusotmerInfo(customerInfoWithUpdatedAt);
+      // console.log("CustomerEmails: ", customerInfo);
     }
 
     // 2. CustomerUrlTableからemail_customerに一致するpropertyIDとURLを取得
-    const customerUrls = [];
+    const udpateCusotmerInfo = await Promise.all(
+      customerInfo.map(async (customer) => {
+        const { data: propertyIdsAndUrls, error: urlsError } = await supabase
+          .from('CustomerUrlTable')
+          .select('property_id, customer_url')
+          .eq('email_customer', customer.email);
 
-    for (let customer of customerEmails) {
-      const email = customer.email_customer;
+          if (urlsError) {
+            console.error('Error fetching customer urls:', urlsError);
+            return {...customer, urls: []};
+          }
 
-      // CustomerUrlsTableからemail_customerに一致するURLを取得
-      const {data: propertyIdsAndUrls, error: urlsError } = await supabase  
-        .from('CustomerUrlTable')
-        .select('property_id, customer_url')
-        .eq('email_customer', email);
+          // PropertyIDとURLをcustomerInfoに追加
+          const urls = propertyIdsAndUrls.map(propertyIdAndUrlObj => ({
+            propertyId: propertyIdAndUrlObj.property_id,
+            url: propertyIdAndUrlObj.customer_url
+          }));
+
+          return {
+            ...customer,    // 既存のcustomer情報を保持
+            urls: urls      // 取得したURLを追加
+          }
+      })
+    );
+
+    setCusotmerInfo(udpateCusotmerInfo);
+    console.log("CustomerInfo: ", udpateCusotmerInfo);
+    // const customerUrls = [];
+
+    // for (let customer of customerEmails) {
+    //   const email = customer.email_customer;
+
+    //   // CustomerUrlsTableからemail_customerに一致するURLを取得
+    //   const {data: propertyIdsAndUrls, error: urlsError } = await supabase  
+    //     .from('CustomerUrlTable')
+    //     .select('property_id, customer_url')
+    //     .eq('email_customer', email);
       
-      if (urlsError) {
-        console.error('Error fetching customer urls:', urlsError);
-        continue;
-      }
+    //   if (urlsError) {
+    //     console.error('Error fetching customer urls:', urlsError);
+    //     continue;
+    //   }
 
-      // 取得したURLを辞書形式で保存
-      propertyIdsAndUrls.forEach(propertyIdAndUrlObj => {
-        customerUrls.push(propertyIdAndUrlObj.customer_url);
-      });
-    }
-    setCustomerUrls(customerUrls);
+    //   // 取得したURLを辞書形式で保存
+    //   propertyIdsAndUrls.forEach(propertyIdAndUrlObj => {
+    //     customerUrls.push(propertyIdAndUrlObj.customer_url);
+    //   });
+    // }
+    // setCustomerUrls(customerUrls);
   }
 
   const fetchSearchConsoleData = async () => {
@@ -317,14 +334,14 @@ export default function Home() {
   // Search Consoleのデータを取得 [] -> 一度だけ実行される
   useEffect(() => {
     if (customerUrls.length > 0) {
-      fetchSearchConsoleData();
+      // fetchSearchConsoleData();
     }
   }, [customerUrls]);
 
   // AnlyticsとSearch Consoleのデータを取得したら，データの更新日時をDBに保存
   useEffect(() => {
     if (isAnalyticsFetched && isSearchConsoleFetched) {
-      updateCustomerEmailUpdateAt();
+      // updateCustomerEmailUpdateAt();
     }
   }, [isAnalyticsFetched, isSearchConsoleFetched]);
 
