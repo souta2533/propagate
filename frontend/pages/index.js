@@ -251,16 +251,8 @@ export default function Home() {
   const fetchSearchConsoleData = async () => {
     setLoading(true);
 
-    // 更新日時を取得できている場合はそれを使い，取得できていない場合は現在より1年前の日付を取得
-    // const startDate = lastUpdatedAt 
-    //   ? new Date(lastUpdatedAt).toISOString().split('T')[0] 
-    //   : new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().split('T')[0];
-
-    const startDate = "2024-09-01";
-
     try {
       // console.log("CustomerUrls: ", customerUrls);  
-      console.log("Start Date: ", startDate);
       
       const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -268,8 +260,13 @@ export default function Home() {
       const results = await Promise.all(
         customerInfo.map(async (customer) => {
           // Emailに対するすべてのURLに対してAPIリクエストを送る
-          return Promise.all(
+          const urlsData = await Promise.all(
             customer.urls.map(async (urlObj) => {
+              // 更新日時を取得できている場合はそれを使い，取得できていない場合は現在より1年前の日付を取得
+              const startDate = customer.updated_at
+                ? new Date(customer.updated_at).toISOString().split('T')[0]
+                : new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().split('T')[0];
+
               // URLに対してSearch Consoleのデータを取得
               const response = await fetch(`${apiUrl}/get-search-console`, {
                 method: 'POST',
@@ -298,37 +295,10 @@ export default function Home() {
                 return { url: urlObj.url, data: null};
               }
             })
-          )
+          );
+          return { email: customer.email, urlsData: urlsData};
         })
-      )
-
-      // const results = await Promise.all(customerUrls.map(async (url) => {
-      //   const response = await fetch(`${apiUrl}/get-search-console`, {
-      //     method: 'POST', 
-      //     headers: { 'Content-Type': 'application/json' },
-      //     body: JSON.stringify({
-      //       accessToken: session.accessToken,
-      //       url: url,
-      //       startDate: startDate,
-      //       endDate: new Date().toISOString().split('T')[0]
-      //     })
-      //   });
-      //   // レスポンスの確認
-      //   if (response.ok) {
-      //     if (response.status === 204) {
-      //       console.warn("No data available from Search Console. URL: ", url);
-      //       alert("No data available from Search Console");
-      //       return { url ,data: null};
-      //     } else {
-      //       const data = await response.json();
-      //       // console.log(`Success! Received data:${data}\nURL: ${url}`);
-      //       return { url, data: data };
-      //     }
-      //   } else {
-      //     console.error(`Failed to fetch search console data. Status: ${response.status}  \nURL: ${url}`);
-      //     // throw new Error('Failed to fetch search console data');
-      //   }
-      // }));
+      );
 
       console.log('Search Console : ', results);
 
