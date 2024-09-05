@@ -6,6 +6,8 @@ class AnalyticsRequest(BaseModel):
     accessToken: str
     accountId: str = None
     propertyId: str = None
+    startDate: str 
+    endDate: str
 
 class CustomerEmailRequest(BaseModel):
     email_propagate_id: int

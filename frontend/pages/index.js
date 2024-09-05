@@ -35,11 +35,11 @@ export default function Home() {
 
   useEffect(() => {
     if (status === 'loading') {
-      console.log("Loading session data ...");
+      // console.log("Loading session data ...");
     }
     // sessionが存在する場合にのみ実行
     if (session) {
-      console.log("Start fetching analytics properties ...");
+      // console.log("Start fetching analytics properties ...");
       fetchAnalyticsProperties();
     } else {
       console.log("No session");
@@ -145,6 +145,11 @@ export default function Home() {
     if (!selectedProperty) return;
     setLoading(true);
     try {
+      // 更新日時を取得できている場合はそれを使い，取得できていない場合は現在より1年前の日付を取得
+      const startDate = lastUpdatedAt 
+      ? new Date(lastUpdatedAt).toISOString().split('T')[0] 
+      : new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().split('T')[0];
+
       const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
       const response = await fetch(`${apiUrl}/get-analytics`, {
         method: 'POST',
@@ -152,12 +157,14 @@ export default function Home() {
         body: JSON.stringify({ 
           accessToken: session.accessToken,
           accountId: selectedProperty.accountId,
-          propertyId: selectedProperty.propertyId
+          propertyId: selectedProperty.propertyId,
+          startDate: startDate,
+          endDate: new Date().toISOString().split('T')[0]
         })
       });
       
       const json_data = await response.json();
-      // console.log(data);
+      console.log(json_data);
 
       // pagePathのリストを取得(ここ無駄)
       const pathList = Array.from(new Set(
@@ -256,7 +263,9 @@ export default function Home() {
       : new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().split('T')[0];
 
     try {
-      console.log("CustomerUrls: ", customerUrls);  
+      // console.log("CustomerUrls: ", customerUrls);  
+      console.log("Start Date: ", startDate);
+      
       const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
       const results = await Promise.all(customerUrls.map(async (url) => {

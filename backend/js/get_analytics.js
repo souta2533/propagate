@@ -4,6 +4,7 @@ const { fstat } = require('fs');
 const { google } = require('googleapis');
 const { json } = require('stream/consumers');
 const fs = require('fs');
+const { start } = require('repl');
 
 var START_DATE = '2024-07-30';
 var END_DATE = '2024-08-26';
@@ -50,7 +51,7 @@ function flattenDateMap(initialDateMap) {
 async function handler(req, res) {
 //   console.log("handler");
   // accountId: 各WebサイトのGoogle AnalyticsのアカウントID（Googleアカウントの1つ下位層），propertyId: 各WebサイトのGoogle AnalyticsのプロパティID（各Webサイト）
-  const { accessToken, accountId, propertyId } = req.body;
+  const { accessToken, accountId, propertyId, startDate, endDate } = req.body;
 
   if (!accessToken || !accountId || !propertyId) {
     console.error('Access token, accountID, and propertyID are required');
@@ -94,48 +95,63 @@ async function handler(req, res) {
       return acc;
     }, {});
 
-    // Make a request to fetch the analytics data
-    const response = await analyticsData.properties.runReport({
-      property: `properties/${propertyId}`, // properties/452842721
-      requestBody: {
-        dateRanges: [
-          {
-            startDate: START_DATE,
-            endDate: END_DATE,
-          },
-        ],
-        dimensions: [
-          { name: 'pageLocation' },
-          { name: 'pagePath' },
-          { name: 'date' },
-          { name: 'deviceCategory' },
-          { name: 'sessionSource' },  
-          { name: 'city' },
-          { name: 'firstUserSourceMedium' },
-        ],
-        metrics: [
-          { name: 'screenPageViews' },
-          { name: 'conversions' },
-          { name: 'activeUsers' },
-          { name: 'sessions' },
-          { name: 'engagedSessions' },
-        ],
-      },
-    });
+    // 以下では，Google Analyticsのデータを取得する
+    let startRow = 0;
+    let allRows = [];
+    let hasMoreData = true;
 
-    if (response.data.rows && Array.isArray(response.data.rows)){
-      // console.log("\nResponse Data:");
-      // console.log(JSON.stringify(response.data, null, 2)); // JSON形式で整形して出力
-      // console.log(response.data.rows)
-      // console.log("\n");
-    }
-    else{
-    //   console.log("\nResponse Data: Row is not found\n");
-    }
+    while (hasMoreData) {
+      // Analytics APIのリクエストを作成
+      const response = await analyticsData.properties.runReport({
+        property: `properties/${propertyId}`, // properties/452842721
+        requestBody: {
+          dateRanges: [
+            {
+              startDate: startDate,
+              endDate: endDate,
+            },
+          ],
+          dimensions: [
+            { name: 'pageLocation' },
+            { name: 'pagePath' },
+            { name: 'date' },
+            { name: 'deviceCategory' },
+            { name: 'sessionSource' },  
+            { name: 'city' },
+            { name: 'firstUserSourceMedium' },
+          ],
+          metrics: [
+            { name: 'screenPageViews' },
+            { name: 'conversions' },
+            { name: 'activeUsers' },
+            { name: 'sessions' },
+            { name: 'engagedSessions' },
+          ],
+          limit: 1000,   // 1回のリクエストで取得する行数
+          offset: startRow,   // 取得する行の開始位置
+        },
+      });
+
+      // レスポンスの確認
+      if (response && response.data && response.data.rows && Array.isArray(response.data.rows)) {
+        allRows = allRows.concat(response.data.rows);
+
+        // データが1000行未満の場合は，これ以上データがないことを確認
+        if (response.data.rows.length < 1000) {
+          hasMoreData = false;
+        } else {
+          // データが1000行以上ある場合，次の1000行を取得するためにstartRowを更新
+          startRow += 1000;
+        }
+      } else {
+        // データが取得できていない場合はループを終了
+        hasMoreData = false;
+      }
+    }    
 
     let json_data = []; // JSON形式で整形するための変数
-    if(response.data.rows && Array.isArray(response.data.rows)){
-      response.data.rows.forEach(row => {
+    if(allRows && Array.isArray(allRows)){
+      allRows.forEach(row => {
         const dimensions = row.dimensionValues.map(dim => dim.value);
         const metrics = row.metricValues.map(metric => Number(metric.value));
         const pagePath = dimensions[1];

@@ -1,8 +1,6 @@
 const { google } = require('googleapis');
 const fs = require('fs');
 
-const START_DATE = '2024-08-20';
-const END_DATE = '2024-08-21';
 
 // Goolge Search Console APIからデータを取得する関数
 async function getSearchConsoleData(auth, siteURL, startDate, endDate) {
