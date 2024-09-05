@@ -57,7 +57,6 @@ export default function Home() {
    */
   useEffect(() => {
     getCustomerEmailsAndUpdatedAtAndUrls();
-    // fetchLastUpdatedAt();
   }, []);
   
   const fetchAnalyticsProperties = async () => {
@@ -128,43 +127,68 @@ export default function Home() {
   };
 
   const fetchAnalyticsData = async () => {
-    if (!selectedProperty) return;
+    // if (!selectedProperty) return;
     setLoading(true);
     try {
-      // 更新日時を取得できている場合はそれを使い，取得できていない場合は現在より1年前の日付を取得
-      const startDate = lastUpdatedAt 
-      ? new Date(lastUpdatedAt).toISOString().split('T')[0] 
-      : new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().split('T')[0];
-
       const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-      const response = await fetch(`${apiUrl}/get-analytics`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          accessToken: session.accessToken,
-          accountId: selectedProperty.accountId,
-          propertyId: selectedProperty.propertyId,
-          startDate: startDate,
-          endDate: new Date().toISOString().split('T')[0]
+
+      // 全てのaccountIDとpropertyIDでAnalyticsのデータを取得
+      const results = await Promise.all(
+        propertyList.map(async (property) => {
+          // 更新日時を取得できている場合はそれを使い，取得できていない場合は現在より1年前の日付を取得
+          const startDate = '2024-09-01';
+
+          const response = await fetch(`${apiUrl}/get-analytics`, {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              accessToken: session.accessToken,
+              accountId: property.accountId,
+              propertyId: property.propertyId,
+              startDate: startDate,
+              endDate: new Date().toISOString().split('T')[0]
+            })
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            return { propertyName: property.propertyName, data: data };
+          } else {
+            console.error(`Failed to fetch analytics data. Status: ${response.status}`);
+            return { propertyName: property.propertyName, data: null };
+          }
         })
-      });
+      );
+
+      console.log("AnalyticsData: ", results);
+
+      // const response = await fetch(`${apiUrl}/get-analytics`, {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ 
+      //     accessToken: session.accessToken,
+      //     accountId: selectedProperty.accountId,
+      //     propertyId: selectedProperty.propertyId,
+      //     startDate: startDate,
+      //     endDate: new Date().toISOString().split('T')[0]
+      //   })
+      // });
       
-      const json_data = await response.json();
-      console.log("Anlytics: ", json_data);
+      // const json_data = await response.json();
+      // console.log("Anlytics: ", json_data);
 
       // pagePathのリストを取得(ここ無駄)
-      const pathList = Array.from(new Set(
-        json_data.map(entry => entry.pagePath)
-      ));
-      setPathList(pathList);
-      setSelectedPagePath(pathList[0]);
+      // const pathList = Array.from(new Set(
+      //   json_data.map(entry => entry.pagePath)
+      // ));
+      // setPathList(pathList);
+      // setSelectedPagePath(pathList[0]);
 
       // console.log(json_data);
 
-      setAnalyticsData(json_data);
+      setAnalyticsData(results);
 
-      // バックエンドにデータを送信
-      sendAnalyticsData(json_data);
+      setLoading(false);
 
       // 成功した場合にステートを更新
       setIsAnalyticsFetched(true);
@@ -315,9 +339,14 @@ export default function Home() {
   // 特定の条件を満たした際に，呼び出される
   // 第2引数（[selectedProperty]）に指定した変数が変更された際に，呼び出される
   useEffect(() => {
+    if (propertyList) {
+      fetchAnalyticsData();
+    }
+  }, [propertyList]);
+
+  useEffect(() => {
     if (customerInfo) {
-      // fetchAnalyticsData();
-      fetchSearchConsoleData();
+      // fetchSearchConsoleData();
     }
   }, [customerInfo]);
 
