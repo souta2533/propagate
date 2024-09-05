@@ -24,7 +24,7 @@ export default function Home() {
   const [analyticsProperties, setAnalyticsProperties] = useState([]);
   const [propertyList, setPropertyList] = useState([]); // accountId, propertyId, propertyNameをリスト形式で格納
   const [selectedProperty, setSelectedProperty] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);  // データ取得中かどうかを管理
   const [pathList, setPathList] = useState([]); // pathListの状態を管理
   const [selectedPagePath, setSelectedPagePath] = useState(''); // 選択されたpagePathの状態を管理
 
@@ -37,13 +37,14 @@ export default function Home() {
   const [isSearchConsoleFetched, setIsSearchConsoleFetched] = useState(false);    // Search Consoleデータが取得されたかどうかを管理
   const [lastUpdatedAt, setLastUpdatedAt] = useState(null);  // 最終更新日時を管理
 
+
   useEffect(() => {
     if (status === 'loading') {
       // console.log("Loading session data ...");
     }
     // sessionが存在する場合にのみ実行
     if (session) {
-      // fetchAnalyticsProperties();
+      fetchAnalyticsProperties();
     } else {
       console.log("No session");
     }
@@ -216,66 +217,46 @@ export default function Home() {
         urls: [],
       }));
 
-    // 2. CustomerUrlTableからemail_customerに一致するpropertyIDとURLを取得
-    const udpateCusotmerInfo = await Promise.all(
-      customerInfoWithUpdatedAt.map(async (customer) => {
-        const { data: propertyIdsAndUrls, error: urlsError } = await supabase
-          .from('CustomerUrlTable')
-          .select('property_id, customer_url')
-          .eq('email_customer', customer.email);
+      // 2. CustomerUrlTableからemail_customerに一致するpropertyIDとURLを取得
+      const udpateCusotmerInfo = await Promise.all(
+        customerInfoWithUpdatedAt.map(async (customer) => {
+          const { data: propertyIdsAndUrls, error: urlsError } = await supabase
+            .from('CustomerUrlTable')
+            .select('property_id, customer_url')
+            .eq('email_customer', customer.email);
 
-          if (urlsError) {
-            console.error('Error fetching customer urls:', urlsError);
-            return {...customer, urls: []};
-          }
+            if (urlsError) {
+              console.error('Error fetching customer urls:', urlsError);
+              return {...customer, urls: []};
+            }
 
-          // PropertyIDとURLをcustomerInfoに追加
-          const urls = propertyIdsAndUrls.map(propertyIdAndUrlObj => ({
-            propertyId: propertyIdAndUrlObj.property_id,
-            url: propertyIdAndUrlObj.customer_url
-          }));
+            // PropertyIDとURLをcustomerInfoに追加
+            const urls = propertyIdsAndUrls.map(propertyIdAndUrlObj => ({
+              propertyId: propertyIdAndUrlObj.property_id,
+              url: propertyIdAndUrlObj.customer_url
+            }));
 
-          return {
-            ...customer,    // 既存のcustomer情報を保持
-            urls: urls      // 取得したURLを追加
-          }
-      })
-    );
+            return {
+              ...customer,    // 既存のcustomer情報を保持
+              urls: urls      // 取得したURLを追加
+            }
+        })
+      );
 
-    console.log("UpdateCustomerInfo: ", udpateCusotmerInfo);
-    setCustomerInfo(udpateCusotmerInfo);
-  }
-    // const customerUrls = [];
-
-    // for (let customer of customerEmails) {
-    //   const email = customer.email_customer;
-
-    //   // CustomerUrlsTableからemail_customerに一致するURLを取得
-    //   const {data: propertyIdsAndUrls, error: urlsError } = await supabase  
-    //     .from('CustomerUrlTable')
-    //     .select('property_id, customer_url')
-    //     .eq('email_customer', email);
-      
-    //   if (urlsError) {
-    //     console.error('Error fetching customer urls:', urlsError);
-    //     continue;
-    //   }
-
-    //   // 取得したURLを辞書形式で保存
-    //   propertyIdsAndUrls.forEach(propertyIdAndUrlObj => {
-    //     customerUrls.push(propertyIdAndUrlObj.customer_url);
-    //   });
-    // }
-    // setCustomerUrls(customerUrls);
+      console.log("UpdateCustomerInfo: ", udpateCusotmerInfo);
+      setCustomerInfo(udpateCusotmerInfo);
+    }
   };
 
   const fetchSearchConsoleData = async () => {
     setLoading(true);
 
     // 更新日時を取得できている場合はそれを使い，取得できていない場合は現在より1年前の日付を取得
-    const startDate = lastUpdatedAt 
-      ? new Date(lastUpdatedAt).toISOString().split('T')[0] 
-      : new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().split('T')[0];
+    // const startDate = lastUpdatedAt 
+    //   ? new Date(lastUpdatedAt).toISOString().split('T')[0] 
+    //   : new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().split('T')[0];
+
+    const startDate = "2024-09-01";
 
     try {
       // console.log("CustomerUrls: ", customerUrls);  
@@ -283,58 +264,99 @@ export default function Home() {
       
       const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-      const results = await Promise.all(customerUrls.map(async (url) => {
-        const response = await fetch(`${apiUrl}/get-search-console`, {
-          method: 'POST', 
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            accessToken: session.accessToken,
-            url: url,
-            startDate: startDate,
-            endDate: new Date().toISOString().split('T')[0]
-          })
-        });
-        // レスポンスの確認
-        if (response.ok) {
-          if (response.status === 204) {
-            console.warn("No data available from Search Console. URL: ", url);
-            alert("No data available from Search Console");
-            return { url ,data: null};
-          } else {
-            const data = await response.json();
-            // console.log(`Success! Received data:${data}\nURL: ${url}`);
-            return { url, data: data };
-          }
-        } else {
-          console.error(`Failed to fetch search console data. Status: ${response.status}  \nURL: ${url}`);
-          // throw new Error('Failed to fetch search console data');
-        }
-      }));
+      // 全てのEmailとURLでSearch Consoleのデータを取得
+      const results = await Promise.all(
+        customerInfo.map(async (customer) => {
+          // Emailに対するすべてのURLに対してAPIリクエストを送る
+          return Promise.all(
+            customer.urls.map(async (urlObj) => {
+              // URLに対してSearch Consoleのデータを取得
+              const response = await fetch(`${apiUrl}/get-search-console`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  accessToken: session.accessToken,
+                  url: urlObj.url,
+                  startDate: startDate,
+                  endDate: new Date().toISOString().split('T')[0]
+                })
+              });
 
-      console.log('Search Console Data by URL: ', results);
+              // レスポンスの確認
+              if (response.ok) {
+                if (response.status === 204) {
+                  console.warn("No data available from Search Console. URL: ", url);
+                  alert("No data available from Search Console");
+                  return { url: urlObj.url, data: null};
+                } else {
+                  const data = await response.json();
+                  // console.log(`Success! Received data:${data}\nURL: ${url}`);
+                  return { url: urlObj.url, data: data };
+                }
+              } else {
+                console.error(`Failed to fetch search console data. Status: ${response.status}  \nURL: ${url}`);
+                return { url: urlObj.url, data: null};
+              }
+            })
+          )
+        })
+      )
+
+      // const results = await Promise.all(customerUrls.map(async (url) => {
+      //   const response = await fetch(`${apiUrl}/get-search-console`, {
+      //     method: 'POST', 
+      //     headers: { 'Content-Type': 'application/json' },
+      //     body: JSON.stringify({
+      //       accessToken: session.accessToken,
+      //       url: url,
+      //       startDate: startDate,
+      //       endDate: new Date().toISOString().split('T')[0]
+      //     })
+      //   });
+      //   // レスポンスの確認
+      //   if (response.ok) {
+      //     if (response.status === 204) {
+      //       console.warn("No data available from Search Console. URL: ", url);
+      //       alert("No data available from Search Console");
+      //       return { url ,data: null};
+      //     } else {
+      //       const data = await response.json();
+      //       // console.log(`Success! Received data:${data}\nURL: ${url}`);
+      //       return { url, data: data };
+      //     }
+      //   } else {
+      //     console.error(`Failed to fetch search console data. Status: ${response.status}  \nURL: ${url}`);
+      //     // throw new Error('Failed to fetch search console data');
+      //   }
+      // }));
+
+      console.log('Search Console : ', results);
 
       // 成功した場合にステートを更新
       setIsSearchConsoleFetched(true);
     } catch (error) {
       console.error('Error fetching search console data:', error);
       // alert('Failed to fetch search console data. Please try again later.');
+    } finally {
+      setLoading(false);
     }
   };
 
   // 特定の条件を満たした際に，呼び出される
   // 第2引数（[selectedProperty]）に指定した変数が変更された際に，呼び出される
   useEffect(() => {
-    if (selectedProperty) {
-      fetchAnalyticsData();
+    if (customerInfo) {
+      // fetchAnalyticsData();
+      fetchSearchConsoleData();
     }
-  }, [selectedProperty]);
+  }, [customerInfo]);
 
   // Search Consoleのデータを取得 [] -> 一度だけ実行される
-  useEffect(() => {
-    if (customerUrls.length > 0) {
-      // fetchSearchConsoleData();
-    }
-  }, [customerUrls]);
+  // useEffect(() => {
+  //   if (customerUrls.length > 0) {
+  //     fetchSearchConsoleData();
+  //   }
+  // }, [customerUrls]);
 
   // AnlyticsとSearch Consoleのデータを取得したら，データの更新日時をDBに保存
   useEffect(() => {
@@ -413,6 +435,17 @@ export default function Home() {
           Sign out
         </button>
       </header>
+
+      <div>
+        {loading ? (
+          <p>ロード中...</p>  // ローディング中のメッセージ
+        ) : (
+          <div>
+            {/* 他のコンテンツ */}
+            <p>データの取得が完了しました。</p>
+          </div>
+        )}
+    </div>
       
       {analyticsProperties.length > 0 ? (
         <div className="analytics-section bg-white p-6 rounded-lg shadow-md mb-6">
