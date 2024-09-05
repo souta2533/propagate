@@ -32,7 +32,7 @@ export default function Home() {
   const [customerEmailsWithUpdatedAt, setCustomerEmailsWithUpdatedAt] = useState([]);
   const [customerUrls, setCustomerUrls] = useState([]); // 顧客のURLの状態を管理
 
-  const [customerInfo, setCusotmerInfo] = useState([]); // email: (updated_at, urls)
+  const [customerInfo, setCustomerInfo] = useState([]); // email: (updated_at, urls)
   const [isAnalyticsFetched, setIsAnalyticsFetched] = useState(false);  // Analyticsデータが取得されたかどうかを管理
   const [isSearchConsoleFetched, setIsSearchConsoleFetched] = useState(false);    // Search Consoleデータが取得されたかどうかを管理
   const [lastUpdatedAt, setLastUpdatedAt] = useState(null);  // 最終更新日時を管理
@@ -215,13 +215,10 @@ export default function Home() {
         updated_at: customer.updated_at,
         urls: [],
       }));
-      setCusotmerInfo(customerInfoWithUpdatedAt);
-      // console.log("CustomerEmails: ", customerInfo);
-    }
 
     // 2. CustomerUrlTableからemail_customerに一致するpropertyIDとURLを取得
     const udpateCusotmerInfo = await Promise.all(
-      customerInfo.map(async (customer) => {
+      customerInfoWithUpdatedAt.map(async (customer) => {
         const { data: propertyIdsAndUrls, error: urlsError } = await supabase
           .from('CustomerUrlTable')
           .select('property_id, customer_url')
@@ -245,8 +242,9 @@ export default function Home() {
       })
     );
 
-    setCusotmerInfo(udpateCusotmerInfo);
-    console.log("CustomerInfo: ", udpateCusotmerInfo);
+    console.log("UpdateCustomerInfo: ", udpateCusotmerInfo);
+    setCustomerInfo(udpateCusotmerInfo);
+  }
     // const customerUrls = [];
 
     // for (let customer of customerEmails) {
@@ -269,7 +267,7 @@ export default function Home() {
     //   });
     // }
     // setCustomerUrls(customerUrls);
-  }
+  };
 
   const fetchSearchConsoleData = async () => {
     setLoading(true);
