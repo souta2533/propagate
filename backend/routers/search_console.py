@@ -13,6 +13,10 @@ logger = logging.getLogger(__name__)
 
 """
     Search Consoleからデータを取得するエンドポイント
+    - access Token
+    - URL
+    - Start Date
+    - End Date
 """
 @router.post("/get-search-console")
 async def get_search_console(data: SearchConsoleRequest):

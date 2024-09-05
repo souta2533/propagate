@@ -41,6 +41,8 @@ class AnalyticsDataRequest(BaseModel):
 class SearchConsoleRequest(BaseModel):
     accessToken: str
     url: str
+    startDate: str
+    endDate: str
 
 class SearchConsoleItem(BaseModel):
     pass

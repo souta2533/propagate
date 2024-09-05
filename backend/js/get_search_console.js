@@ -5,7 +5,7 @@ const START_DATE = '2024-08-20';
 const END_DATE = '2024-08-21';
 
 // Goolge Search Console APIからデータを取得する関数
-async function getSearchConsoleData(auth, siteURL) {
+async function getSearchConsoleData(auth, siteURL, startDate, endDate) {
     const webmasters = google.webmasters({
         version: 'v3',
         auth
@@ -20,8 +20,8 @@ async function getSearchConsoleData(auth, siteURL) {
             const response = await webmasters.searchanalytics.query({
                 siteUrl: siteURL,
                 requestBody: {
-                    startDate: START_DATE,
-                    endDate: END_DATE,
+                    startDate: startDate,
+                    endDate: endDate,
                     dimensions: ['date', 'query', 'page', 'country', 'device'],
                     rowLimit: 1000,
                     startRow: startRow
@@ -59,7 +59,7 @@ function flattenData(dataMap) {
 
 // メインの関数
 async function handler(req, res) {
-    const { accessToken, url } = req.body;
+    const { accessToken, url, startDate, endDate } = req.body;
     if (!accessToken || !url) {
         console.log('AccesToken: ', accessToken, '\nSiteURL: ', url);
         console.error('Access token and site URL are required');
@@ -72,7 +72,7 @@ async function handler(req, res) {
         auth.setCredentials({ access_token: accessToken });
 
         // Google Search Consoleからデータを取得
-        const rows = await getSearchConsoleData(auth, url);
+        const rows = await getSearchConsoleData(auth, url, startDate, endDate);
         // console.log('Rows: ', rows);
 
         // データが空だった場合，終了
