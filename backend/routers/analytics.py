@@ -23,7 +23,7 @@ async def get_analytics(data: AnalyticsRequest):
         raise HTTPException(status_code=500, detail="Failed to get analytics data")
     
     else:
-        # print(f"Result: {result}")
+        pass
         # Google AnalyticsのデータをDBに保存
-        save_analytics_data(property_id, result) 
+        # save_analytics_data(property_id, result) 
     return result

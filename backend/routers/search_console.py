@@ -43,5 +43,5 @@ async def get_search_console(data: SearchConsoleRequest):
         property_id = get_property_id_by_url(data.url)
 
         # Search ConsoleのデータをDBに保存
-        save_search_console_data(property_id, result)
+        # save_search_console_data(property_id, result)
     return result

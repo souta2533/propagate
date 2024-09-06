@@ -28,15 +28,11 @@ export default function Home() {
   const [pathList, setPathList] = useState([]); // pathListの状態を管理
   const [selectedPagePath, setSelectedPagePath] = useState(''); // 選択されたpagePathの状態を管理
 
-  const [customerEmails, setCustomerEmails] = useState([]);
-  const [customerEmailsWithUpdatedAt, setCustomerEmailsWithUpdatedAt] = useState([]);
-  const [customerUrls, setCustomerUrls] = useState([]); // 顧客のURLの状態を管理
-
   const [customerInfo, setCustomerInfo] = useState([]); // email: (updated_at, urls)
   const [isAnalyticsFetched, setIsAnalyticsFetched] = useState(false);  // Analyticsデータが取得されたかどうかを管理
   const [isSearchConsoleFetched, setIsSearchConsoleFetched] = useState(false);    // Search Consoleデータが取得されたかどうかを管理
-  const [lastUpdatedAt, setLastUpdatedAt] = useState(null);  // 最終更新日時を管理
 
+  const [unregisteredCustomers, setUnregisteredCustomer] = useState([]);  // 未登録のCustomer EmailとURLを格納  
 
   useEffect(() => {
     if (status === 'loading') {
@@ -177,7 +173,7 @@ export default function Home() {
       console.error('Error fetching analytics data:', error);
       // alert('Failed to fetch analytics data. Please try again later.');
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
   };
 
@@ -310,7 +306,7 @@ export default function Home() {
       console.error('Error fetching search console data:', error);
       // alert('Failed to fetch search console data. Please try again later.');
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
   };
 
@@ -357,6 +353,7 @@ export default function Home() {
   useEffect(() => {
     if (isAnalyticsFetched && isSearchConsoleFetched) {
       updateCustomerEmailUpdateAt();
+      setLoading(false);
     }
     else{
       console.log("Analytics Fetch: ", isAnalyticsFetched); 
@@ -389,6 +386,81 @@ export default function Home() {
       console.error('Error updating updatedAt:', error);
     }
   }
+
+  // 未登録のCustomer EmailをUnregisteredTableから取得
+  const getUnregisteredCustomer = async () => {
+    try {
+      // UnregisteredTableから未登録のEmailとURLを取得
+      const { data, error } = await supabase 
+        .from('UnregisteredTable')
+        .select('email, url');
+
+      if (error) {
+        console.error('Error fetching unregistered customers:', error); 
+        return;
+      }
+
+      // データを保存するための構造を作成
+      const unregisteredCustomersInfo = data.map((customer) => ({
+        email: customer.email,
+        url: customer.url,
+        accountId: null,   // accountIDはこの後取得するため，初期値としてnull
+      }));
+
+      setUnregisteredCustomer(unregisteredCustomersInfo);
+
+      console.log("UnregisteredCustomers: ", unregisteredCustomersInfo);
+    } catch (error) {
+      console.error('Error fetching unregistered customers:', error);
+    }
+  };
+
+  // 未登録のCustomer EmailがaccountIDを持つかを確認
+  const checkUnregisteredCustomer = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('CustomerDetailsTable')
+        .select('email_customer, accounts_id')
+
+      if (error) {
+        console.error('Error fetching unregistered customers:', error);
+        return;
+      }
+
+      // accountIDが存在するか確認し，unregisteredCustomersに反映
+      // console.log("Before", unregisteredCustomers);
+      const updateUnregisteredCustomers = unregisteredCustomers.map((customer) => {
+        const matchedCustomer = data.find((item) => item.email_customer === customer.email);
+        if (matchedCustomer && matchedCustomer.accounts_id) {
+          return {
+            ...customer,
+            accountId: matchedCustomer.accounts_id,
+          };
+        }
+        return customer;    // account_idがない場合はnullのまま，元のデータを返す
+      });
+      
+      console.log("Update Unregistered Customers: ", updateUnregisteredCustomers);
+
+      // 実際に更新があった場合のみstateを更新
+      if (JSON.stringify(unregisteredCustomers) !== JSON.stringify(updateUnregisteredCustomers)) {
+        setUnregisteredCustomer(updateUnregisteredCustomers);
+        console.log("Updated Unregistered Customers: ", updateUnregisteredCustomers);
+      }
+    } catch (error) {
+      console.error('Error checking unregistered customers: ', error);
+    }
+  };
+
+  useEffect(() => {
+      // 1. 未登録のDBに含まれるEmailを全て取得（accountIDがない + URLの登録がまだの両方を含む）
+      getUnregisteredCustomer();
+  }, []);
+
+  useEffect(() => {
+    // 2. 未登録のEmailからaccountIDがあるかを確認
+    checkUnregisteredCustomer();
+  }, [unregisteredCustomers]);
 
   if (!session) {
     return (
@@ -443,8 +515,98 @@ export default function Home() {
           <div>
             {/* 他のコンテンツ */}
             <p>データの取得が完了しました。</p>
-          </div>
-        )}
+
+            {unregisteredCustomers.length > 0 ? (
+            <div className="mt-6">
+              <h2 className="text-lg font-semibold mb-4">未登録の顧客リスト:</h2>
+              <table className="table-auto w-full bg-white shadow-md rounded-lg">
+                <thead>
+                  <tr className="bg-gray-200">
+                    <th className="px-4 py-2">Email</th>
+                    <th className="px-4 py-2">Account ID</th>
+                    <th className="px-4 py-2">URL</th>
+                    <th className="px-4 py-2">Property ID</th>
+                    <th className="px-4 py-2">Property Name</th>
+                    <th className="px-4 py-2">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                {unregisteredCustomers.map((customer) => (
+                    <tr key={customer.email} className="border-b">
+                      <td className="px-4 py-2">{customer.email}</td>
+                      <td className="px-4 py-2">
+                        {customer.accountId === null ? (
+                          <input
+                            type="text"
+                            placeholder="Enter Account ID"
+                            className="px-4 py-2 border border-gray-300 rounded"
+                            value={customer.accountId || ""}
+                            onChange={(e) =>
+                              handleAccountIdChange(customer.email, e.target.value)
+                            }
+                          />
+                        ) : (
+                          <span>{customer.accountId}</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-2">{customer.url}</td>
+                      <td className="px-4 py-2">
+                        <input
+                          type="text"
+                          placeholder="Enter Property ID"
+                          className="px-4 py-2 border border-gray-300 rounded"
+                          value={customer.propertyId || ""}
+                          onChange={(e) =>
+                            handlePropertyIdChange(customer.email, e.target.value)
+                          }
+                        />
+                      </td>
+                      <td className="px-4 py-2">
+                        <input
+                          type="text"
+                          placeholder="Enter Property Name"
+                          className="px-4 py-2 border border-gray-300 rounded"
+                          value={customer.propertyName || ""}
+                          onChange={(e) =>
+                            handlePropertyNameChange(customer.email, e.target.value)
+                          }
+                        />
+                      </td>
+                      <td className="px-4 py-2">
+                        {customer.accountId === null ? (
+                          <button
+                            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                            onClick={() =>
+                              registerAccountID(customer.email, customer.accountId)
+                            }
+                          >
+                            RegisterAccountID
+                          </button>
+                        ) : (
+                          <button
+                            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                            onClick={() =>
+                              registerPropertyID(
+                                customer.accountId,
+                                customer.propertyId,
+                                customer.propertyName
+                              )
+                            }
+                          >
+                            RegisterPropertyID
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p>未登録の顧客データがありません。</p>
+              )}
+              </div>
+            )}
     </div>
       
       {analyticsProperties.length > 0 ? (
