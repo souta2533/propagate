@@ -6,7 +6,7 @@ import logging
 
 from utils.batch import batch_process
 
-NUM_DATA = 100
+NUM_DATA = 10
 
 
 """
@@ -195,39 +195,39 @@ def save_batch_analytics_data(batch, property_id):
                 supabase.table("AnalyticsData")
                 .select("id")
                 .eq("property_id", property_id)
-                .eq("date", item.date)
-                .eq("page_location", item.pageLocation)
-                .eq("page_path", item.pagePath)
-                .eq("device_category", item.deviceCategory)
-                .eq("session_source", item.sessionSource)
-                .eq("city", item.city)
-                .eq("first_user_source_medium", item.firstUserSourceMedium)
-                .eq("screen_page_views", item.screenPageViews)
-                .eq("conversions", item.conversions)
-                .eq("active_users", item.activeUsers)
-                .eq("sessions", item.sessions)
-                .eq("engaged_sessions", item.engagedSessions)
+                .eq("date", item['date'])
+                .eq("page_location", item['pageLocation'])
+                .eq("page_path", item['pagePath'])
+                .eq("device_category", item['deviceCategory'])
+                .eq("session_source", item['sessionSource'])
+                .eq("city", item['city'])
+                .eq("first_user_source_medium", item['firstUserSourceMedium'])
+                .eq("screen_page_views", item['screenPageViews'])
+                .eq("conversions", item['conversions'])
+                .eq("active_users", item['activeUsers'])
+                .eq("sessions", item['sessions'])
+                .eq("engaged_sessions", item['engagedSessions'])
                 .execute()
                 )
-            print(f"Date: {item.date}")
+            
             if existing_data.data:
                 print(f"Data already exists: {existing_data.data}")
                 continue
 
             response = supabase.table("AnalyticsData").insert({
                 "property_id": property_id,
-                "page_location": item.pageLocation,
-                "page_path": item.pagePath,
-                "date": item.date,
-                "device_category": item.deviceCategory,
-                "session_source": item.sessionSource,
-                "city": item.city,
-                "first_user_source_medium": item.firstUserSourceMedium,
-                "screen_page_views": item.screenPageViews,
-                "conversions": item.conversions,
-                "active_users": item.activeUsers,
-                "sessions": item.sessions,
-                "engaged_sessions": item.engagedSessions,
+                "date": item['date'],
+                "page_location": item['pageLocation'],
+                "page_path": item['pagePath'],
+                "device_category": item['deviceCategory'],
+                "session_source": item['sessionSource'],
+                "city": item['city'],
+                "first_user_source_medium": item['firstUserSourceMedium'],
+                "screen_page_views": item['screenPageViews'],
+                "conversions": item['conversions'],
+                "active_users": item['activeUsers'],
+                "sessions": item['sessions'],
+                "engaged_sessions": item['engagedSessions'],
             }).execute()
     except APIError as e:
         error_info = e.args[0]

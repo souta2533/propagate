@@ -40,7 +40,7 @@ export default function Home() {
 
   useEffect(() => {
     if (status === 'loading') {
-      // console.log("Loading session data ...");
+      console.log("Loading session data ...");
     }
     // sessionが存在する場合にのみ実行
     if (session) {
@@ -135,8 +135,16 @@ export default function Home() {
       // 全てのaccountIDとpropertyIDでAnalyticsのデータを取得
       const results = await Promise.all(
         propertyList.map(async (property) => {
+
+          // PropertyListに対して，propertyIDに対応するupdated_atを取得
+          const matchedCustomer = customerInfo.find(customer =>
+            customer.urls.some(urlObj => urlObj.propertyId === property.propertyId)
+          );
+
           // 更新日時を取得できている場合はそれを使い，取得できていない場合は現在より1年前の日付を取得
-          const startDate = '2024-09-01';
+          const startDate = matchedCustomer
+            ? new Date(matchedCustomer.updated_at).toISOString().split('T')[0]
+            : new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().split('T')[0];
 
           const response = await fetch(`${apiUrl}/get-analytics`, {
             method: "POST",
@@ -162,36 +170,9 @@ export default function Home() {
 
       console.log("AnalyticsData: ", results);
 
-      // const response = await fetch(`${apiUrl}/get-analytics`, {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ 
-      //     accessToken: session.accessToken,
-      //     accountId: selectedProperty.accountId,
-      //     propertyId: selectedProperty.propertyId,
-      //     startDate: startDate,
-      //     endDate: new Date().toISOString().split('T')[0]
-      //   })
-      // });
-      
-      // const json_data = await response.json();
-      // console.log("Anlytics: ", json_data);
-
-      // pagePathのリストを取得(ここ無駄)
-      // const pathList = Array.from(new Set(
-      //   json_data.map(entry => entry.pagePath)
-      // ));
-      // setPathList(pathList);
-      // setSelectedPagePath(pathList[0]);
-
-      // console.log(json_data);
-
       setAnalyticsData(results);
 
       setLoading(false);
-
-      // 成功した場合にステートを更新
-      setIsAnalyticsFetched(true);
     } catch (error) {
       console.error('Error fetching analytics data:', error);
       // alert('Failed to fetch analytics data. Please try again later.');
@@ -325,9 +306,6 @@ export default function Home() {
       );
 
       console.log('Search Console : ', results);
-
-      // 成功した場合にステートを更新
-      setIsSearchConsoleFetched(true);
     } catch (error) {
       console.error('Error fetching search console data:', error);
       // alert('Failed to fetch search console data. Please try again later.');
@@ -339,28 +317,50 @@ export default function Home() {
   // 特定の条件を満たした際に，呼び出される
   // 第2引数（[selectedProperty]）に指定した変数が変更された際に，呼び出される
   useEffect(() => {
-    if (propertyList) {
-      fetchAnalyticsData();
+    let timeout;
+    if (propertyList.length > 1 && customerInfo && !isAnalyticsFetched) {
+      const fetchAnalytics = async () => {
+        await fetchAnalyticsData(); // fetchAnalyticsDataが完了するまで待機
+        setIsAnalyticsFetched(true); // 完了後にフラグをtrueに設定
+        console.log("Analytics fetched successfully");
+        timeout = setTimeout(() => setIsAnalyticsFetched(false), 5 * 60 * 1000); // 5分後にリセット
+      };
+  
+      fetchAnalytics();
     }
-  }, [propertyList]);
+  
+    // クリーンアップ処理
+    return () => {
+      if (timeout) clearTimeout(timeout);
+    };
+  }, [propertyList, customerInfo, isAnalyticsFetched]);
 
   useEffect(() => {
-    if (customerInfo) {
-      // fetchSearchConsoleData();
+    let timeout;
+    if (customerInfo.length > 1 && !isSearchConsoleFetched) {
+      const fetchSearchConsole = async () => {
+        await fetchSearchConsoleData(); // fetchSearchConsoleDataが完了するまで待機
+        setIsSearchConsoleFetched(true); // 完了後にフラグをtrueに設定
+        console.log("Search Console fetched successfully");
+        timeout = setTimeout(() => setIsSearchConsoleFetched(false), 5 * 60 * 1000); // 5分後にリセット
+      };
+  
+      fetchSearchConsole();
     }
-  }, [customerInfo]);
-
-  // Search Consoleのデータを取得 [] -> 一度だけ実行される
-  // useEffect(() => {
-  //   if (customerUrls.length > 0) {
-  //     fetchSearchConsoleData();
-  //   }
-  // }, [customerUrls]);
+    // クリーンアップ処理
+  return () => {
+    if (timeout) clearTimeout(timeout);
+  };
+}, [customerInfo, isSearchConsoleFetched]);
 
   // AnlyticsとSearch Consoleのデータを取得したら，データの更新日時をDBに保存
   useEffect(() => {
     if (isAnalyticsFetched && isSearchConsoleFetched) {
-      // updateCustomerEmailUpdateAt();
+      updateCustomerEmailUpdateAt();
+    }
+    else{
+      console.log("Analytics Fetch: ", isAnalyticsFetched); 
+      console.log("Search Console Fetch: ", isSearchConsoleFetched);
     }
   }, [isAnalyticsFetched, isSearchConsoleFetched]);
 
@@ -372,8 +372,9 @@ export default function Home() {
       const jstTime = new Date(currentTime.getTime() + 9 * 60 * 60 * 1000);
 
       // すべての顧客のemail
-      for (let customer of customerEmails) {
-        const email = customer.email_customer;
+      console.log("CustomerInfo: ", customerInfo);
+      for (let customer of customerInfo) {
+        const email = customer.email;
         const { data, error } = await supabase
           .from('CustomerEmailsTable')
           .update({ updated_at: jstTime })
@@ -383,7 +384,7 @@ export default function Home() {
             console.error("Error updating updatedAt:", error);
           }
       }
-      console.log("Updated updatedAt for all customers", customerEmails);
+      console.log("Updated updatedAt for all customers");
     } catch (error) {
       console.error('Error updating updatedAt:', error);
     }
