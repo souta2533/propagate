@@ -29,7 +29,7 @@ def run_js_script(script_name, input_data):
         
         # 出力結果をJSON形式に変換
         # print('Raw stdout from Node.hs script: ', stdout.decode())
-        print(json.loads(stdout.decode()))
+        # print(json.loads(stdout.decode()))
 
         # 出力が空だった場合，Noneを返す
         if stdout.decode().strip() == "NoData":

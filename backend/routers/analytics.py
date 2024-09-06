@@ -4,6 +4,7 @@ import json
 
 from js_runner import run_js_script
 from models.request import AnalyticsRequest
+from db.db_operations import save_analytics_data
 
 router = APIRouter()
 
@@ -11,6 +12,7 @@ router = APIRouter()
 # Google Analyticsのデータを取得するエンドポイント
 @router.post("/get-analytics")
 async def get_analytics(data: AnalyticsRequest):
+    property_id = data.propertyId
     result = run_js_script("./js/get_analytics.js", data.model_dump())
     # print(result)
     # JSONファイルに保存する
@@ -20,4 +22,7 @@ async def get_analytics(data: AnalyticsRequest):
         print(f"Result is None: {result}")
         raise HTTPException(status_code=500, detail="Failed to get analytics data")
     
+    else:
+        # Google AnalyticsのデータをDBに保存
+        save_analytics_data(property_id, result) 
     return result
