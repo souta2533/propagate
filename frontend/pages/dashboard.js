@@ -30,6 +30,14 @@ const Dashboard = () => {
             const sessionData = storedSession ? JSON.parse(storedSession) : null;
             // console.log("session: ", sessionData);
 
+            // const { data, error } = await supabase.auth.getSession();
+            // if (error) {
+            //     console.error('Error fetching session:', error);
+            //     return;
+            // }
+            // console.log('Session: ', data);
+            // const sessionData = data.session;
+
             if (!sessionData) {
                 // router.push('/auth/login');
             } else {

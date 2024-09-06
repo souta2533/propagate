@@ -26,6 +26,21 @@ const Register = () => {
             setEmail('');
             setPassword('');
 
+            // 登録したユーザー情報をバックエンドに送信
+            const response = await fetch('/api/register-user', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                email: email,
+              }),
+            });
+
+            if (!response.ok) {
+              console.error('Failed to register user on the backend');
+            }
+
             // 登録後にダッシュボードへリダイレクト
             router.push('/dashboard');
         }

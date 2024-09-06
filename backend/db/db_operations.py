@@ -10,6 +10,37 @@ NUM_DATA = 10
 
 
 """
+    UnregisteredTable
+        - id
+        - email
+        - url
+"""
+class UnregisteredTable:
+    def __init__(self, supabase_client: Client) -> None:
+        self.supabase = supabase_client
+    
+    async def add_unregistered_user(self, email: str):
+        try:
+            existing_response = self.supabase.table("UnregisteredTable").select("email").eq("email", email).execute()
+
+            if existing_response.data:
+                print(f"Email already exists: {existing_response.data}")
+                return existing_response.data[0]['email']
+            
+            response = self.supabase.table("UnregisteredTable").insert({
+                "email": email
+            }).execute()
+
+            if 'error' in response:
+                print(f"Error: {response.error}")
+            else:
+                return response.data[0]['email']
+        except Exception as e:
+            print(f"Error: {e}")
+            return False
+
+
+"""
     CustomerEmailsTable
         - id
         - email_propagate_id
@@ -38,7 +69,6 @@ class CustomerEmailsTable:
         except Exception as e:
             return False
             
-
 """
 
     ここに新しいEmail Propagateの情報を保存する関数が必要

@@ -29,6 +29,8 @@ export default function Login() {
             
             // ログイン成功時，ダッシュボードへリダイレクト
             await router.push('/dashboard');
+
+            // console.log("Data: ", data);    
         } else {
             // ログイン失敗時，エラーメッセージを表示
             setError(data.message);
