@@ -216,7 +216,7 @@ export default function Home() {
         urls: [],
       }));
       setCusotmerInfo(customerInfoWithUpdatedAt);
-      // console.log("CustomerEmails: ", customerInfo);
+      console.log("CustomerEmails: ", customerInfoWithUpdatedAt);
     }
 
     // 2. CustomerUrlTableからemail_customerに一致するpropertyIDとURLを取得
