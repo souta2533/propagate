@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
 import { handlerUrlSubmit } from '../lib/submitHandler';
+import './dashboard.css'
 
 const Dashboard = () => {
     const router = useRouter();
@@ -21,6 +22,12 @@ const Dashboard = () => {
 
     const [propertyId, setPropertyId] = useState('');     // Property ID(URLと一生に送信する用)の状態を管理
     const [url, setUrl] = useState('');     // URLの状態を管理
+
+    const [isOpen, setIsOpen] = useState(false);
+
+    const toggleDropdown = () => {
+        setIsOpen(!isOpen);
+    }
 
     useEffect(() => {
         const fetchAnalyticsData = async () => {
@@ -180,18 +187,17 @@ const Dashboard = () => {
 
     // ダッシュボードの内容を記載
     return (
-        <div>
+        <div className="main-content">
             <h1>Dashboard</h1>
-
+    
             {/* Account ID の選択ドロップダウン */}
             {accountIds.length > 0 && (
-                <div className="mb-4">
-                    <label htmlFor="accountId" className="block text-gray-700">Select Account ID</label>
+                <div className="select-section">
+                    <label htmlFor="accountId">Select Account ID</label>
                     <select 
                         id="accountId"
                         value={selectedAccountId || ''}
                         onChange={handleAccountChange}
-                        className="block w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                         {accountIds.map(accountId => (
                             <option key={accountId} value={accountId}>
@@ -201,75 +207,107 @@ const Dashboard = () => {
                     </select>
                 </div>
             )}
-
+    
             {/* Property ID の選択ドロップダウン */}
             {filteredProperties.length > 0 ? (
-                <div className="analytics-section bg-white p-6 rounded-lg shadow-md mb-6">
-                    <h2 className="text-lg font-semibold mb-4">Analytics Properties:</h2>
-                    <div className="relative">
-                        <label htmlFor="propertyId" className="block text-gray-700">Select Property ID</label>
-                        <select 
-                            id="propertyId"
-                            value={selectedProperty ? selectedProperty.properties_id : ''}
-                            onChange={handlePropertyChange}
-                            className="block w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                            {filteredProperties.map(prop => (
-                                <option key={prop.properties_id} value={prop.properties_id}>
-                                    {prop.properties_name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                <div className="select-section">
+                    <h2>Analytics Properties:</h2>
+                    <label htmlFor="propertyId">Select Property ID</label>
+                    <select 
+                        id="propertyId"
+                        value={selectedProperty ? selectedProperty.properties_id : ''}
+                        onChange={handlePropertyChange}
+                    >
+                        {filteredProperties.map(prop => (
+                            <option key={prop.properties_id} value={prop.properties_id}>
+                                {prop.properties_name}
+                            </option>
+                        ))}
+                    </select>
                     
                     {selectedProperty && (
-                        <div className="mt-4">
+                        <div>
                             <p><strong>Selected Account ID:</strong> {selectedProperty.account_id}</p>
                             <p><strong>Selected Property ID:</strong> {selectedProperty.properties_id}</p>
                         </div>
                     )}
                 </div>
             ) : (
-                <p className="text-gray-600">No Analytics properties found for this account.</p>
+                <p>No Analytics properties found for this account.</p>
             )}
+    
             {/* URLとProperty IDの入力と送信ボタン */}
-<div className="url-submission-section bg-white p-6 rounded-lg shadow-md mt-6">
-    <h2 className="text-lg font-semibold mb-4">Submit Property ID and URL:</h2>
-    <form onSubmit={handleSubmit}>
-        <label htmlFor="propertyId" className="block text-gray-700">Enter Property ID</label>
-        <input
-            id="propertyId"
-            type="text"
-            value={propertyId}
-            onChange={(e) => setPropertyId(e.target.value)}
-            className="block w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
-            placeholder="Property ID"
-            required
-        />
-
-        <label htmlFor="url" className="block text-gray-700">Enter URL</label>
-        <input
-            id="url"
-            type="text"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            className="block w-full px-4 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
-            placeholder="https://example.com"
-            required
-        />
-
-        <button
-            type="submit"
-            className="px-4 py-2 bg-blue-500 text-white rounded-md shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-            Submit
-        </button>
-    </form>
-</div>
-
+            <div className="form-section">
+                <h2>Submit Property ID and URL:</h2>
+                <form onSubmit={handleSubmit}>
+                    <label htmlFor="propertyId">Enter Property ID</label>
+                    <input
+                        id="propertyId"
+                        type="text"
+                        value={propertyId}
+                        onChange={(e) => setPropertyId(e.target.value)}
+                        placeholder="Property ID"
+                        required
+                    />
+    
+                    <label htmlFor="url">Enter URL</label>
+                    <input
+                        id="url"
+                        type="text"
+                        value={url}
+                        onChange={(e) => setUrl(e.target.value)}
+                        placeholder="https://example.com"
+                        required
+                    />
+    
+                    <button type="submit">
+                        Submit
+                    </button>
+                </form>
+            </div>
+    
+            {/* カード表示 */}
+            <div className="card-container">
+                <div className="card">
+                    <h2>PV (ページ訪問者数)</h2>
+                    <p>Search for Data...</p>
+                </div>
+                <div className="card">
+                    <h2>CV (お問い合わせ数)</h2>
+                    <p>Search for Data...</p>
+                </div>
+                <div className="card">
+                    <h2>UU (ページ訪問者数)</h2>
+                    <p>Search for Data...</p>
+                </div>
+                <aside className="sidebar">
+                <div className="logo">
+                    <h1 className="sidebar-name">Propagate Analytics</h1>
+                </div>
+                <nav className="sidebar-nav">
+                    <ul>
+                        <li><a href="#">ホーム</a></li>
+                        <li><a href="#">ページ別状況</a></li>
+                        <li className="dropdown">
+                            <button className="dropdown-btn" onClick={toggleDropdown}>
+                                アナリティクスレポート
+                            </button>
+                            <div className={`dropdown-content ${isOpen ? "open" : ""}`}>
+                                <a href="#">PVレポート</a>
+                                <a href="#">CVレポート</a>
+                                <a href="#">UUレポート</a>
+                            </div>
+                        </li>
+                    </ul>
+                </nav>
+            </aside>
+            <main className="main-content">
+                <h1>Dashboard Content</h1>
+            </main>
+            </div>
         </div>
+        
     );
 }
-
 
 export default Dashboard;

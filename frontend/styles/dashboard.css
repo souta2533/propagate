@@ -1,0 +1,167 @@
+/* 全体レイアウト */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    margin: 0;
+    padding: 0;
+}
+
+/* サイドバー */
+.sidebar {
+    width: 220px;
+    background-color: #2d2d2d;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding-top: 20px;
+    color : white;
+}
+
+.sidebar a {
+    display: block;
+    padding: 10px 20px;
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.sidebar a:hover {
+    background-color: #575757;
+}
+
+/* ドロップダウンメニューのコンテナ */
+.dropdown {
+    position: relative;
+}
+
+.dropdown-btn {
+    background-color: transparent;
+    color: white;
+    font-size: 16px;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    padding: 10px 20px;
+}
+
+.dropdown-btn:hover {
+    background-color: #575757;
+}
+
+.dropdown-content {
+    display: none;
+    background-color: #3e3e3e;
+    position: relative;
+    padding-left: 20px;
+}
+
+.dropdown-content a {
+    padding: 10px 20px;
+    text-decoration: none;
+    display: block;
+    color: white;
+    font-size: 14px;
+}
+
+.dropdown-content a:hover {
+    background-color: #575757;
+}
+
+/* ドロップダウンメニューが表示されたときのスタイル */
+.dropdown.open .dropdown-content {
+    display: block;
+}
+
+/* メインコンテンツ */
+.main-content {
+    margin-left: 240px;
+    padding: 20px;
+}
+
+/* ダッシュボードヘッダー */
+h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color : black;
+
+}
+
+/* ドロップダウンとフォーム */
+.select-section, .form-section {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+}
+
+select, input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+button {
+    background-color: #1d72b8;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    
+}
+
+button:hover {
+    background-color: #155a8a;
+}
+
+/* カードスタイル */
+.card-container {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 31%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card h2 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.card p {
+    font-size: 14px;
+    color: #555;
+}
+
+/* モバイル対応 */
+@media (max-width: 768px) {
+    .card {
+        width: 100%;
+    }
+
+    .main-content {
+        margin-left: 0;
+        padding: 10px;
+    }
+}
