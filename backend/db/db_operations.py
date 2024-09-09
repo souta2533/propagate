@@ -6,6 +6,10 @@ import logging
 
 from utils.batch import batch_process
 
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+log = logging.getLogger("uvicorn")
+
 NUM_DATA = 10
 
 
@@ -19,18 +23,21 @@ class PropagateAccountTable:
     def __init__(self, supabase_client: Client) -> None:
         self.supabase = supabase_client
 
-    def get_id_by_email(self, email_propagate: str):
+    async def get_id_by_email(self, email_propagate: str):
         try:
             response = self.supabase.table("PropagateAccountTable").select('id').eq('email_propagate', email_propagate).execute()
 
             if response.data:
+                # log.info(f"PropagateID: {response.data[0]['id']}")
                 return response.data[0]['id']
             
             elif 'error' in response:
-                print(f"Error: {response.error}")
+                log.error(f"Error: {response.error}")
                 return None
+            else:
+                log.error(f"PropagateID not found for email: {email_propagate}")
         except Exception as e:
-            print(f"Error: {e}")
+            log.error(f"Error: {e}")
             return None
         
 class CustomerEmailsTable:
@@ -43,26 +50,33 @@ class CustomerEmailsTable:
     def __init__(self, supabase_client: Client) -> None:
         self.supabase = supabase_client
 
-    def insert_customer_email(self, email_propagate_id, email_customer):
+    async def insert_customer_email(self, email_propagate_id, email_customer):
         try:
-            existing_response = self.supabase.table("CustomerEmailsTable").select("email_customer").eq("email_customer", email_customer).execute()
+            log.info(f"Email: {email_customer}")
+            existing_response = self.supabase.table("CustomerEmailsTable").select("email_propagate_id", 'email_customer').eq("email_customer", email_customer).execute()
+            log.info(f"Existing response: {existing_response}")
 
             if existing_response.data:
+                log.error(f"Email already exists: {existing_response.data[0]['email_customer']}")
+                return None
+                
+            else:
                 response = self.supabase.table("CustomerEmailsTable").insert({
                     "email_propagate_id": email_propagate_id,
                     "email_customer": email_customer
                 }).execute()
 
+                log.info(f"Response: {response}")
+
                 if 'error' in response:
-                    print(f"Error: {response.error}")
+                    log.error(f"Error: {response.error}")
                     return None
                 else:
+                    log.error(f"Email already exists: {existing_response.data}")
                     return response.data[0]['email_customer']
         except Exception as e:
-            print(f"Error: {e}")
+            log.error(f"Error: {e}")
             return None
-
-
 
 class CustomerDetailsTable:
     """
@@ -90,7 +104,31 @@ class CustomerDetailsTable:
             return None
         
     async def register_account_id(self, email_customer: str, account_id: str):
-        pass
+        try:
+            log.info(f"Email: {email_customer}")
+            log.info(f"AccountID: {account_id}")    
+            existing_response = self.supabase.table("CustomerDetailsTable").select('accounts_id').eq('accounts_id', account_id).execute()
+
+            if existing_response.data:
+                return existing_response.data[0]['accounts_id']
+
+            elif 'error' in existing_response:
+                log.error(f"Error: {existing_response.error}")
+                return None
+            else:
+                response = self.supabase.table("CustomerDetailsTable").insert({
+                        "email_customer": email_customer,
+                        "accounts_id": account_id
+                    }).execute()
+                
+                if 'error' in response:
+                    log.error(f"Error: {response.error}")
+                    return None
+                return response.data[0]['accounts_id']
+            
+        except Exception as e:
+            log.error(f"Error: {e}")
+            return None
 
 
 class PropertyTable:

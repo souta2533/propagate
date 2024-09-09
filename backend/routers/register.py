@@ -1,10 +1,13 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
+import logging
 
 from db.supabase_client import supabase
 from models.request import RegisterUrl, RegisterAccountId
-from db.db_operations import PropagateAccountTable, CustomerDetailsTable, PropertyTable, UnregisteredTable
+from db.db_operations import PropagateAccountTable, CustomerEmailsTable, CustomerDetailsTable, PropertyTable, UnregisteredTable
 
 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+log = logging.getLogger("uvicorn")
 router = APIRouter()
 
 
@@ -18,16 +21,42 @@ async def register_account_id(request: RegisterAccountId):
     propagate_email = request.propagateEmail
     email = request.email
     account_id = request.accountId
+    # print(f"Request: {request}")
 
-    # propagate_emailからそのIDを取得
-    propagate_account_table = PropagateAccountTable(supabase)
-    propagate_id = propagate_account_table.get_id_by_email(propagate_email)
+    try:
+        # propagate_emailからそのIDを取得
+        propagate_account_table = PropagateAccountTable(supabase)
+        propagate_id = await propagate_account_table.get_id_by_email(propagate_email)
+        # log.info(f"PropagateID: {propagate_id}")
 
-    if propagate_id is None:
-        raise Exception(status_code=500, detail="Failed to get Propagate ID")
-    
-    # 取得したPropagateIDとAccountIDをCustomerDetailsTableに保存
+        if propagate_id is None:
+            raise HTTPException(status_code=500, detail="Failed to get Propagate ID")
+        
+        # 取得したPropagateIDからCustomerEmailsTableにEmailを保存
+        customer_emails_table = CustomerEmailsTable(supabase)
+        result = await customer_emails_table.insert_customer_email(propagate_id, email)
+        log.info(f"CustomerEmailsTable: {result}")
 
+        if result is None:
+            log.error(f"CustomerEmailsTable: {result}")
+            raise HTTPException(status_code=500, detail="Failed to register email data")
+        
+        # CustomerDetailsTableにAccountIDを保存
+        log.info(f"Email: {email}, AccountID: {account_id}")
+        customer_details_table = CustomerDetailsTable(supabase)
+        result = await customer_details_table.register_account_id(email, account_id)
+        log.info(f"CustomerDetailsTable: {result}")
+
+        if result is None:
+            log.info(f"CustomerDetailsTable: {result}")
+            raise HTTPException(status_code=500, detail="Failed to register account data")
+        
+        return {"message": "Account ID registered successfully"}
+        
+    except Exception as e:
+        log.error(f"Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+        return {"error": str(e)}, 500
 
 """
     Userが入力したURLをDBに保存するエンドポイント

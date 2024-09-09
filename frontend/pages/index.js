@@ -3,7 +3,7 @@ import { useSession, signIn, signOut } from "next-auth/react";
 import dynamic from 'next/dynamic';
 require('dotenv').config({ path: '.env.local' });
 import { supabase } from '../lib/supabaseClient';
-import { registerPropertyId } from '../lib/submitHandler';
+import { registerPropertyId, registerAccountId } from '../lib/submitHandler';
 // import { url } from 'inspector';
 
 
@@ -408,6 +408,8 @@ export default function Home() {
         email: customer.email,
         url: customer.url,
         accountId: null,   // accountIDはこの後取得するため，初期値としてnull
+        isSentAccountId: false,     // データを送信したかどうかを管理
+        isSentUrl: false
       }));
 
       setUnregisteredCustomer(unregisteredCustomersInfo);
@@ -438,6 +440,7 @@ export default function Home() {
           return {
             ...customer,
             accountId: matchedCustomer.accounts_id,
+            isSentAccountId: true
           };
         }
         return customer;    // account_idがない場合はnullのまま，元のデータを返す
@@ -509,6 +512,20 @@ export default function Home() {
     );
   };
 
+  const handleSentStatusChange = (email, type, value) => {
+    setUnregisteredCustomer((prevCustomers) =>
+      prevCustomers.map((customer) =>
+        customer.email == email
+        ? { 
+            ...customer, 
+            isSentAccountId: type === 'accountId' ? value : customer.isSentAccountId,
+            isSentUrl: type === 'url' ? value : customer.isSentUrl,
+          } 
+        : customer
+      )
+    );
+  };
+
   return (
     <div className="container mx-auto p-6 bg-gray-50 min-h-screen">
       {pathList.length > 0 && (
@@ -567,19 +584,15 @@ export default function Home() {
                     <tr key={customer.email} className="border-b">
                       <td className="px-4 py-2">{customer.email}</td>
                       <td className="px-4 py-2">
-                        {customer.accountId === null ? (
-                          <input
-                            type="text"
-                            placeholder="Enter Account ID"
-                            className="px-4 py-2 border border-gray-300 rounded"
-                            value={customer.accountId || ""}
-                            onChange={(e) =>
-                              handleAccountIdChange(customer.email, e.target.value)
-                            }
-                          />
-                        ) : (
-                          <span>{customer.accountId}</span>
-                        )}
+                        <input
+                          type="text"
+                          placeholder="Enter Account ID"
+                          className="px-4 py-2 border border-gray-300 rounded"
+                          value={customer.accountId || ""}
+                          onChange={(e) =>
+                            handleAccountIdChange(customer.email, e.target.value)
+                          }
+                        />
                       </td>
                       <td className="px-4 py-2">{customer.url}</td>
                       <td className="px-4 py-2">
@@ -605,26 +618,28 @@ export default function Home() {
                         />
                       </td>
                       <td className="px-4 py-2">
-                        {customer.accountId === null ? (
+                        {customer.accountId === null || !customer.isSentAccountId ? (
                           <button
                             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                            onClick={() =>
-                              registerAccountID(PROPAGATE_EMAIL, customer.email, customer.accountId)
-                            }
+                            onClick={() => {
+                              registerAccountId(PROPAGATE_EMAIL, customer.email, customer.accountId)
+                              handleSentStatusChange(customer.email, 'accountId', true) 
+                            }}
                           >
                             RegisterAccountID
                           </button>
                         ) : (
                           <button
                             className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-                            onClick={() =>
+                            onClick={() => {
                               registerPropertyId(
                                 customer.email,
                                 customer.propertyId,
                                 customer.propertyName,
                                 customer.url
                               )
-                            }
+                              handleSentStatusChange(customer.email, 'url', true) 
+                            }}
                           >
                             RegisterPropertyID
                           </button>
