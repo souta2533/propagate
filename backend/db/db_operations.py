@@ -9,6 +9,59 @@ from utils.batch import batch_process
 NUM_DATA = 10
 
 
+class CustomerDetailsTable:
+    """
+        CustomerDetailsTable
+            - id
+            - email_customer
+            - accounts_id
+            - created_at
+    """
+    def __init__(self, supabase_client: Client) -> None:
+        self.supabase = supabase_client
+
+    def get_account_id_by_email(self, email_customer: str):
+        # 複数のAccountIDが見つかった場合でも，最初に見つかったAccountIDを返す
+        # TODO: 複数のAccountIDが見つかった場合の処理
+        try:
+            response = self.supabase.table("CustomerDetailsTable").select('accounts_id').eq('email_customer', email_customer).execute()
+
+            if response.data:
+                return response.data[0]['accounts_id']
+            else:
+                return None
+        except Exception as e:
+            print(f"Error: {e}")
+            return None
+
+class PropertyTable:
+    """
+        Property table
+            - id
+            - account_id
+            - properties_id
+            - properties_name
+            - created_at
+    """
+    def __init__(self, supabase_client: Client) -> None:
+        self.supabase = supabase_client
+
+    async def register_property(self, account_id, property_id, property_name):
+        try:
+            response = self.supabase.table('PropertyTable').insert({
+                'account_id': account_id,
+                'properties_id': property_id,
+                'properties_name': property_name    
+            }).execute()
+
+            if 'error' in response:
+                print(f"Error: {response.error}")
+            else:
+                return response.data[0]
+        except Exception as e:
+            print(f"Error: {e}")
+            return None
+    
 """
     UnregisteredTable
         - id
@@ -38,7 +91,26 @@ class UnregisteredTable:
         except Exception as e:
             print(f"Error: {e}")
             return False
+        
+    async def del_unregistered_url(self, email: str, url: str):
+        try:
+            existing_response = self.supabase.table("UnregisteredTable").select('email', 'url').eq('email', email).eq('url', url).execute()
 
+            if existing_response.data:
+                delete_response = self.supabase.table("UnregisteredTable").delete().eq('email', email).eq('url', url).execute()
+
+                if 'error' in delete_response:
+                    print(f"Error: {delete_response.error}")
+                    return False
+                else:
+                    print(f"Deleted URL: {url}")
+                    return True
+            else:
+                print(f"URL not found: {url}")
+                return False
+        except Exception as e:
+            print(f"Error: {e}")
+            return False
 
 """
     CustomerEmailsTable
@@ -74,6 +146,7 @@ class CustomerEmailsTable:
     ここに新しいEmail Propagateの情報を保存する関数が必要
 
 """
+
 def make_email_propagate(email_propagate):
     """
         同じemail_propagateがすでに存在するかを確認する必要がある

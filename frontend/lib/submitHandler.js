@@ -28,3 +28,58 @@ export const handlerUrlSubmit = async (customerEmail, propertyId, url, setUrl) =
         console.error('Failed to submit URL', error);
     }
 }
+
+export const registerAccountId = async (email, accountId) => {
+    try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+        const response = await fetch(`${apiUrl}/register-account-id`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: email,
+                accountId: accountId,
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error("AccountID registration failed");
+        }
+        
+        console.log('AccountID registered successfully: ', email, accountId);
+    } catch (error) {
+        console.error("Error registering AccountID: ", error);  
+    }
+};
+
+export const registerPropertyId = async (email, propertyId, propertyName, url) => {
+    console.log('registerPropertyId: ', email, propertyId, propertyName);
+    if (!propertyId || !propertyName) {
+        alert("全ての項目を入力してください");
+        return;
+    }
+    try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+        const response = await fetch(`${apiUrl}/register-property-id`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',   
+            },
+            body: JSON.stringify({
+                email: email,
+                propertyId: propertyId,
+                propertyName: propertyName,
+                url: url,
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error("PropertyID registration failed");
+        }
+
+        console.log('PropertyID registered successfully: ', propertyId, propertyName);
+    } catch (error) {
+        console.error("Error registering PropertyID: ", error);
+    }
+};

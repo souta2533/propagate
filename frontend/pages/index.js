@@ -3,6 +3,8 @@ import { useSession, signIn, signOut } from "next-auth/react";
 import dynamic from 'next/dynamic';
 require('dotenv').config({ path: '.env.local' });
 import { supabase } from '../lib/supabaseClient';
+import { registerPropertyId } from '../lib/submitHandler';
+// import { url } from 'inspector';
 
 
 const EMAIL_PROPAGATE_ID = 35;  // 事前に作成しておくPropagateのメールアドレス
@@ -477,6 +479,35 @@ export default function Home() {
     );
   }
 
+  // 入力されたAccountID, PropertyID, PropertyNameを制御
+  const handleAccountIdChange = (email, newAccountId) => {
+    setUnregisteredCustomer((prevCustomers) => 
+      prevCustomers.map((customer) =>
+        customer.email == email ? {...customer, accountId: newAccountId } : customer
+      )
+    );
+  }
+
+  const handlePropertyIdChange = (email, url, newPropertyId) => {
+    setUnregisteredCustomer((prevCustomers) => 
+      prevCustomers.map((customer) =>
+        customer.email == email && customer.url === url
+          ? {...customer, propertyId: newPropertyId } 
+          : customer
+      )
+    );
+  };
+
+  const handlePropertyNameChange = (email, url, newPropertyName) => {
+    setUnregisteredCustomer((prevCustomers) => 
+      prevCustomers.map((customer) =>
+        customer.email == email && customer.url === url
+          ? { ...customer, propertyName: newPropertyName } 
+          : customer
+      )
+    );
+  };
+
   return (
     <div className="container mx-auto p-6 bg-gray-50 min-h-screen">
       {pathList.length > 0 && (
@@ -557,7 +588,7 @@ export default function Home() {
                           className="px-4 py-2 border border-gray-300 rounded"
                           value={customer.propertyId || ""}
                           onChange={(e) =>
-                            handlePropertyIdChange(customer.email, e.target.value)
+                            handlePropertyIdChange(customer.email, customer.url, e.target.value)
                           }
                         />
                       </td>
@@ -568,7 +599,7 @@ export default function Home() {
                           className="px-4 py-2 border border-gray-300 rounded"
                           value={customer.propertyName || ""}
                           onChange={(e) =>
-                            handlePropertyNameChange(customer.email, e.target.value)
+                            handlePropertyNameChange(customer.email, customer.url, e.target.value)
                           }
                         />
                       </td>
@@ -586,10 +617,11 @@ export default function Home() {
                           <button
                             className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
                             onClick={() =>
-                              registerPropertyID(
-                                customer.accountId,
+                              registerPropertyId(
+                                customer.email,
                                 customer.propertyId,
-                                customer.propertyName
+                                customer.propertyName,
+                                customer.url
                               )
                             }
                           >

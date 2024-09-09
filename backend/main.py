@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr
 import json
 
-from routers import properties, db, analytics, search_console, user_input_handler
+from routers import properties, db, analytics, search_console, user_input_handler, register
 from db.db_operations import save_email_customer
 from js_runner import run_js_script
 
@@ -14,6 +14,7 @@ app.include_router(db.router)
 app.include_router(analytics.router)
 app.include_router(search_console.router)
 app.include_router(user_input_handler.router)
+app.include_router(register.router)
 
 # 許可するオリジンを指定
 # CORS設定
@@ -30,7 +31,6 @@ app.add_middleware(
     allow_methods=["*"],    # すべてのHTTPメソッド（GET, POST, PUT, DELETEなど）を許可
     allow_headers=["*"],    # すべてのHTTPヘッダーを許可
 )
-
 
 @app.get("/")
 def read_root():

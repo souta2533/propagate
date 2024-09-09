@@ -61,3 +61,10 @@ class URLRequest(BaseModel):
 # Userの新規登録（email）
 class RegisterUser(BaseModel):
     email: str
+
+# UserのURLの追加
+class RegisterUrl(BaseModel):
+    email: str
+    propertyId: str
+    propertyName: str
+    url: str
