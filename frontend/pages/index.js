@@ -7,6 +7,7 @@ import { registerPropertyId } from '../lib/submitHandler';
 // import { url } from 'inspector';
 
 
+const PROPAGATE_EMAIL = "propagate1@gmail.com";  // 事前に作成しておくPropagateのメールアドレス
 const EMAIL_PROPAGATE_ID = 35;  // 事前に作成しておくPropagateのメールアドレス
 const EMAIL_CUSTOMER = "egnpropagate85@gmail.com";    // 顧客が入力するメールアドレス
 
@@ -608,7 +609,7 @@ export default function Home() {
                           <button
                             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                             onClick={() =>
-                              registerAccountID(customer.email, customer.accountId)
+                              registerAccountID(PROPAGATE_EMAIL, customer.email, customer.accountId)
                             }
                           >
                             RegisterAccountID

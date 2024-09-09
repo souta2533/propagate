@@ -9,6 +9,61 @@ from utils.batch import batch_process
 NUM_DATA = 10
 
 
+class PropagateAccountTable:
+    """
+        PropagateAccountTable
+            - id
+            - email_propagate
+            - created_at
+    """
+    def __init__(self, supabase_client: Client) -> None:
+        self.supabase = supabase_client
+
+    def get_id_by_email(self, email_propagate: str):
+        try:
+            response = self.supabase.table("PropagateAccountTable").select('id').eq('email_propagate', email_propagate).execute()
+
+            if response.data:
+                return response.data[0]['id']
+            
+            elif 'error' in response:
+                print(f"Error: {response.error}")
+                return None
+        except Exception as e:
+            print(f"Error: {e}")
+            return None
+        
+class CustomerEmailsTable:
+    """
+        CustomerEmailsTable
+            - id
+            - email_propagate_id
+            - email_customer
+    """
+    def __init__(self, supabase_client: Client) -> None:
+        self.supabase = supabase_client
+
+    def insert_customer_email(self, email_propagate_id, email_customer):
+        try:
+            existing_response = self.supabase.table("CustomerEmailsTable").select("email_customer").eq("email_customer", email_customer).execute()
+
+            if existing_response.data:
+                response = self.supabase.table("CustomerEmailsTable").insert({
+                    "email_propagate_id": email_propagate_id,
+                    "email_customer": email_customer
+                }).execute()
+
+                if 'error' in response:
+                    print(f"Error: {response.error}")
+                    return None
+                else:
+                    return response.data[0]['email_customer']
+        except Exception as e:
+            print(f"Error: {e}")
+            return None
+
+
+
 class CustomerDetailsTable:
     """
         CustomerDetailsTable
@@ -33,6 +88,10 @@ class CustomerDetailsTable:
         except Exception as e:
             print(f"Error: {e}")
             return None
+        
+    async def register_account_id(self, email_customer: str, account_id: str):
+        pass
+
 
 class PropertyTable:
     """
@@ -61,14 +120,14 @@ class PropertyTable:
         except Exception as e:
             print(f"Error: {e}")
             return None
-    
-"""
-    UnregisteredTable
-        - id
-        - email
-        - url
-"""
+
 class UnregisteredTable:
+    """
+        UnregisteredTable
+            - id
+            - email
+            - url
+    """
     def __init__(self, supabase_client: Client) -> None:
         self.supabase = supabase_client
     
@@ -112,34 +171,6 @@ class UnregisteredTable:
             print(f"Error: {e}")
             return False
 
-"""
-    CustomerEmailsTable
-        - id
-        - email_propagate_id
-        - email_customer
-        - updated_at
-"""
-class CustomerEmailsTable:
-    def __init__(self, supabase_client: Client):
-        self.supabase = supabase_client 
-
-    async def update_updated_at(self, email_customer: str):
-        """指定されたemail_customerのupdated_atを更新する"""
-        try:
-            # 現在の日時を取得
-            current_time = datetime.datetime.utnow()
-            jst_time = current_time + datetime.timedelta(hours=9)
-
-            # email_customerに一致する行のupdated_atを更新
-            response = await self.supabase \
-                .table("CustomerEmailsTable").update({'updated_at': jst_time}) \
-                .eq('email_customer', email_customer) \
-                .execute()
-
-            if response.status_code == 200:
-                return True
-        except Exception as e:
-            return False
             
 """
 

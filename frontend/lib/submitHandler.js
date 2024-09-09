@@ -29,7 +29,7 @@ export const handlerUrlSubmit = async (customerEmail, propertyId, url, setUrl) =
     }
 }
 
-export const registerAccountId = async (email, accountId) => {
+export const registerAccountId = async (propagateEmail, email, accountId) => {
     try {
         const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
         const response = await fetch(`${apiUrl}/register-account-id`, {
@@ -38,6 +38,7 @@ export const registerAccountId = async (email, accountId) => {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
+                propagateEmail: propagateEmail,
                 email: email,
                 accountId: accountId,
             }),

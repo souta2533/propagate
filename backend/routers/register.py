@@ -1,13 +1,37 @@
 from fastapi import APIRouter
 
 from db.supabase_client import supabase
-from models.request import RegisterUrl
-from db.db_operations import CustomerDetailsTable, PropertyTable, UnregisteredTable
+from models.request import RegisterUrl, RegisterAccountId
+from db.db_operations import PropagateAccountTable, CustomerDetailsTable, PropertyTable, UnregisteredTable
 
 
 router = APIRouter()
 
 
+"""
+    Userの新規登録を行うエンドポイント
+        - Gmail
+        - AccountID(Propagateが挿入)
+"""
+@router.post("/register-account-id")
+async def register_account_id(request: RegisterAccountId):
+    propagate_email = request.propagateEmail
+    email = request.email
+    account_id = request.accountId
+
+    # propagate_emailからそのIDを取得
+    propagate_account_table = PropagateAccountTable(supabase)
+    propagate_id = propagate_account_table.get_id_by_email(propagate_email)
+
+    if propagate_id is None:
+        raise Exception(status_code=500, detail="Failed to get Propagate ID")
+    
+    # 取得したPropagateIDとAccountIDをCustomerDetailsTableに保存
+
+
+"""
+    Userが入力したURLをDBに保存するエンドポイント
+"""
 @router.post("/register-property-id")
 async def register_url(request: RegisterUrl):
     email = request.email
