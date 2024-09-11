@@ -29,7 +29,8 @@ const Register = () => {
             setPassword('');
 
             // 登録したユーザー情報をバックエンドに送信(('/api/register-user',?)
-            const response = await fetch('/register-user', {
+            const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+            const response = await fetch(`${apiUrl}/register-user`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -45,7 +46,7 @@ const Register = () => {
             }
 
             // 登録後にダッシュボードへリダイレクト
-            router.push('/dashboard');
+            router.push('/auth/login');
         }
     }
 

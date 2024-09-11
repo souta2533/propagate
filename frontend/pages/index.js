@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useSession, signIn, signOut } from "next-auth/react";
+import { useRouter } from 'next/router';  // useRouterをインポート
 import dynamic from 'next/dynamic';
 require('dotenv').config({ path: '.env.local' });
 import { supabase } from '../lib/supabaseClient';
 import { registerAccountId, registerPropertyId } from '../lib/submitHandler';
-// import { url } from 'inspector';
+import { checkUserRole } from '../lib/checkRole';
 
 
 const PROPAGATE_EMAIL = "propagate1@gmail.com";  // 事前に作成しておくPropagateのメールアドレス
@@ -30,12 +31,32 @@ export default function Home() {
   const [loading, setLoading] = useState(false);  // データ取得中かどうかを管理
   const [pathList, setPathList] = useState([]); // pathListの状態を管理
   const [selectedPagePath, setSelectedPagePath] = useState(''); // 選択されたpagePathの状態を管理
+  const router = useRouter();
 
   const [customerInfo, setCustomerInfo] = useState([]); // email: (updated_at, urls)
   const [isAnalyticsFetched, setIsAnalyticsFetched] = useState(false);  // Analyticsデータが取得されたかどうかを管理
   const [isSearchConsoleFetched, setIsSearchConsoleFetched] = useState(false);    // Search Consoleデータが取得されたかどうかを管理
 
   const [unregisteredCustomers, setUnregisteredCustomer] = useState([]);  // 未登録のCustomer EmailとURLを格納  
+
+  // 管理者かUserかを確認
+  // useEffect(() => {
+  //   const fetchUserRole = async () => {
+  //     const role = await checkUserRole();
+
+  //     if (role === 'admin') {
+  //       setPropertyList('admin');
+  //     } else if (role === 'user') {
+  //       await router.push('/auth/login');
+  //     } 
+  //     else {
+  //       console.log("No role");
+  //       router.push('/auth/register');
+  //     }
+  //   };
+
+  //   fetchUserRole();
+  // }, []);
 
   useEffect(() => {
     if (status === 'loading') {
