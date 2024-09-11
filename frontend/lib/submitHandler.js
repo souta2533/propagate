@@ -3,6 +3,31 @@ import { setPriority } from 'os';
 require('dotenv').config({ path: '.env.local' });
 
 
+// Userが新規登録した際に，そのUserのEmailをバックエンドに送信する関数（未登録DBへの格納）
+// export const registerNewUser = async (email) => {
+//     try {
+//         const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+//         const response = await fetch(`${apiUrl}/register-new-user`, {
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application.json',
+//             },
+//             body: JSON.stringify({
+//                 email: email, 
+//             })
+//         });
+
+//         if (!response.ok) {
+//             throw new Error("Failed to register new user");
+//         } else {
+//             console.log('New user registered successfully: ', email);
+//         }
+//     } catch (error) {
+//         console.error("Error registering new user:", error);
+//     } 
+// }
+
 export const handlerUrlSubmit = async (customerEmail, propertyId, url, setUrl) => {
     try {
         const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;    //await fetch(`${apiUrl}/get-properties`

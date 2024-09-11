@@ -18,6 +18,10 @@ async def register_user(data: RegisterUser):
     unregistered_table = UnregisteredTable(supabase)
     try:
         email = await unregistered_table.add_unregistered_user(data.email)
+
+        if email is None:
+            raise HTTPException(status_code=500, detail="Failed to register email data")
+        
         return {"message": f"User registered {email}"}
     except Exception as e:
         return {"error": str(e)}, 500
