@@ -3,7 +3,7 @@ import { useSession, signIn, signOut } from "next-auth/react";
 import dynamic from 'next/dynamic';
 require('dotenv').config({ path: '.env.local' });
 import { supabase } from '../lib/supabaseClient';
-import { registerPropertyId } from '../lib/submitHandler';
+import { registerAccountId, registerPropertyId } from '../lib/submitHandler';
 // import { url } from 'inspector';
 
 
@@ -609,7 +609,11 @@ export default function Home() {
                           <button
                             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                             onClick={() =>
-                              registerAccountID(PROPAGATE_EMAIL, customer.email, customer.accountId)
+                              registerAccountId(
+                                PROPAGATE_EMAIL, 
+                                customer.email, 
+                                customer.accountId
+                              )
                             }
                           >
                             RegisterAccountID
