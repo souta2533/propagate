@@ -37,9 +37,9 @@ export const handlerUrlSubmit = async (customerEmail, propertyId, url, setUrl) =
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({ 
-                customerEmail: customerEmail,
-                propertyId: propertyId,
-                url: url}),
+                email: customerEmail,
+                url: url
+            }),
         });
 
         if (response.ok) {

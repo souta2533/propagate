@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../../lib/supabaseClient';
 import Link from 'next/link'
-import './register.css';
+import '../../styles/register.css';
 
 
 const Register = () => {
@@ -28,8 +28,8 @@ const Register = () => {
             setEmail('');
             setPassword('');
 
-            // 登録したユーザー情報をバックエンドに送信
-            const response = await fetch('/api/register-user', {
+            // 登録したユーザー情報をバックエンドに送信(('/api/register-user',?)
+            const response = await fetch('/register-user', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -41,6 +41,7 @@ const Register = () => {
 
             if (!response.ok) {
               console.error('Failed to register user on the backend');
+              return;
             }
 
             // 登録後にダッシュボードへリダイレクト

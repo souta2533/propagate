@@ -53,9 +53,12 @@ class SearchConsoleDataRequest(BaseModel):
     searchConsoleData: List[SearchConsoleItem]
 
 # URLを受け取る
+# class URLRequest(BaseModel):
+#     customerEmail: str
+#     propertyId: int
+#     url: str
 class URLRequest(BaseModel):
-    customerEmail: str
-    propertyId: int
+    email: str
     url: str
 
 # Userの新規登録（email）

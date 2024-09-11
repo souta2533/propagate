@@ -2,7 +2,7 @@ import React from 'react';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link'
-import './login.css'
+import '../../styles/login.css';
 
 
 export default function Login() {

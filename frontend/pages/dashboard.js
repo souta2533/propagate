@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
 import { handlerUrlSubmit } from '../lib/submitHandler';
-import './dashboard.css'
+import '../styles/dashboard.css'
 
 const Dashboard = () => {
     const router = useRouter();

@@ -61,11 +61,11 @@ def get_analytics_data(request: AnalyticsDataRequest, propertyId: str):
 """
     Userが入力したURLを取得するエンドポイント
 """
-@router.post("/submit-url")
-async def submit_url(data: URLRequest):
-    customer_email = data.customerEmail
-    property_id = data.propertyId
-    url = data.url
+# @router.post("/submit-url")
+# async def submit_url(data: URLRequest):
+#     customer_email = data.customerEmail
+#     property_id = data.propertyId
+#     url = data.url
 
-    # URLをDBに保存
-    save_customer_url(customer_email, property_id, url)
+#     # URLをDBに保存
+#     save_customer_url(customer_email, property_id, url)

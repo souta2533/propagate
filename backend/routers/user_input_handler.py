@@ -30,5 +30,12 @@ async def register_user(data: RegisterUser):
     UserがURLを入力した際にDBへ保存するエンドポイント
 """
 @router.post("/submit-url")
-async def sumit_url(data: URLRequest):
-    pass
+async def submit_url(request: URLRequest):
+    email = request.email
+    url = request.url
+
+    unregistered_table = UnregisteredTable(supabase)
+    result = await unregistered_table.add_url(email, url)
+
+    if result is None:
+        raise HTTPException(status_code=500, detail="Failed to register url data")

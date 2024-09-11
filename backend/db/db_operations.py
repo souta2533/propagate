@@ -214,6 +214,29 @@ class UnregisteredTable:
             log.error(f"Error: {e}")
             return False
         
+    async def add_url(self, email: str, url: str):
+        try:
+            existing_response = self.supabase.table("UnregisteredTable").select('email', 'url').eq('email', email).eq('url', url).execute()
+
+            if existing_response.data:
+                log.info(f"URL already exists: {existing_response.data}") 
+                return existing_response.data[0]['url']
+            
+            response = self.supabase.table("UnregisteredTable").insert({
+                'email': email,
+                'url': url
+            }).execute()
+
+            if 'error' in response:
+                log.error(f"Error: {response.error}")
+                return None
+
+            return response.data[0]['url']
+    
+        except Exception as e:
+            log.error(f"Error: {e}")
+            return None
+        
     async def del_unregistered_url(self, email: str, url: str):
         try:
             existing_response = self.supabase.table("UnregisteredTable").select('email', 'url').eq('email', email).eq('url', url).execute()
