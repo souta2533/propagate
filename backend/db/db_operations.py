@@ -52,9 +52,9 @@ class CustomerEmailsTable:
 
     async def insert_customer_email(self, email_propagate_id, email_customer):
         try:
-            log.info(f"Email: {email_customer}")
+            # log.info(f"Email: {email_customer}")
             existing_response = self.supabase.table("CustomerEmailsTable").select("email_propagate_id", 'email_customer').eq("email_customer", email_customer).execute()
-            log.info(f"Existing response: {existing_response}")
+            # log.info(f"Existing response: {existing_response}")
 
             if existing_response.data:
                 log.error(f"Email already exists: {existing_response.data[0]['email_customer']}")
@@ -66,13 +66,13 @@ class CustomerEmailsTable:
                     "email_customer": email_customer
                 }).execute()
 
-                log.info(f"Response: {response}")
+                # log.info(f"Response: {response}")
 
                 if 'error' in response:
                     log.error(f"Error: {response.error}")
                     return None
                 else:
-                    log.error(f"Email already exists: {existing_response.data}")
+                    log.info(f"Success to insert email: {response.data[0]['email_customer']}")
                     return response.data[0]['email_customer']
         except Exception as e:
             log.error(f"Error: {e}")
@@ -105,8 +105,8 @@ class CustomerDetailsTable:
         
     async def register_account_id(self, email_customer: str, account_id: str):
         try:
-            log.info(f"Email: {email_customer}")
-            log.info(f"AccountID: {account_id}")    
+            # log.info(f"Email: {email_customer}")
+            # log.info(f"AccountID: {account_id}")    
             existing_response = self.supabase.table("CustomerDetailsTable").select('accounts_id').eq('accounts_id', account_id).execute()
 
             if existing_response.data:
@@ -187,6 +187,31 @@ class UnregisteredTable:
                 return response.data[0]['email']
         except Exception as e:
             print(f"Error: {e}")
+            return False
+        
+    async def del_new_user(self, email: str):
+        """
+            Account IDをつけたユーザの削除
+            ただし, URLの登録はされていないことを想定
+        """
+        try:
+            existing_response = self.supabase.table("UnregisteredTable").select('email').eq('email', email).execute()
+
+            if existing_response.data:
+                delete_response = self.supabase.table("UnregisteredTable").delete().eq('email', email).eq('url', 'NULL').execute()
+                log.info(f"Delete response: {delete_response}")
+
+                if 'error' in delete_response.data:
+                    log.error(f"Error: {delete_response.error}")
+                    return False
+                else:
+                    log.info(f"Deleted email: {email}")
+                    return True
+            else:
+                log.error(f"Email not found: {email}")
+                return False
+        except Exception as e:
+            log.error(f"Error: {e}")
             return False
         
     async def del_unregistered_url(self, email: str, url: str):

@@ -35,21 +35,28 @@ async def register_account_id(request: RegisterAccountId):
         # 取得したPropagateIDからCustomerEmailsTableにEmailを保存
         customer_emails_table = CustomerEmailsTable(supabase)
         result = await customer_emails_table.insert_customer_email(propagate_id, email)
-        log.info(f"CustomerEmailsTable: {result}")
+        # log.info(f"CustomerEmailsTable: {result}")
 
         if result is None:
             log.error(f"CustomerEmailsTable: {result}")
             raise HTTPException(status_code=500, detail="Failed to register email data")
         
         # CustomerDetailsTableにAccountIDを保存
-        log.info(f"Email: {email}, AccountID: {account_id}")
+        # log.info(f"Email: {email}, AccountID: {account_id}")
         customer_details_table = CustomerDetailsTable(supabase)
         result = await customer_details_table.register_account_id(email, account_id)
-        log.info(f"CustomerDetailsTable: {result}")
+        # log.info(f"CustomerDetailsTable: {result}")
 
         if result is None:
             log.info(f"CustomerDetailsTable: {result}")
             raise HTTPException(status_code=500, detail="Failed to register account data")
+        
+        unregistered_table = UnregisteredTable(supabase)
+        result = await unregistered_table.del_new_user(email)
+
+        if result is None:
+            log.info(f"UnregisteredTable: {result}")
+            raise HTTPException(status_code=500, detail="Failed to delete new user data")
         
         return {"message": "Account ID registered successfully"}
         

@@ -407,7 +407,7 @@ export default function Home() {
       const unregisteredCustomersInfo = data.map((customer) => ({
         email: customer.email,
         url: customer.url,
-        accountId: null,   // accountIDはこの後取得するため，初期値としてnull
+        accountId: null,            // accountIDはこの後取得するため，初期値としてnull
         isSentAccountId: false,     // データを送信したかどうかを管理
         isSentUrl: false
       }));
@@ -523,6 +523,8 @@ export default function Home() {
           } 
         : customer
       )
+      // 'isSentAccountId', 'isSentUrl'のどちらかがtrueの場合は，その顧客を削除
+      .filter(customer => !(customer.isSentAccountId || customer.isSentUrl))
     );
   };
 
@@ -621,12 +623,14 @@ export default function Home() {
                         {customer.accountId === null || !customer.isSentAccountId ? (
                           <button
                             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                            onClick={() =>
+                            onClick={() => {
                               registerAccountId(
                                 PROPAGATE_EMAIL, 
                                 customer.email, 
                                 customer.accountId
                               )
+                              handleSentStatusChange(customer.email, 'accountId', true)
+                            }
                             }
                           >
                             RegisterAccountID
