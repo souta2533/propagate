@@ -4,6 +4,16 @@ import { useRouter } from "next/router";
 import { supabase } from "../lib/supabaseClient";
 import { handlerUrlSubmit } from "../lib/submitHandler";
 import "../styles/dashboard.css";
+import Link from "next/link";
+import { config } from "@fortawesome/fontawesome-svg-core";
+import "@fortawesome/fontawesome-svg-core/styles.css"; // 必要なスタイルを読み込み
+config.autoAddCss = false; // 自動的にスタイルを追加しないようにする
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"; /*sidebarのアイコンをimport*/
+import {
+  faHome,
+  faFileAlt,
+  faChartBar,
+} from "@fortawesome/free-solid-svg-icons";
 
 const Dashboard = () => {
   const router = useRouter();
@@ -22,6 +32,7 @@ const Dashboard = () => {
   const [url, setUrl] = useState(""); // URLの状態を管理
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("PV");
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
@@ -299,6 +310,7 @@ const Dashboard = () => {
           <h2>UU (ページ訪問者数)</h2>
           <p>Search for Data...</p>
         </div>
+
         <aside className="sidebar">
           <div className="logo">
             <h1 className="sidebar-name">Propagate Analytics</h1>
@@ -306,14 +318,24 @@ const Dashboard = () => {
           <nav className="sidebar-nav">
             <ul>
               <li>
-                <a href="#">ホーム</a>
+                <Link href="/dashboard" legacyBehavior>
+                  <a>
+                    <FontAwesomeIcon icon={faHome} />
+                    ホーム
+                  </a>
+                </Link>
               </li>
               <li>
-                <a href="#">ページ別状況</a>
+                <Link href="/" legacyBehavior>
+                  <a>
+                    <FontAwesomeIcon icon={faFileAlt} />
+                    ページ別状況
+                  </a>
+                </Link>
               </li>
               <li className="dropdown">
                 <button className="dropdown-btn" onClick={toggleDropdown}>
-                  アナリティクスレポート
+                  <FontAwesomeIcon icon={faChartBar} /> アナリティクスレポート
                 </button>
                 <div className={`dropdown-content ${isOpen ? "open" : ""}`}>
                   <a href="#">PVレポート</a>
@@ -329,24 +351,51 @@ const Dashboard = () => {
       {/*グラフ領域*/}
       <div class="graph-container">
         <div class="graphcard-container">
-          <div class="graphcard">
+          <button
+            className={`graphcard ${activeTab === "PV" ? "active" : ""}`}
+            onClick={() => setActiveTab("PV")}
+          >
             <h2>PV (ページ訪問者数)</h2>
             <p>Search for Data...</p>
-          </div>
-          <div class="graphcard">
+          </button>
+          <button
+            className={`graphcard ${activeTab === "CV" ? "active" : ""}`}
+            onClick={() => setActiveTab("CV")}
+          >
             <h2>CV (お問い合わせ数)</h2>
             <p>Search for Data...</p>
-          </div>
-          <div class="graphcard">
+          </button>
+
+          <button
+            className={`graphcard ${activeTab === "UU" ? "active" : ""}`}
+            onClick={() => setActiveTab("UU")}
+          >
             <h2>UU (ページ訪問者数)</h2>
             <p>Search for Data...</p>
-          </div>
-          <div class="graphcard">
+          </button>
+
+          <button
+            className={`graphcard ${activeTab === "SS" ? "active" : ""}`}
+            onClick={() => setActiveTab("SS")}
+          >
             <h2>SS (セッション数)</h2>
             <p>Search for Data...</p>
-          </div>
+          </button>
         </div>
-        <div id="chart-space"></div>
+
+        <div id="chart-space">
+          {activeTab === "PV" && <div>PVに関連するデータを表示</div>}
+          {activeTab === "CV" && <div>CVに関連するデータを表示</div>}
+          {activeTab === "UU" && <div>UUに関連するデータを表示</div>}
+          {activeTab === "SS" && <div>SSに関連するデータを表示</div>}
+        </div>
+
+        {/*右下に詳細ページへのボタンを追加*/}
+        <div className="detail-link">
+          <Link href="/details">
+            <button classNeme="detail-button">詳細ページ</button>
+          </Link>
+        </div>
       </div>
 
       <main className={`main-content ${isSidebarOpen ? "shifted" : ""}`}></main>

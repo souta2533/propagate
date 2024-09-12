@@ -33,6 +33,17 @@ body {
   transition: transform 0.3s ease;
 }
 
+.sidebar-nav ul li a,
+.dropdown-btn {
+  display: flex;
+  align-items: center;
+}
+
+.sidebar-nav ul li a svg,
+.dropdown-btn svg {
+  margin-right: 10px;
+}
+
 .sidebar.active {
   transform: translateX(0);
   padding: 60px 20px;
@@ -186,6 +197,7 @@ button:hover {
 
 .graphcard {
   background-color: #f9f9f9;
+  color: black;
   padding: 10px;
   flex-grow: 1; /*カードの幅を自動調整*/
   flex-shrink: 0; /*カードを最小から小さくしない*/
@@ -196,6 +208,11 @@ button:hover {
   border: 2px solid #eeeeee;
   border-bottom: none;
   /*border-radius: 10px;*/
+  transition: background-color 0.3s ease;
+}
+
+.graphcard:hover {
+  background-color: white;
 }
 
 .graphcard:last-child {
@@ -229,6 +246,25 @@ button:hover {
   background-color: white; /* グラフの背景色 */
   /*border-radius: 10px;*/ /* グラフエリアの角丸 */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* グラフエリアの影 */
+}
+
+.detail-link {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+}
+
+.detail-button {
+  background-color: #0073e6;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.detail-button:hover {
+  background-color: #005bb5;
 }
 
 /* モバイル対応 */
