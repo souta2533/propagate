@@ -55,7 +55,7 @@ const Register = () => {
   return (
     <div className="container flex-center">
       {/* 右上にログインリンクを配置 */}
-      <Link href="/login" className="login-link">
+      <Link href="/auth/login" className="login-link">
         ログインはこちら
       </Link>
       <div className="form-container">
@@ -92,6 +92,5 @@ const Register = () => {
       </div>
     </div>
   );
-};
 
 export default Register;
