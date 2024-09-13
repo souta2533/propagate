@@ -1,6 +1,6 @@
 .container {
   width: 100%;
-  padding: 20px;
+  padding: 0;
 }
 
 .header {
@@ -16,6 +16,7 @@
 }
 
 .icon {
+  margin-top: 10px;
   margin-right: 10px;
 }
 
@@ -35,20 +36,87 @@
   margin-left: 10px;
 }
 
-.tabs {
-  margin-top: 20px;
+/*日付選択のスタイル*/
+.filter-section {
+  display: flex;
+  justify-content: space-between; /* 左右の要素を端に配置 */
+  align-items: center; /* 垂直方向に中央揃え */
+  padding: 0 20px; /* パディングで余白を追加 */
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd; /* 下線を追加 */
 }
 
+/*Button(Select)のスタイルを指定*/
+button {
+  background-color: white;
+  border-color: #c9c4c4;
+  border: none;
+  padding: 10px;
+}
+
+.icon-small {
+  align-items: center;
+}
+
+/*
+.filter-button {
+  border-right: 1px solid #ddd;
+}
+
+.date-range {
+  border-left: 1px solid #ddd;
+}
+*/
+
+/*タブの見え方*/
+.tabs {
+  background-color: white;
+  padding: 0 16px;
+  border-bottom: 1px solid #ddd;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.tabs-list {
+  display: flex;
+  gap: 0; /* タブ間のスペースを設定 */
+  border: none;
+  padding: 10px;
+}
+
+.tab {
+  display: flex;
+  background-color: white;
+  padding: 8px 16px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+}
+
+.tab:hover {
+  background-color: #f0f0f0;
+  border-bottom: 2px solid black;
+}
+
+.tab.active {
+  background-color: #e0e0e0; /* アクティブなタブの背景色を変える */
+  font-weight: bold;
+  border-bottom: 3px solid black;
+}
 .chart-controls {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
 .chart {
   margin-top: 20px;
   width: 100%;
+  /*height: auto;*/ /*グラフを追加したらこっちに変更*/
   height: 400px;
 }
 
@@ -68,20 +136,31 @@
   background-color: #f4f4f4;
 }
 
-.select-trigger {
-  width: 200px;
+select {
+  background-color: white;
+}
+
+option {
+  background-color: white;
+  color: black;
+  padding: 10px;
+  font-size: 14px;
+}
+
+.custom-select-trigger {
+  width: auto;
   background-color: white; /* 背景色を白に設定 */
   color: black; /* テキストを黒に */
   border: 1px solid #ccc; /* 境界線を設定 */
 }
 
-.select-content {
+.custom-select-content {
   background-color: white; /* ドロップダウンの背景色を白に設定 */
   color: black; /* ドロップダウン内のテキストを黒に設定 */
   border: 1px solid #ccc; /* 境界線を設定 */
 }
 
-.select-item {
+div.select-item {
   background-color: white; /* 各アイテムの背景色も白に */
   color: black; /* アイテムのテキストを黒に */
 }

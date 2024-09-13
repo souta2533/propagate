@@ -2,7 +2,7 @@ import * as React from "react";
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { Check, ChevronDown } from "lucide-react";
 
-import { cn } from "@/lib/utils";
+import { cn } from "../lib/utils";
 
 const Select = SelectPrimitive.Root;
 
@@ -97,6 +97,38 @@ const SelectSeparator = React.forwardRef(({ className, ...props }, ref) => (
   />
 ));
 SelectSeparator.displayName = SelectPrimitive.Separator.displayName;
+
+/*selectの基本スタイルを指定*/
+const customStyles = {
+  control: (provided) => ({
+    ...provided,
+    backgroundColor: "white",
+    border: "1px solid #ccc",
+    padding: "5px",
+  }),
+  menu: (provided) => ({
+    ...provided,
+    backgroundColor: "#f9f9f9",
+    border: "1px solid #ddd",
+  }),
+  option: (provided, state) => ({
+    ...provided,
+    padding: "10px",
+    backgroundColor: state.isFocused ? "#e0e0e0" : "#fff",
+    color: state.isSelected ? "#333" : "#000",
+    cursor: "pointer",
+  }),
+};
+
+const Dropdown = () => (
+  <Select
+    styles={customStyles}
+    options={[
+      { value: "option1", label: "Option 1" },
+      { value: "option2", label: "Option 2" },
+    ]}
+  />
+);
 
 export {
   Select,
