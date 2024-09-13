@@ -37,8 +37,10 @@ async def get_search_console(data: SearchConsoleRequest):
         if result == "NoData":
             return []
             # raise HTTPException(status_code=204, detail='No data available from Search Console')
-        elif result == '"Access denied':
+        elif result == 'Access denied':
             raise HTTPException(status_code=403, detail="Access denied: User does not have sufficient permissions for this URL")
+        elif result == 'UnregisteredForSearchConsole':
+            raise HTTPException(status_code=400, detail="Unregistered for Search Console")
         elif result is None:
             logger.info("NNNNNNNNONe")
             raise HTTPException(status_code=500, detail='Failed to get Search Console data')

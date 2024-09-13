@@ -38,6 +38,7 @@ export default function Home() {
   const [isSearchConsoleFetched, setIsSearchConsoleFetched] = useState(false);    // Search Consoleデータが取得されたかどうかを管理
 
   const [unregisteredCustomers, setUnregisteredCustomer] = useState([]);  // 未登録のCustomer EmailとURLを格納  
+  const [accessDeniedErrors, setAccessDeniedErrors] = useState([]);       // アクセス権がない場合のエラーを格納
 
   useEffect(() => {
     if (status === 'loading') {
@@ -70,6 +71,12 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ accessToken: session.accessToken })
       });
+
+      if (response.status === 401) {
+        console.error('Unauthorized. Please sign in again.');
+        await signOut();
+        return;
+      }
 
       const properties = await response.json();
       setAnalyticsProperties(properties);
@@ -293,9 +300,7 @@ export default function Home() {
   const fetchSearchConsoleData = async () => {
     setLoading(true);
 
-    try {
-      // console.log("CustomerUrls: ", customerUrls);  
-      
+    try {     
       const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
       // 全てのEmailとURLでSearch Consoleのデータを取得
@@ -316,9 +321,6 @@ export default function Home() {
                 ? new Date(customer.updated_at).toISOString().split('T')[0]
                 : new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().split('T')[0];
 
-              console.log(`Start Date of ${urlObj.url}: ${startDate}`);
-              console.log("URL: ", urlObj.url);
-
               // URLに対してSearch Consoleのデータを取得
               const response = await fetch(`${apiUrl}/get-search-console`, {
                 method: 'POST',
@@ -332,24 +334,30 @@ export default function Home() {
               });
 
               // レスポンスの確認
-              if (response.ok) {
+              if (!response.ok) {
+                if (response.status === 400) {
+                    console.warn("This URL is not registred in Search Console: ", urlObj.url);
+                    setAccessDeniedErrors(prevErrors => [...prevErrors, { email: customer.email, url: urlObj.url }]);
+                } else if (response.status === 403) {
+                    console.warn("Access denied: User does not have permission to access the search console of this URL: ", urlObj.url);
+                    
+                    // アクセス権限がないURLを格納
+                    setAccessDeniedErrors(prevErrors => [...prevErrors, { email: customer.email, url: urlObj.url }]);
+                    return { url: urlObj.url, data: null};
+                } else {
+                  console.error(`Failed to fetch search console data. Status: ${response.status}  \nURL: ${urlObj.url}`);
+                  return { url: urlObj.url, data: null};
+                }
+              } else {
                 if (response.status === 204) {
                   console.warn("No data available from Search Console. URL: ", urlObj.url);
                   alert("No data available from Search Console");
                   return { url: urlObj.url, data: null};
-
-                } else if (response.status === 403) {
-                    console.error("Access denied: User does not have permission to access the search console of this URL: ", urlObj.url);
-                    // throw new Error("Access denied: User does not have permission to access the search console of this URL: ", urlObj.url);
-                    return { url: urlObj.url, data: null};
-                } else {
-                    const data = await response.json();
-                    // console.log(`Success! Received data:${data}\nURL: ${url}`);
-                    return { url: urlObj.url, data: data };
                 }
-              } else {
-                console.error(`Failed to fetch search console data. Status: ${response.status}  \nURL: ${urlObj.url}`);
-                return { url: urlObj.url, data: null};
+
+                const data = await response.json();
+                // console.log(`Success! Received data:${data}\nURL: ${url}`);
+                return { url: urlObj.url, data: data };
               }
             })
           );
@@ -407,6 +415,7 @@ export default function Home() {
     if (isAnalyticsFetched && isSearchConsoleFetched) {
       updateCustomerEmailUpdateAt();
       setLoading(false);
+      console.log("Data fetching completed", accessDeniedErrors);
     }
     else{
       console.log("Analytics Fetch: ", isAnalyticsFetched); 
@@ -705,14 +714,26 @@ export default function Home() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
-            </div>
+              </table> 
+            </div>          
           ) : (
             <p>未登録の顧客データがありません。</p>
               )}
               </div>
             )}
     </div>
+    {accessDeniedErrors.length > 0 && (
+              <div>
+                <h3>アクセス拒否されたURLとEmail:</h3>
+                <ul>
+                  {accessDeniedErrors.map((error, index) => (
+                    <li key={index}>
+                      Email: {error.email}, URL: {error.url}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )} 
       
       {analyticsProperties.length > 0 ? (
         <div className="analytics-section bg-white p-6 rounded-lg shadow-md mb-6">

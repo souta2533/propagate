@@ -17,7 +17,10 @@ class AnalyticsRequest(BaseModel):
 @router.post("/get-properties")
 async def get_properties(data: AnalyticsRequest):
     result = run_js_script("./js/get_properties.js", data.model_dump())
-    if result is None:
+    
+    if result == "GooglePropertyError":
+        raise HTTPException(status_code=401, detail='Google Property Error')
+    elif result is None:
         raise HTTPException(status_code=500, detail="Failed to get properties data")
     # print(result[0])
     return result
