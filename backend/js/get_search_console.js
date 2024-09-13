@@ -40,8 +40,14 @@ async function getSearchConsoleData(auth, siteURL, startDate, endDate) {
         }
         return allRows;
     } catch (error) {
-        console.error('Error fetching Search Console data:', error);
-        throw error;
+        // 403 Forbidden エラー処理
+        if (error.response && error.response.status === 403) {
+            console.log('403: Access denied for URL: ', siteURL);
+            throw new Error('403: Acess denied for URL: ', siteURL);
+        } else {
+            console.error('Error fetching Search Console data:', error);
+            throw error;
+        }
     }
 }
 

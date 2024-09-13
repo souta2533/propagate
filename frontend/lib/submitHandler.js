@@ -1,6 +1,6 @@
-import { setPriority } from 'os';
+// import { setPriority } from 'os';
 
-require('dotenv').config({ path: '.env.local' });
+// require('dotenv').config({ path: '.env.local' });
 
 
 // Userが新規登録した際に，そのUserのEmailをバックエンドに送信する関数（未登録DBへの格納）
@@ -44,7 +44,7 @@ export const handlerUrlSubmit = async (customerEmail, propertyId, url, setUrl) =
 
         if (response.ok) {
             alert('URL submitted successfully!');
-            setPriority('');        // フォームをクリア
+            // setPriority('');        // フォームをクリア
             setUrl('');    
         } else {
             alert('Failed to submit URL');

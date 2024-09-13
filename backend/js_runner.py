@@ -3,6 +3,10 @@
 """
 import subprocess
 import json
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 def run_js_script(script_name, input_data):
@@ -21,11 +25,15 @@ def run_js_script(script_name, input_data):
         stdout, stderr = process.communicate(json.dumps(input_data).encode())
 
         if stderr:
+            # Search Consoleで権限がない場合
+            if 'Access denied' in stderr.decode():
+                return "Access denied"
+            
             print(f"JavaScript Error: {stderr.decode()}")
             raise Exception(f"JavaScript Error: {stderr.decode()}") 
         
-        if not stdout:
-            raise Exception("No output received from JavaScript")
+        # if not stdout:
+        #     raise Exception("No output received from JavaScript")
         
         # 出力結果をJSON形式に変換
         # print('Raw stdout from Node.hs script: ', stdout.decode())
@@ -38,5 +46,9 @@ def run_js_script(script_name, input_data):
         return json.loads(stdout.decode())
     
     except Exception as e:
+        if '403' in str(e):
+            return "Access denied"
+        
         print(f"Failed to run JavaScript: {e}")
+        logger.info("Reply noooooooone")
         return None

@@ -11,7 +11,6 @@ log = logging.getLogger("uvicorn")
 router = APIRouter()
     
 
-
 """
     Userの新規登録を行うエンドポイント
         - Gmail
@@ -83,13 +82,13 @@ async def register_url(request: RegisterUrl):
     # AccountIDが複数ある場合，最初のAccountIDを採用
     # TODO: AccountIDが複数ある場合の処理
     # account_id = account_id[0] if len(account_id) > 1 else account_id
-    print(f"AccountID: {account_id}")
+    log.info(f"AccountID: {account_id}")
 
     # 取得したAcountIDからPropertyTableにPropertyIDとPropertyNameを保存
     property_table = PropertyTable(supabase)
     unregistered_table = UnregisteredTable(supabase)
     try:
-        result = await property_table.register_property(account_id, property_id, property_name)
+        result = await property_table.register_property(account_id, property_id, property_name, url)
 
         if result is None:
             print(f"PropertyTable: {result}")

@@ -39,25 +39,6 @@ export default function Home() {
 
   const [unregisteredCustomers, setUnregisteredCustomer] = useState([]);  // 未登録のCustomer EmailとURLを格納  
 
-  // 管理者かUserかを確認
-  // useEffect(() => {
-  //   const fetchUserRole = async () => {
-  //     const role = await checkUserRole();
-
-  //     if (role === 'admin') {
-  //       setPropertyList('admin');
-  //     } else if (role === 'user') {
-  //       await router.push('/auth/login');
-  //     } 
-  //     else {
-  //       console.log("No role");
-  //       router.push('/auth/register');
-  //     }
-  //   };
-
-  //   fetchUserRole();
-  // }, []);
-
   useEffect(() => {
     if (status === 'loading') {
       console.log("Loading session data ...");
@@ -157,14 +138,20 @@ export default function Home() {
         propertyList.map(async (property) => {
 
           // PropertyListに対して，propertyIDに対応するupdated_atを取得
+          // console.log("CustomerInfo at FetchAnalyticsData: ", customerInfo);
+          // console.log("Property at FetchAnalyticsData: ", property);
           const matchedCustomer = customerInfo.find(customer =>
             customer.urls.some(urlObj => urlObj.propertyId === property.propertyId)
           );
 
           // 更新日時を取得できている場合はそれを使い，取得できていない場合は現在より1年前の日付を取得
+          // console.log("MatchedCustomer: ", matchedCustomer);
           const startDate = matchedCustomer
             ? new Date(matchedCustomer.updated_at).toISOString().split('T')[0]
             : new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().split('T')[0];
+
+            console.log(`Start Date of ${property.propertyName}: ${startDate}`);
+            console.log(`PropertyID: ${property.propertyId}`);
 
           const response = await fetch(`${apiUrl}/get-analytics`, {
             method: "POST",
@@ -188,7 +175,9 @@ export default function Home() {
         })
       );
 
-      console.log("AnalyticsData: ", results);
+      console.log("Analytics fetched successfully\nAnalyticsData: ", results);
+
+      setIsAnalyticsFetched(true); // 完了後にフラグをtrueに設定
 
       setAnalyticsData(results);
 
@@ -225,7 +214,7 @@ export default function Home() {
     }
   };
 
-  // CustomerEmailsTableからemail_customerを取得し，CustomerUrlTableからURLを取得
+  // CustomerEmailsTableからemail_customerを取得し，PropertyTableからURLを取得
   const getCustomerEmailsAndUpdatedAtAndUrls = async () => {
     // 1. CustomerEmailsTableからemail_customer, updated_atを取得
     const { data: customerEmailsAndUpdatedAt, error: customerEmailsAndUpdatedAtError } = await supabase
@@ -239,32 +228,60 @@ export default function Home() {
       const customerInfoWithUpdatedAt = customerEmailsAndUpdatedAt.map((customer) => ({
         email: customer.email_customer,
         updated_at: customer.updated_at,
+        account_ids: [],
         urls: [],
       }));
 
-      // 2. CustomerUrlTableからemail_customerに一致するpropertyIDとURLを取得
-      const udpateCusotmerInfo = await Promise.all(
+      // 2. CustomerDetailsTableからemail_customerに一致するaccountIDを取得
+      const addAccountId = await Promise.all(
         customerInfoWithUpdatedAt.map(async (customer) => {
-          const { data: propertyIdsAndUrls, error: urlsError } = await supabase
-            .from('CustomerUrlTable')
-            .select('property_id, customer_url')
+          const { data: accountIds, error: accountIdsError } = await supabase
+            .from('CustomerDetailsTable')
+            .select('accounts_id')
             .eq('email_customer', customer.email);
 
-            if (urlsError) {
-              console.error('Error fetching customer urls:', urlsError);
-              return {...customer, urls: []};
+            if (accountIdsError) {
+              console.error('Error fetching account id:', accountIdsError);
+              return customer
             }
 
-            // PropertyIDとURLをcustomerInfoに追加
-            const urls = propertyIdsAndUrls.map(propertyIdAndUrlObj => ({
-              propertyId: propertyIdAndUrlObj.property_id,
-              url: propertyIdAndUrlObj.customer_url
-            }));
+            const accountIdsList = accountIds.map(accountIdObj => accountIdObj.accounts_id);
+            return { ...customer, account_ids: accountIdsList };
+        })
+      );
 
-            return {
-              ...customer,    // 既存のcustomer情報を保持
-              urls: urls      // 取得したURLを追加
-            }
+      // 3. PropertyTableからaccount_idに一致するpropertyIDとURLを取得
+      const udpateCusotmerInfo = await Promise.all(
+        addAccountId.map(async (customer) => {
+          let allUrls = [];
+
+          const accountIds = Array.isArray(customer.account_ids) ? customer.account_ids : [customer.account_ids];
+
+          // 全てのaccountIDに対してURLを取得
+          for (const accountId of accountIds) {
+            const { data: propertyIdsAndUrls, error: urlsError } = await supabase
+              .from("PropertyTable")
+              .select('properties_id, url')
+              .eq('account_id', accountId);
+
+              if (urlsError) {
+                console.error('Error fetching customer urls:', urlsError);
+                continue;
+              }
+
+              // PropertyIDとURLをcustomerInfoに追加
+              const urls = propertyIdsAndUrls.map(propertyIdAndUrlObj => ({
+                propertyId: propertyIdAndUrlObj.properties_id,
+                url: propertyIdAndUrlObj.url
+              }));
+
+              allUrls = allUrls.concat(urls);
+          }
+
+          return {
+            ...customer,    // 既存のcustomer情報を保持
+            urls: allUrls      // 取得したURLを追加
+          }
         })
       );
 
@@ -287,10 +304,20 @@ export default function Home() {
           // Emailに対するすべてのURLに対してAPIリクエストを送る
           const urlsData = await Promise.all(
             customer.urls.map(async (urlObj) => {
+
+              // urlが定義されていない場合，スキップ
+              if (!urlObj.url) {
+                console.warn("URL is not defined for this customer:", customer.email);
+                return { url: null, data: null };
+              }
+
               // 更新日時を取得できている場合はそれを使い，取得できていない場合は現在より1年前の日付を取得
               const startDate = customer.updated_at
                 ? new Date(customer.updated_at).toISOString().split('T')[0]
                 : new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().split('T')[0];
+
+              console.log(`Start Date of ${urlObj.url}: ${startDate}`);
+              console.log("URL: ", urlObj.url);
 
               // URLに対してSearch Consoleのデータを取得
               const response = await fetch(`${apiUrl}/get-search-console`, {
@@ -307,16 +334,21 @@ export default function Home() {
               // レスポンスの確認
               if (response.ok) {
                 if (response.status === 204) {
-                  console.warn("No data available from Search Console. URL: ", url);
+                  console.warn("No data available from Search Console. URL: ", urlObj.url);
                   alert("No data available from Search Console");
                   return { url: urlObj.url, data: null};
+
+                } else if (response.status === 403) {
+                    console.error("Access denied: User does not have permission to access the search console of this URL: ", urlObj.url);
+                    // throw new Error("Access denied: User does not have permission to access the search console of this URL: ", urlObj.url);
+                    return { url: urlObj.url, data: null};
                 } else {
-                  const data = await response.json();
-                  // console.log(`Success! Received data:${data}\nURL: ${url}`);
-                  return { url: urlObj.url, data: data };
+                    const data = await response.json();
+                    // console.log(`Success! Received data:${data}\nURL: ${url}`);
+                    return { url: urlObj.url, data: data };
                 }
               } else {
-                console.error(`Failed to fetch search console data. Status: ${response.status}  \nURL: ${url}`);
+                console.error(`Failed to fetch search console data. Status: ${response.status}  \nURL: ${urlObj.url}`);
                 return { url: urlObj.url, data: null};
               }
             })
@@ -325,7 +357,8 @@ export default function Home() {
         })
       );
 
-      console.log('Search Console : ', results);
+      console.log('Search Console fetched successfully\nSearch Console : ', results);
+      setIsSearchConsoleFetched(true); // 完了後にフラグをtrueに設定
     } catch (error) {
       console.error('Error fetching search console data:', error);
       // alert('Failed to fetch search console data. Please try again later.');
@@ -338,11 +371,9 @@ export default function Home() {
   // 第2引数（[selectedProperty]）に指定した変数が変更された際に，呼び出される
   useEffect(() => {
     let timeout;
-    if (propertyList.length > 1 && customerInfo && !isAnalyticsFetched) {
+    if (propertyList.length > 1 && customerInfo.length > 1 && !isAnalyticsFetched) {
       const fetchAnalytics = async () => {
         await fetchAnalyticsData(); // fetchAnalyticsDataが完了するまで待機
-        setIsAnalyticsFetched(true); // 完了後にフラグをtrueに設定
-        console.log("Analytics fetched successfully");
         timeout = setTimeout(() => setIsAnalyticsFetched(false), 5 * 60 * 1000); // 5分後にリセット
       };
   
@@ -360,8 +391,6 @@ export default function Home() {
     if (customerInfo.length > 1 && !isSearchConsoleFetched) {
       const fetchSearchConsole = async () => {
         await fetchSearchConsoleData(); // fetchSearchConsoleDataが完了するまで待機
-        setIsSearchConsoleFetched(true); // 完了後にフラグをtrueに設定
-        console.log("Search Console fetched successfully");
         timeout = setTimeout(() => setIsSearchConsoleFetched(false), 5 * 60 * 1000); // 5分後にリセット
       };
   
@@ -435,7 +464,7 @@ export default function Home() {
 
       setUnregisteredCustomer(unregisteredCustomersInfo);
 
-      console.log("UnregisteredCustomers: ", unregisteredCustomersInfo);
+      // console.log("UnregisteredCustomers: ", unregisteredCustomersInfo);
     } catch (error) {
       console.error('Error fetching unregistered customers:', error);
     }
@@ -467,7 +496,7 @@ export default function Home() {
         return customer;    // account_idがない場合はnullのまま，元のデータを返す
       });
       
-      console.log("Update Unregistered Customers: ", updateUnregisteredCustomers);
+      console.log("Unregistered Customers: ", updateUnregisteredCustomers);
 
       // 実際に更新があった場合のみstateを更新
       if (JSON.stringify(unregisteredCustomers) !== JSON.stringify(updateUnregisteredCustomers)) {

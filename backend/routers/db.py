@@ -3,7 +3,7 @@ from fastapi import APIRouter
 from functools import lru_cache
 
 from models.request import CustomerEmailRequest, InfoRequestForDB, AnalyticsDataRequest, URLRequest
-from db.db_operations import save_email_customer, save_account_data, save_property_data, save_analytics_data, save_customer_url
+from db.db_operations import save_email_customer, save_account_data, save_property_data, save_analytics_data
 
 
 router = APIRouter()

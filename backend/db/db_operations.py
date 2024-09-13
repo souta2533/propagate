@@ -138,17 +138,19 @@ class PropertyTable:
             - account_id
             - properties_id
             - properties_name
+            - url
             - created_at
     """
     def __init__(self, supabase_client: Client) -> None:
         self.supabase = supabase_client
 
-    async def register_property(self, account_id, property_id, property_name):
+    async def register_property(self, account_id, property_id, property_name, url):
         try:
             response = self.supabase.table('PropertyTable').insert({
                 'account_id': account_id,
                 'properties_id': property_id,
-                'properties_name': property_name    
+                'properties_name': property_name,
+                'url': url
             }).execute()
 
             if 'error' in response:
@@ -199,7 +201,7 @@ class UnregisteredTable:
 
             if existing_response.data:
                 delete_response = self.supabase.table("UnregisteredTable").delete().eq('email', email).eq('url', 'NULL').execute()
-                log.info(f"Delete response: {delete_response}")
+                # log.info(f"Delete response: {delete_response}")
 
                 if 'error' in delete_response.data:
                     log.error(f"Error: {delete_response.error}")
@@ -291,24 +293,24 @@ def make_email_propagate(email_propagate):
 """
     Userが入力したURLを保存する関数
 """
-def save_customer_url(customer_email, property_id, url):
-    response = supabase.table("CustomerUrlTable").select("customer_url").eq("customer_url", url).execute()
-    existing_url = response.data
-    print(existing_url)
+# def save_customer_url(customer_email, property_id, url):
+#     response = supabase.table("CustomerUrlTable").select("customer_url").eq("customer_url", url).execute()
+#     existing_url = response.data
+#     print(existing_url)
 
-    if existing_url and existing_url[0]['customer_url']:
-        return existing_url[0]['customer_url']
-    else:
-        response = supabase.table("CustomerUrlTable").insert({
-            "email_customer": customer_email,
-            "property_id": property_id,
-            "customer_url": url
-        }).execute()
+#     if existing_url and existing_url[0]['customer_url']:
+#         return existing_url[0]['customer_url']
+#     else:
+#         response = supabase.table("CustomerUrlTable").insert({
+#             "email_customer": customer_email,
+#             "property_id": property_id,
+#             "customer_url": url
+#         }).execute()
 
-        if 'error' in response:
-            print(f"Error: {response.error}")
+#         if 'error' in response:
+#             print(f"Error: {response.error}")
         
-        return response.data[0]['customer_url']
+#         return response.data[0]['customer_url']
 
 """
     CustomerEmailsTable
