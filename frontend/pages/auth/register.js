@@ -50,7 +50,6 @@ const Register = () => {
             router.push('/auth/login');
         }
     }
-  };
 
   return (
     <div className="container flex-center">
@@ -92,5 +91,5 @@ const Register = () => {
       </div>
     </div>
   );
-
+};
 export default Register;
