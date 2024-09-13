@@ -41,7 +41,7 @@ export default function Login() {
   return (
     <div className="min-h-screen flex">
       {/* 新規会員登録リンクを右上に配置 */}
-      <Link href="/signup" className="signup-link">
+      <Link href="/auth/register" className="signup-link">
         新規会員登録はこちらー＞
       </Link>
       {/* ログインフォーム */}
