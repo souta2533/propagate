@@ -40,26 +40,8 @@ export default function Home() {
   const [unregisteredCustomers, setUnregisteredCustomer] = useState([]);  // 未登録のCustomer EmailとURLを格納  
   const [accessDeniedErrors, setAccessDeniedErrors] = useState([]);       // アクセス権がない場合のエラーを格納
 
-  useEffect(() => {
-    if (status === 'loading') {
-      console.log("Loading session data ...");
-    }
-    // sessionが存在する場合にのみ実行
-    if (session) {
-      fetchAnalyticsProperties();
-    } else {
-      console.log("No session");
-    }
-  }, [session, status]);
+  const [userRole, setUserRole] = useState(null);         // ユーザのロールを管理
 
-  /**
-   * コンポーネントがマウントされたときに
-   * 1. CustomerEmailからすべてのURLを取得
-   * 2. データの更新日時を取得
-   */
-  useEffect(() => {
-    getCustomerEmailsAndUpdatedAtAndUrls();
-  }, []);
   
   const fetchAnalyticsProperties = async () => {
     setLoading(true);
@@ -374,6 +356,41 @@ export default function Home() {
       // setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const initialize = async () => {
+      if (status === 'loading') {
+        console.log("Loading session data ...");
+      }
+  
+      if (!session) {
+        console.log("No session");
+        return;
+      }
+  
+      // ユーザが管理者かどうかを確認
+      const role = await checkUserRole();
+      if (role === 'admin') {
+        setUserRole('admin');
+      } else {
+        // ホストでない場合，ユーザのログインページへリダイレクト
+        // router.push('/auth/login');
+        console.log("User is not an admin", role);
+      }
+    };
+
+    initialize();
+    fetchAnalyticsProperties();
+  }, [session, status]);
+
+  /**
+   * コンポーネントがマウントされたときに
+   * 1. CustomerEmailからすべてのURLを取得
+   * 2. データの更新日時を取得
+   */
+  useEffect(() => {
+    getCustomerEmailsAndUpdatedAtAndUrls();
+  }, []);
 
   // 特定の条件を満たした際に，呼び出される
   // 第2引数（[selectedProperty]）に指定した変数が変更された際に，呼び出される
