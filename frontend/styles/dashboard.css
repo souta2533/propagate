@@ -1,167 +1,311 @@
 /* 全体レイアウト */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
-    margin: 0;
-    padding: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f9;
+  margin: 0;
+  padding: 0;
+}
+
+/*ハンバーガーメニューボタン*/
+.hamburger {
+  display: none;
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  font-size: 30px;
+  z-index: 1000;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
 }
 
 /* サイドバー */
 .sidebar {
-    width: 220px;
-    background-color: #2d2d2d;
-    height: 100vh;
-    position: fixed;
-    top: 0;
-    left: 0;
-    padding-top: 20px;
-    color : white;
+  width: 25%;
+  height: 100vh;
+  background-color: black;
+  color: white;
+  position: fixed;
+  top: 0;
+  left: 0;
+  transform: translateX(0);
+  transition: transform 0.3s ease;
+}
+
+.sidebar-nav ul li a,
+.dropdown-btn {
+  display: flex;
+  align-items: center;
+}
+
+.sidebar-nav ul li a svg,
+.dropdown-btn svg {
+  margin-right: 10px;
+}
+
+.sidebar.active {
+  transform: translateX(0);
+  padding: 60px 20px;
 }
 
 .sidebar a {
-    display: block;
-    padding: 10px 20px;
-    color: white;
-    text-decoration: none;
-    font-size: 16px;
+  display: block;
+  padding: 10px 20px;
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
 }
 
 .sidebar a:hover {
-    background-color: #575757;
+  background-color: #575757;
 }
 
 /* ドロップダウンメニューのコンテナ */
 .dropdown {
-    position: relative;
+  position: relative;
 }
 
 .dropdown-btn {
-    background-color: transparent;
-    color: white;
-    font-size: 16px;
-    border: none;
-    outline: none;
-    cursor: pointer;
-    width: 100%;
-    text-align: left;
-    padding: 10px 20px;
+  background-color: transparent;
+  color: white;
+  font-size: 16px;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  padding: 10px 20px;
 }
 
 .dropdown-btn:hover {
-    background-color: #575757;
+  background-color: #575757;
 }
 
 .dropdown-content {
-    display: none;
-    background-color: #3e3e3e;
-    position: relative;
-    padding-left: 20px;
+  display: none;
+  background-color: #3e3e3e;
+  position: relative;
+  padding-left: 20px;
 }
 
 .dropdown-content a {
-    padding: 10px 20px;
-    text-decoration: none;
-    display: block;
-    color: white;
-    font-size: 14px;
+  padding: 10px 20px;
+  text-decoration: none;
+  display: block;
+  color: white;
+  font-size: 14px;
 }
 
 .dropdown-content a:hover {
-    background-color: #575757;
+  background-color: #575757;
 }
 
 /* ドロップダウンメニューが表示されたときのスタイル */
 .dropdown.open .dropdown-content {
-    display: block;
+  display: block;
 }
 
 /* メインコンテンツ */
 .main-content {
-    margin-left: 240px;
-    padding: 20px;
+  margin-left: 25%;
+  padding: 20px;
+  transition: margin-left 0.3s ease;
 }
 
 /* ダッシュボードヘッダー */
 h1 {
-    font-size: 24px;
-    margin-bottom: 20px;
-    color : black;
-
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: black;
+  left: 20px;
+  top: 20px;
 }
 
 /* ドロップダウンとフォーム */
-.select-section, .form-section {
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
+.select-section,
+.form-section {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
 }
 
 label {
-    font-size: 14px;
-    font-weight: 600;
-    color: #333;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
 }
 
-select, input {
-    width: 100%;
-    padding: 10px;
-    margin-top: 5px;
-    margin-bottom: 20px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #f9f9f9;
+select,
+input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
 }
 
 button {
-    background-color: #1d72b8;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    
+  background-color: #1d72b8;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
 button:hover {
-    background-color: #155a8a;
+  background-color: #155a8a;
 }
 
 /* カードスタイル */
 .card-container {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-    justify-content: space-between;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  justify-content: space-around;
 }
 
 .card {
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    width: 31%;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  flex: 1 1 20%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 10px;
 }
 
 .card h2 {
-    font-size: 18px;
-    margin-bottom: 10px;
+  font-size: 18px;
+  margin-bottom: 10px;
 }
 
 .card p {
-    font-size: 14px;
-    color: #555;
+  font-size: 14px;
+  color: #555;
+}
+
+.graphcard-container {
+  display: flex;
+  flex-wrap: nowrap;
+  width: 100%;
+}
+
+.graphcard {
+  background-color: #f9f9f9;
+  color: black;
+  padding: 10px;
+  flex-grow: 1; /*カードの幅を自動調整*/
+  flex-shrink: 0; /*カードを最小から小さくしない*/
+  flex-basis: 0; /*初期幅を設定しない*/
+  height: auto;
+  margin: 0;
+  /*box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);*/
+  border: 2px solid #eeeeee;
+  border-bottom: none;
+  /*border-radius: 10px;*/
+  transition: background-color 0.3s ease;
+}
+
+.graphcard:hover {
+  background-color: white;
+}
+
+.graphcard:last-child {
+  margin-right: 0;
+}
+
+.graphcard h2 {
+  font-size: 18px;
+  margin: 0;
+}
+
+.graphcard p {
+  font-size: 14px;
+  color: #555;
+  margin: 0;
+}
+
+.graph-container {
+  width: 100%;
+  height: 700px;
+  background-color: #f9f9f9; /* グラフ領域の背景色 */
+  padding: 10px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* グラフエリアにも影を追加 */
+}
+
+#chart-space {
+  width: 100%;
+  height: 100%; /* グラフが領域いっぱいに表示されるように */
+  background-color: white; /* グラフの背景色 */
+  /*border-radius: 10px;*/ /* グラフエリアの角丸 */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* グラフエリアの影 */
+}
+
+.detail-link {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+}
+
+.detail-button {
+  background-color: #0073e6;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.detail-button:hover {
+  background-color: #005bb5;
 }
 
 /* モバイル対応 */
 @media (max-width: 768px) {
-    .card {
-        width: 100%;
-    }
+  .hamburger {
+    display: block;
+    position: fixed;
+    top: 10px; /* 上からの余白 */
+    left: 10px; /* 左からの余白 */
+    z-index: 1000; /* ハンバーガーメニューが他の要素の上に表示されるように */
+  }
 
-    .main-content {
-        margin-left: 0;
-        padding: 10px;
-    }
+  .sidebar {
+    width: 80%;
+    transform: translateX(-100%);
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+
+  .card-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .card {
+    width: 90%;
+    margin-top: 10px;
+  }
+
+  .graph-container {
+    height: 300px; /* モバイル時のグラフ領域の高さを調整 */
+  }
+
+  .main-content {
+    margin-left: 0;
+    padding: 10px;
+  }
+
+  .main-content h1 {
+    text-align: center;
+  }
 }
