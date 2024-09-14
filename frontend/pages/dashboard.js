@@ -3,7 +3,18 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { supabase } from "../lib/supabaseClient";
 import { handlerUrlSubmit } from "../lib/submitHandler";
-import "../styles/dashboard.css";
+import { Home, BarChart2, FileText, Search, Settings } from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import Link from "next/link";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css"; // 必要なスタイルを読み込み
@@ -14,6 +25,20 @@ import {
   faFileAlt,
   faChartBar,
 } from "@fortawesome/free-solid-svg-icons";
+import { cn } from "@/lib/utils";
+import { cva } from "class-variance-authority";
+import { Button } from "../components/Button";
+import { Input } from "../components/Input";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/Card";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "../components/Select";
+
+import "../styles/dashboard.css";
 
 const Dashboard = () => {
   const router = useRouter();
@@ -33,14 +58,8 @@ const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("PV");
-
-  const toggleDropdown = () => {
-    setIsOpen(!isOpen);
-  };
-  //sidebarを開く関数
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  const [selectedMetric, setSelectedMetric] = useState("pv");
+  const [dateRange, setDateRange] = useState("過去28日間");
 
   useEffect(() => {
     const fetchAnalyticsData = async () => {
@@ -212,12 +231,160 @@ const Dashboard = () => {
     );
   };
 
+  /*新しいダッシュボード */
+  const Sidebar = () => (
+    <div className="sidebar">
+      <div className="menu-list">
+        <Button variant="ghost" className="menu-button">
+          <Home className="icon" />
+          <div className="icon-text">ホーム</div>
+        </Button>
+        <Button
+          variant="ghost"
+          onClick={() => router.push("/details")}
+          className="menu-button"
+        >
+          <BarChart2 className="icon" />
+          <div className="icon-text">ページ別状況</div>
+        </Button>
+
+        <Button variant="ghost" className="menu-button">
+          <FileText className="icon" />
+          <div className="icon-text">アナリティクスレポート</div>
+        </Button>
+      </div>
+    </div>
+  );
+
+  const Header = () => (
+    <header className="header">
+      <div className="header-left">
+        <h1 className="header-title">Propagate Analytics</h1>
+        <Input
+          type="text"
+          placeholder="https://www.propagateinc.com/"
+          className="header-input"
+        />
+      </div>
+      <Button size="icon" variant="ghost" className="header-button">
+        <Settings className="icon" />
+        <span className="sr-only">Settings</span>
+      </Button>
+    </header>
+  );
+
+  const MetricCard = ({ title, value, target, difference }) => (
+    <Card className="metric-card">
+      <CardHeader className="metric-card-header">
+        <CardTitle className="metric-card-title">{title}</CardTitle>
+      </CardHeader>
+      <CardContent className="metric-card-content">
+        <div className="metric-value">{value.toLocaleString()}</div>
+        {/*<p className="metric-subtext">
+          目標 {target.toLocaleString()}
+          <span
+            className={
+              difference > 0
+                ? "metric-difference positive"
+                : "metric-difference negative"
+            }
+          >
+            {difference > 0 ? "+" : ""}
+            {difference}
+          </span>
+        </p>*/}
+      </CardContent>
+    </Card>
+  );
+
+  const data = [
+    { name: "8/15", value: 4000 },
+    { name: "8/20", value: 3000 },
+    { name: "8/25", value: 2000 },
+    { name: "8/30", value: 2780 },
+    { name: "9/4", value: 1890 },
+    { name: "9/9", value: 2390 },
+    { name: "9/11", value: 3490 },
+  ];
+
+  const LineChartComponent = () => (
+    <ResponsiveContainer width="100%" height={300}>
+      <LineChart
+        data={data}
+        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+      >
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="name" />
+        <YAxis />
+        <Tooltip />
+        <Line
+          type="monotone"
+          dataKey="value"
+          stroke="#8884d8"
+          activeDot={{ r: 8 }}
+        />
+      </LineChart>
+    </ResponsiveContainer>
+  );
+
+  const BarChartComponent = ({ dataKey }) => (
+    <ResponsiveContainer width="100%" height="100%">
+      <BarChart
+        data={data}
+        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+      >
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="name" />
+        <YAxis />
+        <Tooltip />
+        <Bar dataKey="value" fill="#8884d8" />
+      </BarChart>
+    </ResponsiveContainer>
+  );
+
+  const SearchKeyword = ({ keyword, count }) => (
+    <div className="search-keyword">
+      <Search className="search-icon" />
+      <div className="search-info">
+        <p className="search-keyword-text">{keyword}</p>
+        <p className="search-count-text">{count}回の検索結果</p>
+      </div>
+    </div>
+  );
+
+  const metrics = [
+    { title: "PV (ページ閲覧数)", value: 23450, target: 1000, difference: 143 },
+    {
+      title: "CV (お問い合わせ数)",
+      value: 23450,
+      target: 1000,
+      difference: -6,
+    },
+    {
+      title: "CVR (お問い合わせ率)",
+      value: 3.55,
+      target: 2.55,
+      difference: 1.34,
+    },
+    {
+      title: "SS(セッション数)",
+      value: 12345,
+      targe: 23456,
+      difference: 11111,
+    },
+  ];
+
+  const searchKeywords = [
+    { keyword: "サブスクホームページ制作", count: 3280 },
+    { keyword: "東京都Webデザイン会社", count: 2345 },
+    { keyword: "プロパゲート", count: 1034 },
+  ];
+
   // ダッシュボードの内容を記載
-  return (
-    <div className="main-content">
-      <h1>Dashboard</h1>
-      {/* Account ID の選択ドロップダウン */}
-      {/*{accountIds.length > 0 && (
+  /*return (
+      {/* Account ID の選択ドロップダウン */
+  {
+    /*{accountIds.length > 0 && (
         <div className="select-section">
           <label htmlFor="accountId">Select Account ID</label>
           <select
@@ -232,10 +399,13 @@ const Dashboard = () => {
             ))}
           </select>
         </div>
-      )}*/}
-
-      {/* Property ID の選択ドロップダウン */}
-      {/*{filteredProperties.length > 0 ? (
+      )}*/
+  }
+  {
+    /* Property ID の選択ドロップダウン */
+  }
+  {
+    /*{filteredProperties.length > 0 ? (
         <div className="select-section">
           <h2>Analytics Properties:</h2>
           <label htmlFor="propertyId">Select Property ID</label>
@@ -266,10 +436,13 @@ const Dashboard = () => {
         </div>
       ) : (
         <p>No Analytics properties found for this account.</p>
-      )}*/}
-
-      {/* URLとProperty IDの入力と送信ボタン */}
-      {/*<div className="form-section">
+      )}*/
+  }
+  {
+    /* URLとProperty IDの入力と送信ボタン */
+  }
+  {
+    /*<div className="form-section">
         <h2>Submit Property ID and URL:</h2>
         <form onSubmit={handleSubmit}>
           <label htmlFor="propertyId">Enter Property ID</label>
@@ -294,133 +467,67 @@ const Dashboard = () => {
 
           <button type="submit">Submit</button>
         </form>
-      </div>*/}
+      </div>
+      */
+  }
 
-      {/* カード表示 */}
-      <div className="card-container">
-        <div className="card">
-          <h2>PV (ページ訪問者数)</h2>
-          <p>Search for Data...</p>
-        </div>
-        <div className="card">
-          <h2>CV (お問い合わせ数)</h2>
-          <p>Search for Data...</p>
-        </div>
-        <div className="card">
-          <h2>UU (ページ訪問者数)</h2>
-          <p>Search for Data...</p>
-        </div>
-
-        <aside className="sidebar">
-          <div className="logo">
-            <h1 className="sidebar-name">Propagate Analytics</h1>
+  return (
+    <div className="dashboard-container">
+      <Header />
+      <main className="dashboard-main">
+        <Sidebar />
+        <div className="dashboard-main-left">
+          <div className="dashboard-header">
+            <h2 className="dashboard-title">アナリティクスデータ</h2>
+            <Select
+              value={dateRange}
+              onValueChange={setDateRange}
+              className="dashboard-select"
+            >
+              <SelectTrigger className="select-trigger">
+                <SelectValue placeholder="Select date range" />
+              </SelectTrigger>
+              <SelectContent className="select-content">
+                <SelectItem value="過去7日間">過去7日間</SelectItem>
+                <SelectItem value="過去28日間">過去28日間</SelectItem>
+                <SelectItem value="過去90日間">過去90日間</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-          <nav className="sidebar-nav">
-            <ul>
-              <li>
-                <Link href="/dashboard" legacyBehavior>
-                  <a>
-                    <FontAwesomeIcon icon={faHome} />
-                    ホーム
-                  </a>
-                </Link>
-              </li>
-              <li>
-                <Link href="/" legacyBehavior>
-                  <a>
-                    <FontAwesomeIcon icon={faFileAlt} />
-                    ページ別状況
-                  </a>
-                </Link>
-              </li>
-              <li className="dropdown">
-                <button className="dropdown-btn" onClick={toggleDropdown}>
-                  <FontAwesomeIcon icon={faChartBar} /> アナリティクスレポート
+          <div className="dashboard-main-right">
+            <div className="chart-content">
+              <div className="metrics-grid">
+                {metrics.map((metric, index) => (
+                  <MetricCard className="metric-card" key={index} {...metric} />
+                ))}
+              </div>
+              <Card className="chart-card">
+                <CardContent className="chart-card-content">
+                  <LineChartComponent />
+                </CardContent>
+              </Card>
+              <div className="dashboard-details">
+                <button
+                  onClick={() => router.push("/details")}
+                  className="details-button"
+                >
+                  ページ別詳細はこちら
                 </button>
-                <div className={`dropdown-content ${isOpen ? "open" : ""}`}>
-                  <a href="#">PVレポート</a>
-                  <a href="#">CVレポート</a>
-                  <a href="#">UUレポート</a>
-                </div>
-              </li>
-            </ul>
-          </nav>
-        </aside>
-      </div>
-
-      {/*グラフ領域*/}
-      <div class="graph-container">
-        <div class="graphcard-container">
-          <button
-            className={`graphcard ${activeTab === "PV" ? "active" : ""}`}
-            onClick={() => setActiveTab("PV")}
-          >
-            <h2>PV (ページ訪問者数)</h2>
-            <p>Search for Data...</p>
-          </button>
-          <button
-            className={`graphcard ${activeTab === "CV" ? "active" : ""}`}
-            onClick={() => setActiveTab("CV")}
-          >
-            <h2>CV (お問い合わせ数)</h2>
-            <p>Search for Data...</p>
-          </button>
-
-          <button
-            className={`graphcard ${activeTab === "UU" ? "active" : ""}`}
-            onClick={() => setActiveTab("UU")}
-          >
-            <h2>UU (ページ訪問者数)</h2>
-            <p>Search for Data...</p>
-          </button>
-
-          <button
-            className={`graphcard ${activeTab === "SS" ? "active" : ""}`}
-            onClick={() => setActiveTab("SS")}
-          >
-            <h2>SS (セッション数)</h2>
-            <p>Search for Data...</p>
-          </button>
+              </div>
+            </div>
+            <div className="dashboard-sidebar">
+              <h3 className="sidebar-title">検索キーワード</h3>
+              <div className="search-keywords">
+                {searchKeywords.map((keyword, index) => (
+                  <SearchKeyword key={index} {...keyword} />
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="suggest-space"></div>
         </div>
-
-        <div id="chart-space">
-          {activeTab === "PV" && <div>PVに関連するデータを表示</div>}
-          {activeTab === "CV" && <div>CVに関連するデータを表示</div>}
-          {activeTab === "UU" && <div>UUに関連するデータを表示</div>}
-          {activeTab === "SS" && <div>SSに関連するデータを表示</div>}
-        </div>
-
-        {/*右下に詳細ページへのボタンを追加*/}
-        <div className="detail-link">
-          <Link href="/details">
-            <button classNeme="detail-button">詳細ページ</button>
-          </Link>
-        </div>
-      </div>
-
-      <main className={`main-content ${isSidebarOpen ? "shifted" : ""}`}></main>
-
-      {/*ハンバーガーメニュー*/}
-      <div className="dashboard-container">
-        <button className="hamburger" onClick={toggleSidebar}>
-          ☰
-        </button>
-        <div className={`sidebar ${isSidebarOpen ? "active" : ""}`}>
-          <ul>
-            <li>
-              <a href="#">ホーム</a>
-            </li>
-            <li>
-              <a href="#">ページ別状況</a>
-            </li>
-            <li>
-              <a href="#">アナリティクスレポート</a>
-            </li>
-          </ul>
-        </div>
-      </div>
+      </main>
     </div>
   );
 };
-
 export default Dashboard;

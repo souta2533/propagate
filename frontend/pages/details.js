@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import { Button } from "../components/Button";
 import {
   Select,
@@ -32,54 +33,80 @@ import {
 } from "lucide-react";
 import "../styles/AnalyticsDashboard.css";
 
-const generateData = (metric, granularity) => {
-  let baseData;
-  switch (granularity) {
-    case "日別":
-      baseData = [
-        { date: "2024/08/14" },
-        { date: "2024/08/19" },
-        { date: "2024/08/23" },
-        { date: "2024/08/28" },
-        { date: "2024/09/01" },
-        { date: "2024/09/06" },
-        { date: "2024/09/10" },
-      ];
-      break;
-    case "月別":
-      baseData = [
-        { date: "2024/01" },
-        { date: "2024/02" },
-        { date: "2024/03" },
-        { date: "2024/04" },
-        { date: "2024/05" },
-        { date: "2024/06" },
-      ];
-      break;
-    case "年別":
-      baseData = [
-        { date: "2020" },
-        { date: "2021" },
-        { date: "2022" },
-        { date: "2023" },
-        { date: "2024" },
-      ];
-      break;
-    default:
-      baseData = [];
-  }
-  return baseData.map((item) => ({
-    ...item,
-    [metric]: Math.floor(Math.random() * 1000),
-  }));
-};
-
 export default function AnalyticsDashboard() {
   const [dateRange, setDateRange] = useState("過去 28 日間");
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedMetric, setSelectedMetric] = useState("PV");
   const [chartType, setChartType] = useState("折れ線グラフ");
   const [timeGranularity, setTimeGranularity] = useState("日別");
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
+  const router = useRouter();
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = `0${date.getMonth() + 1}`.slice(-2); // 月は0から始まるため+1
+    const day = `0${date.getDate()}`.slice(-2);
+    return `${year}/${month}/${day}`;
+  };
+
+  /*日付を表示形式に整える*/
+  useEffect(() => {
+    // 例として過去7日間を設定
+    const today = new Date();
+    const pastDate = new Date();
+    pastDate.setDate(today.getDate() - 7);
+
+    setStartDate(pastDate);
+    setEndDate(today);
+  }, []);
+
+  /*グラフの日付選択*/
+  const handleDateSelect = (range) => {
+    if (range && range.from && range.to) {
+      setStartDate(range.from);
+      setEndDate(range.to);
+      setShowCalendar(false); // カレンダーを閉じる
+    }
+  };
+
+  const generateData = (metric, granularity, startDate, endDate) => {
+    if (!startDate || !endDate) return [];
+
+    let baseData = [];
+    let currentDate = new Date(startDate);
+
+    while (currentDate <= endDate) {
+      let dateString;
+      switch (granularity) {
+        case "日別":
+          dateString = formatDate(currentDate);
+          currentDate.setDate(currentDate.getDate() + 1);
+          break;
+        case "月別":
+          dateString = `${currentDate.getFullYear()}/${(
+            currentDate.getMonth() + 1
+          )
+            .toString()
+            .padStart(2, "0")}`;
+          currentDate.setMonth(currentDate.getMonth() + 1);
+          break;
+        case "年別":
+          dateString = currentDate.getFullYear().toString();
+          currentDate.setFullYear(currentDate.getFullYear() + 1);
+          break;
+        default:
+          dateString = formatDate(currentDate);
+          currentDate.setDate(currentDate.getDate() + 1);
+      }
+
+      baseData.push({
+        date: dateString,
+        [metric]: Math.floor(Math.random() * 1000),
+      });
+    }
+
+    return baseData;
+  };
 
   // 登録されているURLのリスト
   const [urlList, setUrlList] = useState([
@@ -122,7 +149,12 @@ export default function AnalyticsDashboard() {
   };
 
   const renderChart = () => {
-    const data = generateData(selectedMetric, timeGranularity);
+    const data = generateData(
+      selectedMetric,
+      timeGranularity,
+      startDate,
+      endDate
+    );
     switch (chartType) {
       case "折れ線グラフ":
         return (
@@ -193,7 +225,12 @@ export default function AnalyticsDashboard() {
           {/*ダウンロードアイコンとメッセージアイコン
           <Download className="icon" />
           <MessageSquare className="icon" />*/}
-          <X className="icon" />
+          <button
+            onClick={() => router.push("/dashboard")}
+            className="icon-button"
+          >
+            <X className="icon" />
+          </button>
         </div>
       </div>
 
@@ -244,11 +281,18 @@ export default function AnalyticsDashboard() {
               <PopoverTrigger asChild>
                 <Button variant="outline" className="calendar-button">
                   <CalendarIcon className="icon-small" />
-                  2024/08/14 〜 2024/09/10
+                  {startDate && endDate
+                    ? `${formatDate(startDate)} 〜 ${formatDate(endDate)}`
+                    : "日付を選択"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="calendar-popover">
-                <Calendar />
+                <Calendar
+                  selected={{ from: startDate, to: endDate }}
+                  onSelect={handleDateSelect}
+                  numberOfMonths={2}
+                  mode="range"
+                />
               </PopoverContent>
             </Popover>
           )}
