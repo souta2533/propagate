@@ -1,4 +1,4 @@
-/* AnalyticsDashboard.css */
+/* dashboard.css */
 /* レイアウト全体 */
 .dashboard-container {
   display: flex;
@@ -31,12 +31,12 @@
 
 /* ヘッダー */
 .header {
-  background-color: #ffffff; /* bg-white */
-  padding: 12px; /* p-4 */
+  background-color: #ffffff;
+  padding: 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #e5e7eb; /* border-b */
+  border-bottom: 1px solid #e5e7eb;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   z-index: 10000;
 }
@@ -68,9 +68,11 @@
 
 /*サイドバーメニュー*/
 .sidebar {
+  display: block;
   background-color: #ffffff;
   width: 15%;
   border-right: 3px solid #7272722f;
+  transition: transform 0.3s ease-in-out;
 }
 
 /*sidebarのmenubutton*/
@@ -93,13 +95,14 @@
 .icon {
   height: 20px;
   width: 20px;
-  margin-right: 8px;
+  margin-right: 10px;
 }
 
 .icon-text {
   text-align: left;
   display: flex;
   align-items: center;
+  padding: 10px;
 }
 
 .chart-content {
@@ -110,7 +113,7 @@
 /* メトリックカード */
 .metric-card {
   border-right: 1px solid #f9fafb;
-  padding: 5px;
+  padding: 10px 10px 0 10px;
 }
 
 .metric-card-content {
@@ -121,8 +124,8 @@
 .metrics-grid {
   background-color: white;
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* grid-cols-3 */
-  gap: 0; /* gap-4 */
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
 }
 
 .metric-card:last-child {
@@ -130,6 +133,10 @@
 }
 
 .metric-card:hover {
+  background-color: #f9fafb;
+}
+
+.metric-card.active {
   background-color: #f9fafb;
   border-bottom: 2px solid #59e3d0;
 }
@@ -155,18 +162,6 @@
 .metric-subtext {
   font-size: 0.75rem; /* text-xs */
   color: #f9fafb; /* text-muted-foreground */
-}
-
-.metric-difference {
-  margin-left: 0.25rem; /* ml-1 */
-}
-
-.metric-difference.positive {
-  color: #16a34a; /* text-green-600 */
-}
-
-.metric-difference.negative {
-  color: #dc2626; /* text-red-600 */
 }
 
 /*メインのヘッダ*/
@@ -215,8 +210,7 @@
 /* 検索欄 */
 .dashboard-sidebar {
   background-color: #f6f8f9;
-  width: auto; /* w-64 */
-  margin-left: 10px;
+  width: auto;
   border: 2px solid #f9fafb;
   padding: 20px;
 }
@@ -278,22 +272,134 @@
   border: 1px solid #c7c7c7;
 }
 
+/* スマホサイズのみハンバーガーメニューを表示 */
+.hamburger-icon {
+  display: none; /* デフォルトでは非表示 */
+}
+
 /* レスポンシブコンテナ */
 @media (max-width: 768px) {
+  html,
+  body {
+    width: 100vw;
+    height: 100vh;
+  }
+  .dashboard-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    width: 100vw;
+  }
+
+  .header {
+    width: 100%;
+    height: 100%;
+    min-width: 768px;
+  }
   .dashboard-main {
     flex-direction: column;
+    width: 100%;
+    height: 100%;
+  }
+
+  .dashboard-header {
+    width: 100%;
+    height: 100%;
+    min-width: 768px;
+  }
+
+  .sidebar {
+    width: 50%;
+    position: fixed;
+    height: 100%;
+    z-index: 9999;
+    background-color: #ffffff;
+    border-right: 3px solid #7272722f;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+  }
+
+  /* サイドバーが開いたときに表示 */
+  .sidebar.open {
+    transform: translateX(0);
   }
 
   .dashboard-main-left {
-    padding-right: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
   }
 
-  .dashboard-sidebar {
+  .dashboard-main-right {
     width: 100%;
-    margin-top: 24px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
   }
 
   .metrics-grid {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    width: 100%;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+  }
+
+  .metric-card {
+    min-width: 250px; /* カードの最小幅 */
+    flex: 0 0 250px; /* カードを固定幅に */
+    background-color: #ffffff;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    scroll-snap-align: start; /* スクロール停止位置 */
+  }
+
+  .chart-content {
+    width: 100vh;
+  }
+
+  .dashboard-sidebar {
+    width: 100vw;
+    margin-top: 24px;
+    margin: 10px 0;
+    padding: 0;
+  }
+
+  /*ハンバーガーメニュー*/
+  .hamburger-icon {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+  }
+
+  .hamburger-icon.bar {
+    width: 25px;
+    height: 3px;
+    background-color: #333;
+    margin: 4px 0;
+    transition: 0.4s;
+  }
+
+  /* オーバーレイの設定 */
+  .overlay {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    width: 100%;
+    height: 100%; /* 画面全体をカバー */
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 998;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out; /* オーバーレイのトランジション */
+  }
+
+  .overlay.visible {
+    opacity: 1; /* 不透明に */
+    visibility: visible; /* 表示 */
   }
 }
