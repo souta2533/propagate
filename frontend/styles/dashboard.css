@@ -175,6 +175,8 @@
   background-color: #ffffff;
   border: none;
   padding: 10px;
+  text-align: right;
+  max-width: 120px;
 }
 
 .dashboard-title {
@@ -210,6 +212,7 @@
 /* 検索欄 */
 .dashboard-sidebar {
   background-color: #f6f8f9;
+  margin-left: 10px;
   width: auto;
   border: 2px solid #f9fafb;
   padding: 20px;
@@ -276,7 +279,6 @@
 .hamburger-icon {
   display: none; /* デフォルトでは非表示 */
 }
-
 /* レスポンシブコンテナ */
 @media (max-width: 768px) {
   html,
