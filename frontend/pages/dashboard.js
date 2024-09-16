@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react'
+// import { createPagesServerClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from "next/router";
 import { supabase } from "../lib/supabaseClient";
 import { handlerUrlSubmit } from "../lib/submitHandler";
@@ -41,6 +43,7 @@ import {
 import "../styles/dashboard.css";
 
 const Dashboard = () => {
+//   const user = useUser();
   const router = useRouter();
   const [session, setSession] = useState(null);
   const [error, setError] = useState(null);         // エラーの状態を管理
@@ -73,43 +76,36 @@ const Dashboard = () => {
     setSelectedMetric(value);
   };
 
-  // Sessionを取得
+  // セッションを取得する関数
+  const fetchSession = async () => {
+    const { data, error } = await supabase.auth.getSession();
+    if (error || !data?.session) {
+      console.error('Error fetching session: ', error);
+      setError(error);
+      setLoading(false);
+      return;
+    }
+
+    setSession(data.session);
+    setLoading(false);
+  };
+
+  // useEffectでsessionがnullのときにリトライ
   useEffect(() => {
-    const fetchSession = async () => {
-        const { data, error } = await supabase.auth.getSession();
-
-        if (error || !data?.session) {
-            console.error('Error fetching session: ', error);
-            setError(error);
-            setLoading(false);
-            return;
-        }
-
-        setSession(data.session);
-        setLoading(false);
-    };
-
-    fetchSession();
-  }, []);
-
-  if (loading) {
-    return <div>Loading...</div>; // ローディング中の表示
-  }
-
-  if (error) {
-    return <div>Error: {error}</div>; // エラー時の表示
-  }
+    if (!session) {
+      setLoading(true);  // ローディング状態に戻す
+      fetchSession();
+    }
+  }, [session]);  // session が null の場合に再度 fetchSession を実行
 
   useEffect(() => {
     const fetchAnalyticsData = async () => {
-      // 1. localStorageからセッションを取得
-      const { data, error } = await supabase.auth.getSession();
-      if (error || !data) {
-          console.error('Error fetching session:', error);
-          return;
-      }
+    if (!session) {
+        console.log("Session is null");
+        return;
+    }
 
-      const sessionData = data.session;
+    const sessionData = session;
 
       if (!sessionData) {
         // router.push('/auth/login');
@@ -118,7 +114,9 @@ const Dashboard = () => {
       }
 
       // 2. Userのemailを取得
-      const email_customer = sessionData.user.email;
+      console.log("Session of this: ", sessionData);
+
+      const email_customer = sessionData.user.user_metadata.email;
 
       // 3. CustomerDetailsTableからaccountIdを取得
       const { data: customerDetailsData, error: customerDetailsError } =
@@ -186,7 +184,7 @@ const Dashboard = () => {
     };
 
     fetchAnalyticsData();
-  }, [router]);
+  }, [session]);
 
   useEffect(() => {
     /**
