@@ -113,18 +113,21 @@ const Dashboard = () => {
         setSession(sessionData);
       }
 
-      // 2. Userのemailを取得
-      console.log("Session of this: ", sessionData);
+      // 1. Userのemailを取得
+    //   console.log("Session of this: ", sessionData);
+    console.log("User's auth.uin(): ", sessionData.user.id);
+
 
       const email_customer = sessionData.user.user_metadata.email;
 
-      // 3. CustomerDetailsTableからaccountIdを取得
+      // 2. CustomerDetailsTableからaccountIdを取得
       const { data: customerDetailsData, error: customerDetailsError } =
         await supabase
           .from("CustomerDetailsTable")
           .select("accounts_id")
-          .eq("email_customer", email_customer);
+        //   .eq("email_customer", email_customer);
 
+      console.log("CustomerDetailsData: ", customerDetailsData);
       if (customerDetailsError) {
         console.error("Error fetching accountIds:", customerDetailsError);
         return;
@@ -138,10 +141,10 @@ const Dashboard = () => {
         setSelectedAccountId(accountIds[0]);
       }
 
-      // 4. PropertyTableからpropertyIdを取得
+      // 3. PropertyTableからpropertyIdを取得
       const { data: allProperties, error: propertyError } = await supabase
         .from("PropertyTable")
-        .select("properties_id, properties_name, account_id")
+        .select("properties_id, properties_name, account_id url")
         .in("account_id", accountIds);
 
       if (propertyError) {
@@ -163,7 +166,7 @@ const Dashboard = () => {
         }
       }
 
-      // 5. GoogleAnalyticsDataのデータを取得
+      // 4. GoogleAnalyticsDataのデータを取得
       const propertyIds = allProperties.map((p) => p.properties_id);
       const { data: allAnalytics, error: analyticsError } = await supabase
         .from("AnalyticsData")

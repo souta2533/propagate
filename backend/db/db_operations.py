@@ -130,7 +130,6 @@ class CustomerDetailsTable:
             log.error(f"Error: {e}")
             return None
 
-
 class PropertyTable:
     """
         Property table
