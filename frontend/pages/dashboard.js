@@ -43,6 +43,8 @@ import "../styles/dashboard.css";
 const Dashboard = () => {
   const router = useRouter();
   const [session, setSession] = useState(null);
+  const [error, setError] = useState(null);         // エラーの状態を管理
+  const [loading, setLoading] = useState(true);     // ローディング中かどうかの状態を管理
   const [accountIds, setAccountIds] = useState([]);
   const [propertyIds, setPropertyIds] = useState([]);
   const [filteredProperties, setFilteredProperties] = useState([]);
@@ -70,6 +72,33 @@ const Dashboard = () => {
   const handleMetricChange = (value) => {
     setSelectedMetric(value);
   };
+
+  // Sessionを取得
+  useEffect(() => {
+    const fetchSession = async () => {
+        const { data, error } = await supabase.auth.getSession();
+
+        if (error || !data?.session) {
+            console.error('Error fetching session: ', error);
+            setError(error);
+            setLoading(false);
+            return;
+        }
+
+        setSession(data.session);
+        setLoading(false);
+    };
+
+    fetchSession();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>; // ローディング中の表示
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>; // エラー時の表示
+  }
 
   useEffect(() => {
     const fetchAnalyticsData = async () => {
