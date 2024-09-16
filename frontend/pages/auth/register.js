@@ -29,26 +29,25 @@ const Register = () => {
       setEmail("");
       setPassword("");
 
-            // 登録したユーザー情報をバックエンドに送信(('/api/register-user',?)
-            const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-            const response = await fetch(`${apiUrl}/register-user`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                email: email,
-              }),
-            });
+      // 登録したユーザー情報をバックエンドに送信(('/api/register-user',?)
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+      const response = await fetch(`${apiUrl}/register-user`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email,
+        }),
+      });
 
-            if (!response.ok) {
-              console.error('Failed to register user on the backend');
-              return;
-            }
+      if (!response.ok) {
+        console.error("Failed to register user on the backend");
+        return;
+      }
 
-            // 登録後にダッシュボードへリダイレクト
-            router.push('/auth/login');
-        }
+      // 登録後にダッシュボードへリダイレクト
+      router.push("/auth/login");
     }
 
   return (

@@ -160,7 +160,7 @@ option {
   border: 1px solid #ccc; /* 境界線を設定 */
 }
 
-div.select-item {
+.select-item {
   background-color: white; /* 各アイテムの背景色も白に */
   color: black; /* アイテムのテキストを黒に */
 }
@@ -168,4 +168,12 @@ div.select-item {
 .select-item:hover {
   background-color: #f0f0f0; /* ホバー時の背景色 */
   color: black; /* ホバー時のテキスト色 */
+}
+
+/*アイコンのスタイル*/
+.icon-button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
 }
