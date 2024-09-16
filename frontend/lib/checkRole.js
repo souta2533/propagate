@@ -14,9 +14,9 @@ export const checkUserRole = async () => {
         const { data: roleData, error: roleError } = await supabase
             .from('Roles')
             .select('role')
-            .eq('id', user.id)
+            .eq('user_id', user.id)
             .single();
-
+ 
         // Roles Tableにデータがない場合，管理者でないと判断
         if (roleError || !roleData) {
             console.log('Role not found');

@@ -17,8 +17,6 @@ export default function AdminLogin() {
             password,
         });
 
-        console.log(data.user.id);
-
         if (error) {
             setError(error.message);
         } else {

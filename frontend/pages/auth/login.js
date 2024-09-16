@@ -26,7 +26,7 @@ export default function Login() {
 
     if (res.ok) {
       // session情報をlocalStorageに保存
-      localStorage.setItem("supabaseSession", JSON.stringify(data.session));
+    //   localStorage.setItem("supabaseSession", JSON.stringify(data.session));
 
       // ログイン成功時，ダッシュボードへリダイレクト
       await router.push("/dashboard");

@@ -49,7 +49,6 @@ const Register = () => {
       // 登録後にダッシュボードへリダイレクト
       router.push("/auth/login");
     }
-  };
 
   return (
     <div className="container flex-center">
