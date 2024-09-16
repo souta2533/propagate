@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react'
+// import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react'
 // import { createPagesServerClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from "next/router";
 import { supabase } from "../lib/supabaseClient";
