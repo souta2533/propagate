@@ -405,6 +405,7 @@ def save_property_data(account_id, property_id, property_name):
         - active_users
         - sessions
         - engaged_sessions
+        - total_users
         - created_at
 
     data: {"pageLocation": x, ...}
@@ -429,6 +430,7 @@ def save_batch_analytics_data(batch, property_id):
                 .eq("active_users", item['activeUsers'])
                 .eq("sessions", item['sessions'])
                 .eq("engaged_sessions", item['engagedSessions'])
+                .eq("total_users", item['totalUsers'])  
                 .execute()
                 )
             
@@ -450,6 +452,7 @@ def save_batch_analytics_data(batch, property_id):
                 "active_users": item['activeUsers'],
                 "sessions": item['sessions'],
                 "engaged_sessions": item['engagedSessions'],
+                "total_users": item['totalUsers']
             }).execute()
     except APIError as e:
         error_info = e.args[0]
