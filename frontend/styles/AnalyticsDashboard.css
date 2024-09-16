@@ -1,9 +1,10 @@
 .container {
-  width: 100%;
+  width: 100vw;
   padding: 0;
 }
 
 .header {
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -135,7 +136,7 @@ button {
   background-color: #f4f4f4;
 }
 
-select {
+.select {
   background-color: white;
 }
 
@@ -146,20 +147,19 @@ option {
   font-size: 14px;
 }
 
-.custom-select-trigger {
-  width: auto;
+.select-trigger {
   background-color: white; /* 背景色を白に設定 */
   color: black; /* テキストを黒に */
   border: 1px solid #ccc; /* 境界線を設定 */
 }
 
-.custom-select-content {
+.select-content {
   background-color: white; /* ドロップダウンの背景色を白に設定 */
   color: black; /* ドロップダウン内のテキストを黒に設定 */
   border: 1px solid #ccc; /* 境界線を設定 */
 }
 
-.select-item {
+.select-menu {
   background-color: white; /* 各アイテムの背景色も白に */
   color: black; /* アイテムのテキストを黒に */
 }
@@ -175,4 +175,26 @@ option {
   border: none;
   padding: 0;
   cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .header {
+    width: auto;
+  }
+  .html {
+    width: 100vw;
+  }
+  .graph-control {
+    width: 100%;
+  }
+  .chart {
+    width: 100%;
+  }
+  .tabs {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+  }
+  .tab {
+    min-width: 130px;
+  }
 }

@@ -76,8 +76,8 @@ const Dashboard = () => {
       // 1. localStorageからセッションを取得
       const { data, error } = await supabase.auth.getSession();
       if (error || !data) {
-          console.error('Error fetching session:', error);
-          return;
+        console.error("Error fetching session:", error);
+        return;
       }
 
       const sessionData = data.session;
@@ -241,7 +241,11 @@ const Dashboard = () => {
   const Sidebar = ({ isOpen }) => (
     <div className={`sidebar ${isOpen ? "open" : ""}`}>
       <div className="menu-list">
-        <Button variant="ghost" className="menu-button">
+        <Button
+          variant="ghost"
+          onClick={() => router.push("/dashboard")}
+          className="menu-button"
+        >
           <Home className="icon" />
           <div className="icon-text">ホーム</div>
         </Button>

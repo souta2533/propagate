@@ -255,24 +255,24 @@ export default function AnalyticsDashboard() {
           </button>
         </div>
       </div>
+      <div className="graph-control">
+        <div className="filter-section">
+          <div>
+            <Select value={selectedURL} onValueChange={handleURLChange}>
+              <SelectTrigger className="custom-select-trigger">
+                <SelectValue placeholder="URLを選択" />
+              </SelectTrigger>
 
-      <div className="filter-section">
-        <div>
-          <Select value={selectedURL} onValueChange={handleURLChange}>
-            <SelectTrigger className="custom-select-trigger">
-              <SelectValue placeholder="URLを選択" />
-            </SelectTrigger>
+              <SelectContent className="custom-select-content">
+                {urlList.map((url) => (
+                  <SelectItem key={url.id} value={url.value}>
+                    {url.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-            <SelectContent className="custom-select-content">
-              {urlList.map((url) => (
-                <SelectItem key={url.id} value={url.value}>
-                  {url.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {/* 選択されたURLを表示する部分
+            {/* 選択されたURLを表示する部分
           {selectedURL && (
             <div style={{ marginTop: "20px" }}>
               <p>
@@ -283,108 +283,114 @@ export default function AnalyticsDashboard() {
               </p>
             </div>
           )*/}
-        </div>
-        <div className="date-range">
-          <Select value={dateRange} onValueChange={handleDateRangeChange}>
-            <SelectTrigger className="select-trigger">
-              <SelectValue placeholder="期間を選択" />
-            </SelectTrigger>
-            <div className="select-content">
-              <SelectContent>
-                <SelectItem value="過去 7 日間">過去 7 日間</SelectItem>
-                <SelectItem value="過去 28 日間">過去 28 日間</SelectItem>
-                <SelectItem value="過去 90 日間">過去 90 日間</SelectItem>
-                <SelectItem value="カスタム">カスタム</SelectItem>
+          </div>
+          <div className="date-range">
+            <Select value={dateRange} onValueChange={handleDateRangeChange}>
+              <SelectTrigger className="select-trigger">
+                <SelectValue placeholder="期間を選択" />
+              </SelectTrigger>
+              <SelectContent className="select-content">
+                <SelectItem value="過去 7 日間" className="select-menu">
+                  過去 7 日間
+                </SelectItem>
+                <SelectItem value="過去 28 日間" className="select-menu">
+                  過去 28 日間
+                </SelectItem>
+                <SelectItem value="過去 90 日間" className="select-menu">
+                  過去 90 日間
+                </SelectItem>
+                <SelectItem value="カスタム" className="select-menu">
+                  カスタム
+                </SelectItem>
               </SelectContent>
-            </div>
+            </Select>
+            {showCalendar && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="calendar-button">
+                    <CalendarIcon className="icon-small" />
+                    {startDate && endDate
+                      ? `${formatDate(startDate)} 〜 ${formatDate(endDate)}`
+                      : "日付を選択"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="calendar-popover">
+                  <Calendar
+                    selected={{ from: startDate, to: endDate }}
+                    onSelect={handleDateSelect}
+                    numberOfMonths={2}
+                    mode="range"
+                  />
+                </PopoverContent>
+              </Popover>
+            )}
+          </div>
+        </div>
+        <div className="tabs">
+          <div className="tabs-list">
+            <button
+              onClick={() => handleMetricChange("PV")}
+              className={`tab ${selectedMetric === "PV" ? "active" : ""}`}
+            >
+              ページ閲覧数
+            </button>
+            <button
+              onClick={() => handleMetricChange("CV")}
+              className={`tab ${selectedMetric === "CV" ? "active" : ""}`}
+            >
+              お問い合わせ数
+            </button>
+            <button
+              onClick={() => handleMetricChange("UU")}
+              className={`tab ${selectedMetric === "UU" ? "active" : ""}`}
+            >
+              ページ訪問者数
+            </button>
+            <button
+              onClick={() => handleMetricChange("SS")}
+              className={`tab ${selectedMetric === "SS" ? "active" : ""}`}
+            >
+              セッション数
+            </button>
+            <button
+              onClick={() => handleMetricChange("IR")}
+              className={`tab ${selectedMetric === "IR" ? "active" : ""}`}
+            >
+              お問い合わせ率
+            </button>
+            <button
+              onClick={() => handleMetricChange("DS")}
+              className={`tab ${selectedMetric === "DS" ? "active" : ""}`}
+            >
+              流入元デバイス
+            </button>
+            <button
+              onClick={() => handleMetricChange("UA")}
+              className={`tab ${selectedMetric === "UA" ? "active" : ""}`}
+            >
+              流入者属性
+            </button>
+            <button
+              onClick={() => handleMetricChange("SU")}
+              className={`tab ${selectedMetric === "SU" ? "active" : ""}`}
+            >
+              流入元URL
+            </button>
+            <button
+              onClick={() => handleMetricChange("SK")}
+              className={`tab ${selectedMetric === "SK" ? "active" : ""}`}
+            >
+              検索キーワード
+            </button>
+          </div>
+        </div>
+        <div className="chart-controls">
+          <Select>
+            <SelectContent>
+              <SelectItem value="views">コンテンツ ごとの視聴回数</SelectItem>
+            </SelectContent>
           </Select>
-          {showCalendar && (
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="calendar-button">
-                  <CalendarIcon className="icon-small" />
-                  {startDate && endDate
-                    ? `${formatDate(startDate)} 〜 ${formatDate(endDate)}`
-                    : "日付を選択"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="calendar-popover">
-                <Calendar
-                  selected={{ from: startDate, to: endDate }}
-                  onSelect={handleDateSelect}
-                  numberOfMonths={2}
-                  mode="range"
-                />
-              </PopoverContent>
-            </Popover>
-          )}
-        </div>
-      </div>
-      <div className="tabs">
-        <div className="tabs-list">
-          <button
-            onClick={() => handleMetricChange("PV")}
-            className={`tab ${selectedMetric === "PV" ? "active" : ""}`}
-          >
-            ページ閲覧数
-          </button>
-          <button
-            onClick={() => handleMetricChange("CV")}
-            className={`tab ${selectedMetric === "CV" ? "active" : ""}`}
-          >
-            お問い合わせ数
-          </button>
-          <button
-            onClick={() => handleMetricChange("UU")}
-            className={`tab ${selectedMetric === "UU" ? "active" : ""}`}
-          >
-            ページ訪問者数
-          </button>
-          <button
-            onClick={() => handleMetricChange("SS")}
-            className={`tab ${selectedMetric === "SS" ? "active" : ""}`}
-          >
-            セッション数
-          </button>
-          <button
-            onClick={() => handleMetricChange("IR")}
-            className={`tab ${selectedMetric === "IR" ? "active" : ""}`}
-          >
-            お問い合わせ率
-          </button>
-          <button
-            onClick={() => handleMetricChange("DS")}
-            className={`tab ${selectedMetric === "DS" ? "active" : ""}`}
-          >
-            流入元デバイス
-          </button>
-          <button
-            onClick={() => handleMetricChange("UA")}
-            className={`tab ${selectedMetric === "UA" ? "active" : ""}`}
-          >
-            流入者属性
-          </button>
-          <button
-            onClick={() => handleMetricChange("SU")}
-            className={`tab ${selectedMetric === "SU" ? "active" : ""}`}
-          >
-            流入元URL
-          </button>
-          <button
-            onClick={() => handleMetricChange("SK")}
-            className={`tab ${selectedMetric === "SK" ? "active" : ""}`}
-          >
-            検索キーワード
-          </button>
-        </div>
-      </div>
-      <div className="chart-controls">
-        <Select>
-          <SelectContent>
-            <SelectItem value="views">コンテンツ ごとの視聴回数</SelectItem>
-          </SelectContent>
-        </Select>
-        {/*グラフの種類をコントロール
+          {/*グラフの種類をコントロール
         <div className="chart-type-controls">
           <Select value={chartType} onValueChange={handleChartTypeChange}>
             <SelectTrigger className="custom-select-trigger">
@@ -411,8 +417,8 @@ export default function AnalyticsDashboard() {
           </Select>
         </div>
         */}
+        </div>
       </div>
-
       <div className="chart">
         <ResponsiveContainer width="100%" height="100%">
           {renderChart()}
