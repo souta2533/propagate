@@ -1,9 +1,9 @@
-import React from "react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { supabase } from "../lib/supabaseClient";
 import { handlerUrlSubmit } from "../lib/submitHandler";
 import { Home, BarChart2, FileText, Search, Settings } from "lucide-react";
+import { FaBars, FaTimes } from "react-icons/fa";
 import {
   BarChart,
   Bar,
@@ -57,9 +57,19 @@ const Dashboard = () => {
   const [url, setUrl] = useState(""); // URLの状態を管理
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("PV");
-  const [selectedMetric, setSelectedMetric] = useState("pv");
+  const [activeMetric, setActiveMetric] = useState("PV"); // 初期値を"PV"に設定
+  const [selectedMetric, setSelectedMetric] = useState("PV");
   const [dateRange, setDateRange] = useState("過去28日間");
+
+  /*サイドバーの状態を保持する */
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
+  };
+
+  /*グラフの状態を保持する */
+  const handleMetricChange = (value) => {
+    setSelectedMetric(value);
+  };
 
   useEffect(() => {
     const fetchAnalyticsData = async () => {
@@ -227,8 +237,9 @@ const Dashboard = () => {
   };
 
   /*新しいダッシュボード */
-  const Sidebar = () => (
-    <div className="sidebar">
+  /*Sidebarコンポーネント*/
+  const Sidebar = ({ isOpen }) => (
+    <div className={`sidebar ${isOpen ? "open" : ""}`}>
       <div className="menu-list">
         <Button variant="ghost" className="menu-button">
           <Home className="icon" />
@@ -251,9 +262,33 @@ const Dashboard = () => {
     </div>
   );
 
+  /*Sidebarが開いているときに他の箇所を暗くする */
+  const Overlay = ({ isOpen, toggleMenu }) => (
+    <div
+      className={`overlay ${isOpen ? "visible" : ""}`}
+      onClick={toggleMenu}
+    ></div>
+  );
+
+  // Dropdown コンポーネント
+  const Dropdown = ({ isOpen }) => {
+    return (
+      <div className={`sidebar ${isOpen ? "open" : ""}`}>
+        <div className="menu-list">
+          <button className="menu-button">ホーム</button>
+          <button className="menu-button">アナリティクス</button>
+          {/* 追加のメニューボタン */}
+        </div>
+      </div>
+    );
+  };
+
   const Header = () => (
     <header className="header">
       <div className="header-left">
+        <div className="hamburger-icon" onClick={toggleMenu}>
+          {isOpen ? <FaTimes size={30} /> : <FaBars size={30} />}
+        </div>
         <h1 className="header-title">Propagate Analytics</h1>
         <Input
           type="text"
@@ -268,28 +303,18 @@ const Dashboard = () => {
     </header>
   );
 
-  const MetricCard = ({ title, value, target, difference }) => (
-    <Card className="metric-card">
-      <CardHeader className="metric-card-header">
-        <CardTitle className="metric-card-title">{title}</CardTitle>
-      </CardHeader>
-      <CardContent className="metric-card-content">
+  const MetricCard = ({ title, value, target, isActive, onClick }) => (
+    <div
+      className={`metric-card ${isActive ? "active" : ""}`} // アクティブなカードにクラスを追加
+      onClick={onClick} // カードがクリックされたときに処理を実行
+    >
+      <div className="metric-card-header">
+        <h3>{title}</h3>
+      </div>
+      <div className="metric-card-content">
         <div className="metric-value">{value.toLocaleString()}</div>
-        {/*<p className="metric-subtext">
-          目標 {target.toLocaleString()}
-          <span
-            className={
-              difference > 0
-                ? "metric-difference positive"
-                : "metric-difference negative"
-            }
-          >
-            {difference > 0 ? "+" : ""}
-            {difference}
-          </span>
-        </p>*/}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 
   const data = [
@@ -301,6 +326,20 @@ const Dashboard = () => {
     { name: "9/9", value: 2390 },
     { name: "9/11", value: 3490 },
   ];
+
+  const renderChart = () => {
+    switch (selectedMetric) {
+      case "PV":
+        return <LineChartComponent />;
+      case "CV":
+        return <BarChartComponent />;
+      case "CVR":
+      case "SS":
+        return <BarChartComponent dataKey="value" />;
+      default:
+        return <LineChartComponent />;
+    }
+  };
 
   const LineChartComponent = () => (
     <ResponsiveContainer width="100%" height={300}>
@@ -469,8 +508,13 @@ const Dashboard = () => {
   return (
     <div className="dashboard-container">
       <Header />
+
+      {/* オーバーレイの追加 */}
+      <Overlay isOpen={isOpen} toggleMenu={toggleMenu} />
+
       <main className="dashboard-main">
-        <Sidebar />
+        {/* サイドバーの表示制御 */}
+        <Sidebar isOpen={isOpen} className="sidebar" />
         <div className="dashboard-main-left">
           <div className="dashboard-header">
             <h2 className="dashboard-title">アナリティクスデータ</h2>
@@ -493,12 +537,21 @@ const Dashboard = () => {
             <div className="chart-content">
               <div className="metrics-grid">
                 {metrics.map((metric, index) => (
-                  <MetricCard className="metric-card" key={index} {...metric} />
+                  <MetricCard
+                    key={index}
+                    title={metric.title}
+                    value={metric.value}
+                    isActive={selectedMetric === metric.title} // 選択されているかどうかを判定
+                    onClick={() => setSelectedMetric(metric.title)} // クリックで選択メトリクスを変更
+                  />
                 ))}
               </div>
               <Card className="chart-card">
                 <CardContent className="chart-card-content">
-                  <LineChartComponent />
+                  <CardContent className="chart-card-content">
+                    {renderChart()}{" "}
+                    {/* ここで選択されたメトリクスに応じたグラフを表示 */}
+                  </CardContent>
                 </CardContent>
               </Card>
               <div className="dashboard-details">

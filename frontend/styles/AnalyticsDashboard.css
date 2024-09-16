@@ -83,7 +83,6 @@ button {
   display: flex;
   gap: 0; /* タブ間のスペースを設定 */
   border: none;
-  padding: 10px;
 }
 
 .tab {
@@ -98,11 +97,11 @@ button {
 
 .tab:hover {
   background-color: #f0f0f0;
-  border-bottom: 2px solid black;
+  border-bottom: 3px solid black;
 }
 
 .tab.active {
-  background-color: #e0e0e0; /* アクティブなタブの背景色を変える */
+  background-color: #f0f0f0; /* アクティブなタブの背景色を変える */
   font-weight: bold;
   border-bottom: 3px solid black;
 }

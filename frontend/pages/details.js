@@ -148,6 +148,28 @@ export default function AnalyticsDashboard() {
     setTimeGranularity(value);
   };
 
+  const selectChart = () => {
+    switch (selectedTab) {
+      case "PV":
+        return <div>ページ閲覧数のコンテンツ</div>;
+      case "CV":
+        return <div>お問い合わせ数のコンテンツ</div>;
+      case "UU":
+        return <div>ページ訪問者数のコンテンツ</div>;
+      case "IR":
+        return <div>セッション数のコンテンツ</div>;
+      case "DS":
+        return <div>お問い合わせ率のコンテンツ</div>;
+      case "UA":
+        return <div>流入元デバイスのコンテンツ</div>;
+      case "SU":
+        return <div>流入者属性のコンテンツ</div>;
+      case "SK":
+        return <div>流入元URLのコンテンツ</div>;
+      default:
+        return <div>検索キーワードのコンテンツ</div>;
+    }
+  };
   const renderChart = () => {
     const data = generateData(
       selectedMetric,
@@ -201,8 +223,8 @@ export default function AnalyticsDashboard() {
       <div className="header">
         <div className="metric-select">
           {/*タブを選択してグラフを変える*/}
-          <Select value={selectedMetric} onValueChange={handleMetricChange}>
-            {/*<SelectTrigger className="select-trigger">
+          {/*<Select value={selectedMetric} onValueChange={handleMetricChange}>
+            <SelectTrigger className="select-trigger">
               <SelectValue placeholder="メトリクス" />
             </SelectTrigger>
             <SelectContent className="select-content">
@@ -218,8 +240,8 @@ export default function AnalyticsDashboard() {
               <SelectItem className="select-item" value="SS">
                 SS
               </SelectItem>
-            </SelectContent>*/}
-          </Select>
+            </SelectContent>
+          </Select>*/}
         </div>
         <div className="action-icons">
           {/*ダウンロードアイコンとメッセージアイコン
@@ -325,32 +347,32 @@ export default function AnalyticsDashboard() {
             セッション数
           </button>
           <button
-            onClick={() => handleMetricChange("SS")}
-            className={`tab ${selectedMetric === "SS" ? "active" : ""}`}
+            onClick={() => handleMetricChange("IR")}
+            className={`tab ${selectedMetric === "IR" ? "active" : ""}`}
           >
             お問い合わせ率
           </button>
           <button
-            onClick={() => handleMetricChange("SS")}
-            className={`tab ${selectedMetric === "SS" ? "active" : ""}`}
+            onClick={() => handleMetricChange("DS")}
+            className={`tab ${selectedMetric === "DS" ? "active" : ""}`}
           >
             流入元デバイス
           </button>
           <button
-            onClick={() => handleMetricChange("SS")}
-            className={`tab ${selectedMetric === "SS" ? "active" : ""}`}
+            onClick={() => handleMetricChange("UA")}
+            className={`tab ${selectedMetric === "UA" ? "active" : ""}`}
           >
             流入者属性
           </button>
           <button
-            onClick={() => handleMetricChange("SS")}
-            className={`tab ${selectedMetric === "SS" ? "active" : ""}`}
+            onClick={() => handleMetricChange("SU")}
+            className={`tab ${selectedMetric === "SU" ? "active" : ""}`}
           >
             流入元URL
           </button>
           <button
-            onClick={() => handleMetricChange("SS")}
-            className={`tab ${selectedMetric === "SS" ? "active" : ""}`}
+            onClick={() => handleMetricChange("SK")}
+            className={`tab ${selectedMetric === "SK" ? "active" : ""}`}
           >
             検索キーワード
           </button>
