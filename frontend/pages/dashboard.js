@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
+/*import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";*/
 // import { createPagesServerClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from "next/router";
 import { supabase } from "../lib/supabaseClient";
@@ -239,10 +239,8 @@ const Dashboard = () => {
 
       // 3. CustomerDetailsTableからaccountIdを取得
       const { data: customerDetailsData, error: customerDetailsError } =
-        await supabase
-          .from("CustomerDetailsTable")
-          .select("accounts_id")
-          .eq("email_customer", email_customer);
+        await supabase.from("CustomerDetailsTable").select("accounts_id");
+      /*.eq("email_customer", email_customer);*/
 
       if (customerDetailsError) {
         console.error("Error fetching accountIds:", customerDetailsError);
