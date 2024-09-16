@@ -239,8 +239,8 @@
 .search-keyword {
   display: flex;
   align-items: center;
-  gap: 8px; /* space-x-2 */
-  padding: 8px; /* p-2 */
+  gap: 8px;
+  padding: 8px;
   background-color: #f9fafb; /* bg-gray-100 */
   border-radius: 0.375rem; /* rounded-md */
 }
@@ -260,13 +260,13 @@
 }
 
 .search-keyword-text {
-  font-size: 0.875rem; /* text-sm */
+  font-size: 14px;
   font-weight: 500; /* font-medium */
   margin: 0;
 }
 
 .search-count-text {
-  font-size: 0.75rem; /* text-xs */
+  font-size: 12px; /* text-xs */
   color: #6b7280; /* text-gray-500 */
   margin: 0;
 }

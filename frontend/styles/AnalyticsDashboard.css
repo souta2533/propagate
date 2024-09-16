@@ -84,6 +84,7 @@ button {
   display: flex;
   gap: 0; /* タブ間のスペースを設定 */
   border: none;
+  width: auto;
 }
 
 .tab {
@@ -179,16 +180,16 @@ option {
 
 @media (max-width: 768px) {
   .header {
-    width: auto;
+    width: 100%;
   }
-  .html {
+  .dashboard-header {
     width: 100vw;
   }
   .graph-control {
-    width: 100%;
+    width: 100vw;
   }
   .chart {
-    width: 100%;
+    width: 100vw;
   }
   .tabs {
     overflow-x: auto;

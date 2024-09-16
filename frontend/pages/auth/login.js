@@ -1,6 +1,7 @@
 import React from "react";
 import { useState } from "react";
 import { useRouter } from "next/router";
+import { supabase } from '../../lib/supabaseClient';
 import Link from "next/link";
 import "../../styles/login.css";
 
@@ -14,28 +15,42 @@ export default function Login() {
     e.preventDefault(); // フォームが送信されたときにページがリロードされるのを防ぐ
 
     // ログインリクエストをサーバーに送信
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
+    // const res = await fetch("/api/auth/login", {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify({ email, password }),
+    // });
+
+    // const data = await res.json();
+
+    // Supabaseのクライアントを直接使用してログイン
+    const { error, data } = await supabase.auth.signInWithPassword({
+        email,
+        password,
     });
 
-    const data = await res.json();
-
-    if (res.ok) {
-      // session情報をlocalStorageに保存
-    //   localStorage.setItem("supabaseSession", JSON.stringify(data.session));
-
-      // ログイン成功時，ダッシュボードへリダイレクト
-      await router.push("/dashboard");
-
-      // console.log("Data: ", data);
+    if (error) {
+        console.error('ログインエラー: ', error.message);
     } else {
-      // ログイン失敗時，エラーメッセージを表示
-      setError(data.message);
+        localStorage.setItem("supabaseSession", JSON.stringify(data.session));
+        router.push('/dashboard');
     }
+
+    // if (res.ok) {
+    //   // session情報をlocalStorageに保存
+    // //   localStorage.setItem("supabaseSession", JSON.stringify(data.session));
+
+    //   // ログイン成功時，ダッシュボードへリダイレクト
+    //   console.log("Session: ", data.session);
+    // //   await router.push("/dashboard");
+
+    //   // console.log("Data: ", data);
+    // } else {
+    //   // ログイン失敗時，エラーメッセージを表示
+    //   setError(data.message);
+    // }
   };
 
   return (
