@@ -26,6 +26,7 @@ function initialDateMapForNewPagePath(dateMap, allDates, newPagePath) {
         activeUsers: 0,
         sessions: 0,
         engagedSessions: 0,
+        totalUsers: 0,
       };
     }
   });
@@ -91,6 +92,7 @@ async function handler(req, res) {
         activeUsers: 0,
         sessions: 0,
         engagedSessions: 0,
+        totalUsers: 0,
       };
       return acc;
     }, {});
@@ -126,6 +128,7 @@ async function handler(req, res) {
             { name: 'activeUsers' },
             { name: 'sessions' },
             { name: 'engagedSessions' },
+            { name: 'totalUsers' },
           ],
           limit: 1000,   // 1回のリクエストで取得する行数
           offset: startRow,   // 取得する行の開始位置
@@ -178,6 +181,7 @@ async function handler(req, res) {
           activeUsers: metrics[2],
           sessions: metrics[3],
           engagedSessions: metrics[4],
+          totalUsers: metrics[5],
         };
       });
     } else {

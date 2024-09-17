@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { Button } from "../components/Button";
+import { Button } from "../components/ui/Button";
 import {
   Select,
   SelectTrigger,
   SelectValue,
   SelectContent,
   SelectItem,
-} from "../components/Select";
+} from "../components/ui/Select";
 /*import { Tabs, TabsList, TabsTrigger } from "../components/Tabs";*/
-import { Calendar } from "../components/Calendar";
-import { Popover, PopoverTrigger, PopoverContent } from "../components/Popover";
+import { Calendar } from "../components/ui/Calendar";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "../components/ui/Popover";
 import {
   LineChart,
   Line,

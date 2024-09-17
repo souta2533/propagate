@@ -48,7 +48,7 @@
 }
 
 .header-title {
-  font-size: 1.25rem; /* text-xl */
+  font-size: 20px; /* text-xl */
   font-weight: 700; /* font-bold */
   margin: 0;
 }
@@ -70,7 +70,7 @@
 .sidebar {
   display: block;
   background-color: #ffffff;
-  width: 15%;
+  width: 20%;
   border-right: 3px solid #7272722f;
   transition: transform 0.3s ease-in-out;
 }
@@ -112,7 +112,8 @@
 
 .chart-content {
   border: 1px solid #f6f8f9;
-  width: 75%;
+  width: 80%;
+  padding: 5px;
 }
 
 /* メトリックカード */
@@ -174,6 +175,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 10px;
 }
 
 .dashboard-header button {
@@ -402,7 +404,7 @@
     z-index: 998;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out; /* オーバーレイのトランジション */
+    transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out; /* オーバーレイのトランジション */
   }
 
   .overlay.visible {
