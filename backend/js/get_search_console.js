@@ -77,7 +77,6 @@ async function handler(req, res) {
 
         // Google Search Consoleからデータを取得
         const rows = await getSearchConsoleData(auth, url, startDate, endDate);
-        // console.log('Rows: ', rows);
 
         // データが空だった場合，終了
         if (rows.length == 0) {

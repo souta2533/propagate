@@ -24,8 +24,12 @@ def run_js_script(script_name, input_data):
         # print(json.dumps(input_data))
         stdout, stderr = process.communicate(json.dumps(input_data).encode())
 
+        # print("STDOUT: ", stdout.decode())
+        # print("STDERR: ", stderr.decode())
+        # print("STDDECODE: ", stdout.decode().strip()[:500])
+
         if stderr:            
-            print(f"JavaScript Error: {stderr.decode()}")
+            print(f"JavaScript Error: {stderr.decode()}\n")
             raise Exception(f"JavaScript Error: {stderr.decode()}") 
         
         # 出力結果をJSON形式に変換
@@ -33,7 +37,7 @@ def run_js_script(script_name, input_data):
         # print(json.loads(stdout.decode()))
 
         # 出力が空だった場合，Noneを返す
-        if stdout.decode().strip() == "NoData":
+        if stdout.decode().strip() == "NoData" or stdout.decode().strip() == "":
             return "NoData"
         
         return json.loads(stdout.decode())
@@ -45,8 +49,8 @@ def run_js_script(script_name, input_data):
         elif '401' in str(e):
             return "GooglePropertyError"
         # Search Consoleで権限がない場合
-        if '403' in str(e):
+        elif '403' in str(e):
             return "Access denied"
-        
-        print(f"Failed to run JavaScript: {e}")
-        return None
+        else:
+            print(f"Failed to run JavaScript: {e}")
+            return None

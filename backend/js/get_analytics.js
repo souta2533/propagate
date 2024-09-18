@@ -159,9 +159,6 @@ async function handler(req, res) {
         const metrics = row.metricValues.map(metric => Number(metric.value));
         const pagePath = dimensions[1];
         const date = dimensions[2];
-        // console.log(dimensions);
-
-        // console.log(dimensions[1]);
         
         // 初見のpagePathだった場合，初期データを反映
         if (!initialDateMap[date][pagePath]) {

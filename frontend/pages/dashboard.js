@@ -144,7 +144,7 @@ const Dashboard = () => {
       // 3. PropertyTableからpropertyIdを取得
       const { data: allProperties, error: propertyError } = await supabase
         .from("PropertyTable")
-        .select("properties_id, properties_name, account_id url")
+        .select("properties_id, properties_name, account_id, url")
         .in("account_id", accountIds);
 
       if (propertyError) {
