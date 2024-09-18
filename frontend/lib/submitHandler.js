@@ -54,17 +54,19 @@ export const handlerUrlSubmit = async (customerEmail, propertyId, url, setUrl) =
     }
 }
 
-export const registerAccountId = async (propagateEmail, email, accountId) => {
+export const registerAccountId = async (token,propagateEmail, userId, email, accountId) => {
     try {
         const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
         const response = await fetch(`${apiUrl}/register-account-id`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
             },
             body: JSON.stringify({
                 propagateEmail: propagateEmail,
                 email: email,
+                userId: userId,
                 accountId: accountId,
             }),
         });

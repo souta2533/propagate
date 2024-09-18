@@ -115,10 +115,10 @@ const Dashboard = () => {
 
       // 1. Userのemailを取得
     //   console.log("Session of this: ", sessionData);
-    console.log("User's auth.uin(): ", sessionData.user.id);
+    // console.log("User's auth.uin(): ", sessionData.user.id);
 
 
-      const email_customer = sessionData.user.user_metadata.email;
+      // const email_customer = sessionData.user.user_metadata.email;
 
       // 2. CustomerDetailsTableからaccountIdを取得
       const { data: customerDetailsData, error: customerDetailsError } =

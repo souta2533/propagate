@@ -54,7 +54,7 @@ async def get_search_console(data: SearchConsoleRequest):
             # logger.info(f"PropertyID: {property_id}")
 
             # Search ConsoleのデータをDBに保存
-            await save_search_console_data(property_id, result)
+            # await save_search_console_data(property_id, result)
         return result
     except HTTPException as e:
         if "403" in str(e) or e.status_code == 403:

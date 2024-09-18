@@ -15,7 +15,7 @@ const Register = () => {
     e.preventDefault();
 
     // SupabaseでUser登録
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
     });
@@ -29,7 +29,8 @@ const Register = () => {
       setEmail("");
       setPassword("");
 
-      // 登録したユーザー情報をバックエンドに送信(('/api/register-user',?)
+      // 登録したユーザー情報をバックエンドに送信(auth.uid(user.id))
+      const userId = data.user.id;
       const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
       const response = await fetch(`${apiUrl}/register-user`, {
         method: "POST",
@@ -38,6 +39,7 @@ const Register = () => {
         },
         body: JSON.stringify({
           email: email,
+          userId: userId,
         }),
       });
 

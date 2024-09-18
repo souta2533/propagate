@@ -84,6 +84,7 @@ class CustomerDetailsTable:
             - id
             - email_customer
             - accounts_id
+            - user_id
             - created_at
     """
     def __init__(self, supabase_client: Client) -> None:
@@ -103,7 +104,7 @@ class CustomerDetailsTable:
             print(f"Error: {e}")
             return None
         
-    async def register_account_id(self, email_customer: str, account_id: str):
+    async def register_account_id(self, email_customer: str, account_id: str, user_id: str):
         try:
             # log.info(f"Email: {email_customer}")
             # log.info(f"AccountID: {account_id}")    
@@ -118,7 +119,8 @@ class CustomerDetailsTable:
             else:
                 response = self.supabase.table("CustomerDetailsTable").insert({
                         "email_customer": email_customer,
-                        "accounts_id": account_id
+                        "accounts_id": account_id,
+                        "user_id": user_id
                     }).execute()
                 
                 if 'error' in response:
@@ -187,20 +189,22 @@ class UnregisteredTable:
             - id
             - email
             - url
+            - user_id
     """
     def __init__(self, supabase_client: Client) -> None:
         self.supabase = supabase_client
     
-    async def add_unregistered_user(self, email: str):
+    async def add_unregistered_user(self, email: str, user_id: str):
         try:
-            existing_response = self.supabase.table("UnregisteredTable").select("email").eq("email", email).execute()
+            existing_response = self.supabase.table("UnregisteredTable").select("email").eq("email", email).eq('user_id', user_id).execute()
 
             if existing_response.data:
                 print(f"Email already exists: {existing_response.data}")
                 return existing_response.data[0]['email']
             
             response = self.supabase.table("UnregisteredTable").insert({
-                "email": email
+                "email": email,
+                "user_id": user_id
             }).execute()
 
             if 'error' in response:
@@ -479,7 +483,7 @@ def save_batch_analytics_data(batch, property_id):
         print(e)
         print(f"Error to save analytics data: {error_info}")
 
-def save_analytics_data(property_id, data, batch_size=50):
+async def save_analytics_data(property_id, data, batch_size=50):
     try:
         batch_process(data, batch_size, save_batch_analytics_data, property_id)
     except APIError as e:

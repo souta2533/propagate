@@ -24,6 +24,7 @@ const LoadingSpinner = () => (
 
 export default function Home() {
   const { data: session, status } = useSession();
+  const [ token, setToken ] = useState("");     // JWTトークンを格納(Supabase)
   const [analyticsData, setAnalyticsData] = useState(null);
   const [analyticsProperties, setAnalyticsProperties] = useState([]);
   const [propertyList, setPropertyList] = useState([]); // accountId, propertyId, propertyNameをリスト形式で格納
@@ -379,6 +380,12 @@ export default function Home() {
       }
     };
 
+    if (session && session.accessToken) {
+      setToken(session.accessToken);
+    } else {
+      return;
+    }
+
     initialize();
     fetchAnalyticsProperties();
   }, [session, status]);
@@ -416,7 +423,7 @@ export default function Home() {
     if (customerInfo.length > 1 && !isSearchConsoleFetched) {
       const fetchSearchConsole = async () => {
         await fetchSearchConsoleData(); // fetchSearchConsoleDataが完了するまで待機
-        // timeout = setTimeout(() => setIsSearchConsoleFetched(false), 5 * 60 * 1000); // 5分後にリセット
+        timeout = setTimeout(() => setIsSearchConsoleFetched(false), 5 * 60 * 1000); // 5分後にリセット
       };
   
       fetchSearchConsole();
@@ -472,7 +479,7 @@ export default function Home() {
       // UnregisteredTableから未登録のEmailとURLを取得
       const { data, error } = await supabase 
         .from('UnregisteredTable')
-        .select('email, url');
+        .select('email, url, user_id');
 
       if (error) {
         console.error('Error fetching unregistered customers:', error); 
@@ -482,6 +489,7 @@ export default function Home() {
       // データを保存するための構造を作成
       const unregisteredCustomersInfo = data.map((customer) => ({
         email: customer.email,
+        userId: customer.user_id,
         url: customer.url,
         accountId: null,            // accountIDはこの後取得するため，初期値としてnull
         isSentAccountId: false,     // データを送信したかどうかを管理
@@ -701,7 +709,9 @@ export default function Home() {
                             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                             onClick={() => {
                               registerAccountId(
+                                token,
                                 PROPAGATE_EMAIL, 
+                                customer.userId,
                                 customer.email, 
                                 customer.accountId
                               )

@@ -64,10 +64,12 @@ class URLRequest(BaseModel):
 # Userの新規登録（email）
 class RegisterUser(BaseModel):
     email: str
+    userId: str
 
 # AccountIDの取得
 class RegisterAccountId(BaseModel):
     propagateEmail: str
+    userId: str
     email: str
     accountId: str
 

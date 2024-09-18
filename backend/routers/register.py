@@ -1,5 +1,7 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Header
+from dotenv import load_dotenv
 import logging
+import os
 
 from db.supabase_client import supabase
 from models.request import RegisterUrl, RegisterAccountId
@@ -8,7 +10,9 @@ from db.db_operations import PropagateAccountTable, CustomerEmailsTable, Custome
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 log = logging.getLogger("uvicorn")
+
 router = APIRouter()
+load_dotenv()
     
 
 """
@@ -17,11 +21,25 @@ router = APIRouter()
         - AccountID(Propagateが挿入)
 """
 @router.post("/register-account-id")
-async def register_account_id(request: RegisterAccountId):
+async def register_account_id(
+    request: RegisterAccountId,
+    authorization: str = Header(None)   # JWTトークンをヘッダーから取得
+):     
     propagate_email = request.propagateEmail
     email = request.email
+    user_id = request.userId
     account_id = request.accountId
-    # print(f"Request: {request}")
+    
+    # JWTトークンからuserIDを取得
+    logging.info(f"Authorization: {authorization}")
+    if authorization is None or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail='Authorization header is missing')
+    
+    jwt_token = authorization.split(" ")[1]
+    # headers = {
+    #     "Authorization": f"Bearer {jwt_token}",
+    #     "apikey": os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
+    # }
 
     try:
         # propagate_emailからそのIDを取得
@@ -44,7 +62,7 @@ async def register_account_id(request: RegisterAccountId):
         # CustomerDetailsTableにAccountIDを保存
         # log.info(f"Email: {email}, AccountID: {account_id}")
         customer_details_table = CustomerDetailsTable(supabase)
-        result = await customer_details_table.register_account_id(email, account_id)
+        result = await customer_details_table.register_account_id(email, account_id, user_id)
         # log.info(f"CustomerDetailsTable: {result}")
 
         if result is None:
@@ -82,7 +100,7 @@ async def register_url(request: RegisterUrl):
     # AccountIDが複数ある場合，最初のAccountIDを採用
     # TODO: AccountIDが複数ある場合の処理
     # account_id = account_id[0] if len(account_id) > 1 else account_id
-    log.info(f"AccountID: {account_id}")
+    # log.info(f"AccountID: {account_id}")
 
     # 取得したAcountIDからPropertyTableにPropertyIDとPropertyNameを保存
     property_table = PropertyTable(supabase)
