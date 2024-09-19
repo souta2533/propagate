@@ -1,7 +1,7 @@
 import React from "react";
 import { Bar } from "react-chartjs-2";
 
-const BarChartComponent = ({ data }) => {
+const BarChart = ({ data }) => {
   // dataをchart.jsが必要とする形式に変換
   const chartData = {
     labels: Object.keys(data), // X軸のラベル
@@ -39,4 +39,4 @@ const BarChartComponent = ({ data }) => {
   return <Bar data={chartData} options={options} />;
 };
 
-export default BarChartComponent;
+export default BarChart;

@@ -1,7 +1,7 @@
 import React from "react";
 import { Pie } from "react-chartjs-2";
 
-const PieChartComponent = ({ data }) => {
+const PieChart = ({ data }) => {
   const chartData = {
     labels: Object.keys(data), // ラベル（セクション名）
     datasets: [
@@ -30,4 +30,4 @@ const PieChartComponent = ({ data }) => {
   return <Pie data={chartData} options={options} />;
 };
 
-export default PieChartComponent;
+export default PieChart;

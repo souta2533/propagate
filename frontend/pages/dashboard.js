@@ -7,10 +7,6 @@ import { handlerUrlSubmit } from "../lib/submitHandler";
 import { Home, BarChart2, FileText, Search, Settings } from "lucide-react";
 import { FaBars, FaTimes } from "react-icons/fa";
 import {
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -43,8 +39,8 @@ import Header from "../components/ui/Header";
 import MetricCard from "../components/ui/MetricCard";
 //import Overlay from "../components/ui/Overlay";
 import LineChart from "../components/graph/LineChart";
-import BarChartComponent from "../components/BarChartComponent";
-import PieChartComponent from "../components/PieChartComponent";
+import BarChart from "../components/graph/BarChart";
+import PieChart from "../components/graph/PieChart";
 
 import "../styles/dashboard.css";
 
