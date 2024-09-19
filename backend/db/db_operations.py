@@ -10,7 +10,7 @@ from utils.batch import batch_process
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 log = logging.getLogger("uvicorn")
 
-NUM_DATA = 10
+NUM_DATA = 200
 
 
 class PropagateAccountTable:
@@ -158,6 +158,27 @@ class PropertyTable:
                 return response.data[0]
         except Exception as e:
             print(f"Error: {e}")
+            return None
+
+    async def get_property_id_by_url(self, url):
+        try:
+            response = self.supabase \
+                .table("PropertyTable") \
+                .select("properties_id") \
+                .eq("url", url) \
+                .execute()
+            
+            if 'error' in response:
+                log.error(f"Error: {response.error}")
+                return None
+            elif len(response.data) == 0:
+                log.error(f"No property ID found for URL: {url}")
+                return None
+            else:
+                return response.data[0]['properties_id']
+            
+        except Exception as e:
+            log.error(f"Error: {e}")
             return None
 
 class UnregisteredTable:
@@ -538,7 +559,7 @@ def save_batch_search_console_data(batch, property_id):
         print(f"data: {item}")
         print(f"Error to save search console data: {e}")
 
-def save_search_console_data(property_id, data, batch_size=50):
+async def save_search_console_data(property_id, data, batch_size=50):
     try:
         print(f"Property ID: {property_id}")
         print(f"Total data: {len(data)}")

@@ -1,12 +1,13 @@
 from fastapi import FastAPI, HTTPException, APIRouter
 from pydantic import BaseModel
-import json
+from logging import getLogger
 
 from js_runner import run_js_script
 from models.request import AnalyticsRequest
 from db.db_operations import save_analytics_data
 
 router = APIRouter()
+logger = getLogger(__name__)
 
 
 # Google Analyticsのデータを取得するエンドポイント
@@ -19,9 +20,9 @@ async def get_analytics(data: AnalyticsRequest):
     # with open('analytics_result.json', 'w') as json_file:
     #     json.dump(result, json_file, indent=4, ensure_ascii=False)
     if result is None or result == '':
-        print(f"Result is None: {result}")
+        logger.error(f"Result is None: {result}")
         raise HTTPException(status_code=500, detail="Failed to get analytics data")
-    
+        
     else:
         pass
         # Google AnalyticsのデータをDBに保存

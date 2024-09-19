@@ -87,7 +87,7 @@ export default function Home() {
       console.error('Error fetching analytics properties:', error);
       // alert('Failed to fetch analytics properties. Please try again later.');
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
   };
 
@@ -139,9 +139,6 @@ export default function Home() {
             ? new Date(matchedCustomer.updated_at).toISOString().split('T')[0]
             : new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().split('T')[0];
 
-            console.log(`Start Date of ${property.propertyName}: ${startDate}`);
-            console.log(`PropertyID: ${property.propertyId}`);
-
           const response = await fetch(`${apiUrl}/get-analytics`, {
             method: "POST",
             headers: { 'Content-Type': 'application/json' },
@@ -170,7 +167,7 @@ export default function Home() {
 
       setAnalyticsData(results);
 
-      setLoading(false);
+      // setLoading(false);
     } catch (error) {
       console.error('Error fetching analytics data:', error);
       // alert('Failed to fetch analytics data. Please try again later.');
@@ -294,7 +291,7 @@ export default function Home() {
 
               // urlが定義されていない場合，スキップ
               if (!urlObj.url) {
-                console.warn("URL is not defined for this customer:", customer.email);
+                console.warn("URL is not defined for this customer:", customer.email, customer.url);
                 return { url: null, data: null };
               }
 
@@ -326,9 +323,12 @@ export default function Home() {
                     // アクセス権限がないURLを格納
                     setAccessDeniedErrors(prevErrors => [...prevErrors, { email: customer.email, url: urlObj.url }]);
                     return { url: urlObj.url, data: null};
+                } else if (response.status === 404) {
+                    console.warn("Data is nothing: ", urlObj.url);
+                    return { url: urlObj.url, data: null};
                 } else {
-                  console.error(`Failed to fetch search console data. Status: ${response.status}  \nURL: ${urlObj.url}`);
-                  return { url: urlObj.url, data: null};
+                    console.error(`Failed to fetch search console data. Status: ${response.status}  \nURL: ${urlObj.url}`);
+                    return { url: urlObj.url, data: null};
                 }
               } else {
                 if (response.status === 204) {
@@ -416,7 +416,7 @@ export default function Home() {
     if (customerInfo.length > 1 && !isSearchConsoleFetched) {
       const fetchSearchConsole = async () => {
         await fetchSearchConsoleData(); // fetchSearchConsoleDataが完了するまで待機
-        timeout = setTimeout(() => setIsSearchConsoleFetched(false), 5 * 60 * 1000); // 5分後にリセット
+        // timeout = setTimeout(() => setIsSearchConsoleFetched(false), 5 * 60 * 1000); // 5分後にリセット
       };
   
       fetchSearchConsole();

@@ -179,11 +179,60 @@ const Dashboard = () => {
         console.error("Error fetching session:", error);
         return;
       }
-      // セッションデータを設定
-      setSession(data.session);
+
+      const accountIds = customerDetailsData.map((item) => item.accounts_id);
+      setAccountIds(accountIds); // ['1', '2']
+      console.log("AccountIds: ", accountIds);
+
+      if (accountIds.length > 0) {
+        setSelectedAccountId(accountIds[0]);
+      }
+
+      // 3. PropertyTableからpropertyIdを取得
+      const { data: allProperties, error: propertyError } = await supabase
+        .from("PropertyTable")
+        .select("properties_id, properties_name, account_id, url")
+        .in("account_id", accountIds);
+
+      if (propertyError) {
+        console.error("Error fetching property ids:", propertyError);
+        return;
+      }
+      // console.log('Properties: ', allProperties);
+
+      setPropertyIds(allProperties); // [{account_id, properties_id, properties_name}]
+
+      // 最初のaccountIdに紐づくpropertyIdを取得
+      if (accountIds.length > 0) {
+        const initialFilteredProperties = allProperties.filter(
+          (p) => p.account_id === accountIds[0]
+        );
+        setFilteredProperties(initialFilteredProperties);
+        if (initialFilteredProperties.length > 0) {
+          setSelectedProperty(initialFilteredProperties[0]); // {account_id, properties_id, properties_name}
+        }
+      }
+
+      // 4. GoogleAnalyticsDataのデータを取得
+      const propertyIds = allProperties.map((p) => p.properties_id);
+      const { data: allAnalytics, error: analyticsError } = await supabase
+        .from("AnalyticsData")
+        .select("*")
+        .in("property_id", propertyIds);
+
+      if (analyticsError) {
+        console.error("Error fetching analytics data:", analyticsError);
+        return;
+      }
+
+      setAnalyticsData(allAnalytics);
+      console.log("Analytics: ", allAnalytics);
+
+      // pagePathのリストを取得
+      const pathList = new Set(allAnalytics.map((item) => item.page_path));
+      console.log("PathList: ", pathList);
     };
 
-    //初回レンダリング時にのみ実行する関数
     fetchAnalyticsData();
   }, []);
 
