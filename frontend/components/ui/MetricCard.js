@@ -33,7 +33,8 @@ const MetricCard = ({ title, value, previousValue, isActive, onClick }) => {
       </div>
       <div className="metric-card-content">
         <div className="metric-value">
-          {value.toLocaleString()} {/* 数字をフォーマットして表示 */}
+          {value ? value.toLocaleString() : "0"}{" "}
+          {/* 数字をフォーマットして表示 */}
         </div>
         <div
           className="metric-comparison"
