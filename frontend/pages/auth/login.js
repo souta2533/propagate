@@ -35,7 +35,7 @@ export default function Login() {
       console.error("ログインエラー: ", error.message);
     } else {
       localStorage.setItem("supabaseSession", JSON.stringify(data.session));
-      router.push("/dashboards");
+      router.push("/dashboard");
     }
 
     // if (res.ok) {

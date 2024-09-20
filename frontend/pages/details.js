@@ -251,7 +251,7 @@ export default function AnalyticsDashboard() {
           <Download className="icon" />
           <MessageSquare className="icon" />*/}
           <button
-            onClick={() => router.push("/dashboards")}
+            onClick={() => router.push("/dashboard")}
             className="icon-button"
           >
             <X className="icon" />
