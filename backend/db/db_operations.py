@@ -183,6 +183,117 @@ class PropertyTable:
             log.error(f"Error: {e}")
             return None
 
+class AnalyticsData:
+    """
+        Analytics Table
+            - id
+            - property_id
+            - date
+            - page_location
+            - page_path
+            - device_category
+            - session_source
+            - city
+            - first_user_source_medium
+            - screen_page_views
+            - conversions
+            - active_users
+            - sessions
+            - engaged_sessions
+            - total_users
+            - created_at
+    """
+    def __init__(self, supabase_client: Client) -> None:
+        self.supabase = supabase_client
+
+    async def fetch_aggregated_data(self, property_id, start_date, end_date, jwt_token):
+        try:
+            # JWTトークンをSupabaseクライアントに設定
+            # self.supabase.auth.set_auth(jwt_token)
+
+            response = self.supabase \
+                .table("AnalyticsData") \
+                .select("""
+                date,
+                page_location,
+                page_path, 
+                device_category, 
+                city, 
+                screen_page_views, 
+                conversions, 
+                active_users, 
+                sessions, 
+                engaged_sessions, 
+                total_users
+                """) \
+                .eq("property_id", property_id) \
+                .gte('date', start_date) \
+                .lte('date', end_date) \
+                .execute()
+            
+            if response.data == []:
+                logging.warning(f"No data found for property ID: {property_id}")
+                return None
+            
+            return response.data
+        
+        except Exception as e:
+            log.error(f"Error: {e}")
+            return None
+        
+class SearchConsoleDataTable:
+    """
+        Search Console Data Table
+        - id
+        - property_id
+        - date
+        - query
+        - page
+        - country
+        - device
+        - clicks
+        - impressions
+        - ctr
+        - position
+    """
+    def __init__(self, supabase_client: Client) -> None:
+        self.supabase = supabase_client
+
+    async def fetch_aggregated_data(self, property_id, start_date, end_date, jwt_token):
+        try:
+            # self.supabase.auth.set_auth(jwt_token)
+
+            response = self.supabase \
+                .table("SearchConsoleDataTable") \
+                .select("""
+                date,
+                query,
+                page,
+                country,
+                device,
+                click,
+                impression,
+                ctr,
+                position
+                """) \
+                .eq("property_id", property_id) \
+                .gte('date', start_date) \
+                .lte('date', end_date) \
+                .execute()
+            
+            if response.data == []:
+                logging.warning(f"No data found for property ID: {property_id}")
+                return None
+            
+            return response.data
+        
+        except Exception as e:
+            logging.error(f"Error: {e}")
+            return None
+        
+
+
+
 class UnregisteredTable:
     """
         UnregisteredTable
