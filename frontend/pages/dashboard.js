@@ -1,26 +1,7 @@
-import React, { useEffect, useState } from "react";
-// import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react'
-// import { createPagesServerClient } from '@supabase/auth-helpers-nextjs';
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { supabase } from "../lib/supabaseClient";
-import { handlerUrlSubmit } from "../lib/submitHandler";
-import { Home, BarChart2, FileText, Search, Settings } from "lucide-react";
-import { FaBars, FaTimes } from "react-icons/fa";
-import {
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
-import Link from "next/link";
-import { config } from "@fortawesome/fontawesome-svg-core";
-import "@fortawesome/fontawesome-svg-core/styles.css"; // 必要なスタイルを読み込み
-config.autoAddCss = false; // 自動的にスタイルを追加しないようにする
-import { cn } from "../lib/utils";
-import { cva } from "class-variance-authority";
-import { Button } from "../components/ui/Button";
-import { Input } from "../components/ui/Input";
+import DateRange from "../components/ui/DateRange"; // 日付範囲選択のコンポーネント
 import { Card, CardContent } from "../components/ui/Card";
 import {
   Select,
@@ -31,167 +12,182 @@ import {
 import Sidebar from "../components/ui/Sidebar";
 import Header from "../components/ui/Header";
 import MetricCard from "../components/ui/MetricCard";
-//import Overlay from "../components/ui/Overlay";
+import Overlay from "../components/ui/Overlay";
 import LineChart from "../components/graph/LineChart";
 import BarChart from "../components/graph/BarChart";
 import PieChart from "../components/graph/PieChart";
 
 import "../styles/dashboard.css";
 
-// URLからProperty IDを取得する関数
-const getPropertyIdFromUrl = (url, propertyIds) => {
-  // URLに基づいてProperty IDを取得
-  const matchedProperty = propertyIds.find((property) => property.url === url);
+const PropertyIds = [
+  // サンプルデータ
+  {
+    properties_id: "424732958",
+    properties_name: "Yuya",
+    account_id: "300168308",
+    url: null,
+  },
+  {
+    properties_id: "428269691",
+    properties_name: "gatest",
+    account_id: "300168308",
+    url: null,
+  },
+  {
+    properties_id: "359877627",
+    properties_name: "propagateGA4",
+    account_id: "324522818",
+    url: "https://www.propagateinc.com/",
+  },
+  {
+    properties_id: "425610688",
+    properties_name: "propagate-tfc.tokyo",
+    account_id: "300168308",
+    url: "",
+  },
+  {
+    properties_id: "453492841",
+    properties_name: "AnalyticsTest",
+    account_id: "324522818",
+    url: "",
+  },
+  {
+    properties_id: "452842721",
+    properties_name: "Propagate Analytics",
+    account_id: "300168308",
+    url: "https://www.propagate-fsk.tokyo/",
+  },
+];
 
-  if (matchedProperty) {
-    console.log(`Matched Property ID: ${matchedProperty.properties_id}`);
-    return matchedProperty.properties_id;
-  } else {
-    console.log("指定されたURLに対応するプロパティが見つかりません。");
-    return null;
+const findPropertyIdByUrl = (url) => {
+  let propertyId = null;
+
+  for (let i = 0; i < PropertyIds.length; i++) {
+    if (PropertyIds[i].url === url) {
+      propertyId = PropertyIds[i].properties_id;
+      break; // 一致したらループを抜ける
+    }
   }
+  console.log("Found Property ID:", propertyId); // デバッグ用ログ
+  return propertyId;
+};
+
+const filterByDateRange = (
+  data,
+  dateRange,
+  customStartDate = null,
+  customEndDate = null
+) => {
+  const now = new Date();
+  let startDate, endDate;
+
+  switch (dateRange) {
+    case "過去7日間":
+      startDate = new Date(now.setDate(now.getDate() - 7));
+      break;
+    case "過去30日間":
+      startDate = new Date(now.setDate(now.getDate() - 30));
+      break;
+    case "過去90日間":
+      startDate = new Date(now.setDate(now.getDate() - 90));
+      break;
+    case "カスタム":
+      startDate = new Date(customStartDate);
+      endDate = new Date(customEndDate);
+      break;
+    default:
+      startDate = new Date("2023-01-01"); // 全期間
+  }
+  endDate = endDate || new Date();
+
+  const normalizeDate = (date) => {
+    date.setHours(0, 0, 0, 0); // 時間を00:00:00にリセットして、時間部分を無視する
+    return date;
+  };
+
+  console.log("Filter Date Range Start:", startDate, "End:", endDate); // デバッグ用ログ
+  const filteredData = data.filter((item) => {
+    const itemDate = new Date(item.date);
+    return itemDate >= startDate && itemDate <= endDate;
+  });
+  console.log("Filter Date Range Start:", startDate, "End:", endDate);
+  console.log("Original Data:", data);
+  console.log("Filtered Data:", filteredData); // デバッグ用ログ
+  return filteredData;
+};
+
+// テスト実行
+//const analyticsDataForDateRange = filterByDateRange(analyticsData, "過去7日間");
+//console.log(analyticsDataForDateRange);
+
+//const analytics = [
+// サンプルのanalyticsデータをここに配置
+//];
+
+const calculateMonthOverMonth = (currentValue, previousValue) => {
+  if (previousValue === 0) {
+    return currentValue === 0 ? 0 : 100;
+  }
+  console.log("Current Value:", currentValue, "Previous Value:", previousValue);
+  return ((currentValue - previousValue) / previousValue) * 100;
+};
+
+const getPreviousMonthData = (data, dateRange) => {
+  const now = new Date();
+  let previousStartDate, previousEndDate;
+
+  switch (dateRange) {
+    case "過去7日間":
+      previousStartDate = new Date(now.setDate(now.getDate() - 14));
+      previousEndDate = new Date(now.setDate(now.getDate() + 7));
+      break;
+    case "過去30日間":
+      previousStartDate = new Date(now.setDate(now.getDate() - 60));
+      previousEndDate = new Date(now.setDate(now.getDate() + 30));
+      break;
+    case "過去90日間":
+      previousStartDate = new Date(now.setDate(now.getDate() - 180));
+      previousEndDate = new Date(now.setDate(now.getDate() + 90));
+      break;
+    default:
+      return [];
+  }
+
+  const previousData = data.filter((item) => {
+    const itemDate = new Date(item.date);
+    return itemDate >= previousStartDate && itemDate <= previousEndDate;
+  });
+
+  console.log("Previous Month Data:", previousData); // デバッグ用ログ
+  return previousData;
 };
 
 const Dashboard = () => {
-  //const user = useUser();
-  const router = useRouter();
+  ///////////////////////////////////////////////////////////////////////////////////////////////////
   const [session, setSession] = useState(null);
-  const [error, setError] = useState(null); // エラーの状態を管理
+  const [propertyIds, setPropertyIds] = useState([]);
   const [loading, setLoading] = useState(false); // ローディング中かどうかの状態を管理
   const [accountIds, setAccountIds] = useState([]);
-  const [propertyIds, setPropertyIds] = useState([]);
-  const [filteredProperties, setFilteredProperties] = useState([]);
-  const [analyticsData, setAnalyticsData] = useState([]);
-  const [searchConsoleData, setSearchConsoleData] = useState([]);
   const [selectedAccountId, setSelectedAccountId] = useState(null);
-  const [selectedProperty, setSelectedProperty] = useState(null);
-  // ここにセットされるデータ（必要かも？）
-  const [pathList, setPathList] = useState([]); // pathListの状態を管理
-  const [selectedPagePath, setSelectedPagePath] = useState("");
-  const [propertyId, setPropertyId] = useState(""); // Property ID(URLと一生に送信する用)の状態を管理
-  const [url, setUrl] = useState(""); // URLの状態を管理
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [filteredProperties, setFilteredProperties] = useState([]);
+  const [searchConsoleData, setSearchConsoleData] = useState([]);
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  const [propertyId, setPropertyId] = useState(null);
+  const [chartData, setChartData] = useState([]);
+  const [dateRange, setDateRange] = useState("過去7日間");
   const [isOpen, setIsOpen] = useState(false);
-  const [activeMetric, setActiveMetric] = useState("PV (ページ閲覧数)"); // 初期値を"PV"に設定
-  const [selectedMetric, setSelectedMetric] = useState("PV (ページ閲覧数)");
-  const [metricsData, setMetricsData] = useState({
-    PV: 0,
-    CV: 0,
-    CVR: 0,
-    UU: 0,
-  });
-  const [previousMonthData, setPreviousMonthData] = useState({
-    PV: 0,
-    CV: 0,
-    CVR: 0,
-    UU: 0,
-  });
-  const [searchKeywords, setSearchKeywords] = useState([]);
-  //const [chartData, setChartData] = useState([]);
-  const [dateRange, setDateRange] = useState("過去28日間");
-  const [startDate, setStartDate] = useState(new Date());
-  const [dataByDate, setDataByDate] = useState([]);
-  const [dataByMonth, setDataByMonth] = useState([]);
-  const [dataByYear, setDataByYear] = useState([]);
-  const [endDate, setEndDate] = useState(new Date());
-  const [selectedPropertyId, setSelectedPropertyId] = useState(null);
+  const [url, setUrl] = useState(""); // URL用のstate
+  const [metrics, setMetrics] = useState([]); // メトリクスのstate
+  const [selectedMetric, setSelectedMetric] = useState("PV (ページ閲覧数)"); // 選択中のメトリクス
+  const [searchKeywords, setSearchKeywords] = useState([]); // 検索キーワードのstate
+  const [analyticsData, setAnalyticsData] = useState([]);
+  const [dataForDateRange, setDataForDateRange] = useState([]);
+  const [formattedAnalytics, setFormattedAnalytics] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
 
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  const [totalScreenViews, setTotalScreenViews] = useState(0); // スクリーンビューの合計を管理
-  const urls = "https://www.propagate-fsk.tokyo/"; // 使用したいURL
-  const chartData = [
-    { date: "2024-09-01", PV: 120 },
-    { date: "2024-09-02", PV: 150 },
-    { date: "2024-09-03", PV: 170 },
-  ];
+  const router = useRouter();
 
-  // スクリーンビューを取得する関数
-  const countScreenViewsByPropertyId = async (propertyId) => {
-    try {
-      const { data: properties, error: propertyError } = await supabase
-        .from("PropertyTable")
-        .select("properties_id")
-        .eq("url", url);
-
-      if (propertyError) {
-        throw new Error(`プロパティIDの取得エラー: ${propertyError.message}`);
-      }
-
-      if (properties.length === 0) {
-        console.log("指定されたURLに対応するプロパティが見つかりません。");
-        return 0;
-      }
-
-      const propertyId = properties[0].properties_id;
-      console.log(`取得したプロパティID: ${propertyId}`);
-
-      const { data: analyticsData, error: analyticsError } = await supabase
-        .from("AnalyticsData")
-        .select("screen_page_views")
-        .eq("property_id", propertyId);
-
-      if (analyticsError) {
-        throw new Error(
-          `アナリティクスデータ取得エラー: ${analyticsError.message}`
-        );
-      }
-
-      let totalScreenViews = 0;
-      for (let i = 0; i < analyticsData.length; i++) {
-        totalScreenViews += analyticsData[i].screen_page_views || 0;
-      }
-
-      console.log(
-        `プロパティID ${propertyId} のスクリーンビュー合計: ${totalScreenViews}`
-      );
-      return totalScreenViews;
-    } catch (error) {
-      console.error("countScreenViewsByPropertyId内でのエラー: ", error);
-      return 0;
-    }
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const totalViews = await countScreenViewsByPropertyId(url);
-      setTotalScreenViews(totalViews);
-    };
-
-    fetchData();
-  }, [urls]); // URLが変更されたときにデータを再取得
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-  const metrics = [
-    {
-      title: "PV (ページ閲覧数)",
-      value: metricsData.PV || 0,
-      previousValue: previousMonthData.PV || 0,
-    },
-    {
-      title: "CV (お問い合わせ数)",
-      value: metricsData.CV || 0,
-      previousValue: previousMonthData.CV || 0,
-    },
-    {
-      title: "CVR (お問い合わせ率)",
-      value: metricsData.CVR ? metricsData.CVR.toFixed(2) + "%" : "0%",
-      previousValue: previousMonthData.CVR
-        ? previousData.CVR.toFixed(2) + "%"
-        : "0%",
-    },
-    {
-      title: "UU (セッション数)",
-      value: metricsData.UU || 0,
-      previousValue: previousMonthData.UU || 0,
-    },
-  ];
-
-  const dateOptions = [
-    { value: "7", label: "過去7日間" },
-    { value: "28", label: "過去28日間" },
-    { value: "90", label: "過去90日間" },
-  ];
-
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // セッションを取得する関数
   const fetchSession = async () => {
     const { data, error } = await supabase.auth.getSession();
@@ -213,14 +209,15 @@ const Dashboard = () => {
     }
   }, [session]); // session が null の場合に再度 fetchSession を実行
 
-  /*サイドバーの開閉状態を保持する */
-  const toggleMenu = () => {
-    setIsOpen(!isOpen);
-  };
-
-  /*グラフの状態を保持する */
-  const handleMetricChange = (metric) => {
-    setSelectedMetric(metric);
+  // フォーム送信時の処理
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const foundPropertyId = findPropertyIdByUrl(url);
+    if (foundPropertyId) {
+      setPropertyId(foundPropertyId);
+    } else {
+      console.error("該当するプロパティが見つかりません");
+    }
   };
 
   useEffect(() => {
@@ -350,338 +347,181 @@ const Dashboard = () => {
     fetchSearchConsoleData();
   }, [propertyIds]);
 
-  const handleAccountChange = (e) => {
-    const selectedAccountId = e.target.value;
-    setSelectedAccountId(selectedAccountId);
-
-    // 選択されたaccountIdに紐づくpropertyIdを取得
-    const newFilteredProperties = propertyIds.filter(
-      (property) => property.account_id === selectedAccountId
-    );
-    setFilteredProperties(newFilteredProperties);
-
-    if (newFilteredProperties.length > 0) {
-      setSelectedProperty(newFilteredProperties[0]);
-    } else {
-      setSelectedProperty(null);
-    }
-  };
-
-  const handlePropertyChange = (e) => {
-    const selectedPropertyId = e.target.value;
-    console.log("Selected Property Change:", selectedPropertyId);
-    setSelectedPropertyId(selectedPropertyId); // 追加
-    const property = filteredProperties.find(
-      (p) => p.properties_id === selectedPropertyId
-    );
-    setSelectedProperty(property);
-  };
-
-  /*URLの読み取り */
+  //Dachboardに表示するための加工したデータをformattedAnalyticsに格納
   useEffect(() => {
-    if (url) {
-      const propertyId = getPropertyIdFromUrl(url, propertyIds);
-      if (propertyId) {
-        setSelectedPropertyId(propertyId);
-        fetchAnalyticsDataByPropertyId(propertyId, startDate, endDate);
-      }
-    }
-  }, [url, propertyIds, startDate, endDate]); // urlが変更された時にデータを取得
+    const formattedAnalyticsData = analyticsData.map((entry) => ({
+      properties_id: entry.property_id, // property_idをproperties_idに変換
+      date: entry.date, // dateをそのまま使用
+      screen_page_views: entry.screen_page_views || 0, // screen_page_viewsを使用
+      conversions: entry.conversions || 0, // conversionsを使用
+      sessions: entry.sessions || 0, // sessionsを使用
+    }));
 
-  //入力されたURLに基づいてデータを取得
-  const fetchAnalyticsDataByPropertyId = async (
-    propertyId,
-    startDate,
-    endDate
-  ) => {
-    setLoading(true);
-    try {
-      const formattedStartDate = startDate.toISOString().split("T")[0]; // YYYY-MM-DD形式
-      const formattedEndDate = endDate.toISOString().split("T")[0]; // YYYY-MM-DD形式
+    setFormattedAnalytics(formattedAnalyticsData);
+    console.log("Formatted Analytics:", formattedAnalyticsData);
+  }, [analyticsData]); // analyticsDataが変更された時に実行
 
-      const { data, error } = await supabase
-        .from("AnalyticsData")
-        .select("*")
-        .eq("property_id", propertyId)
-        .gte("date", formattedStartDate)
-        .lte("date", formattedEndDate);
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      if (error) {
-        throw new Error(`Error fetching analytics data: ${error.message}`);
-      }
+  // toggleMenu関数を定義
+  //const toggleMenu = () => {
+  //setIsOpen((prev) => !prev); // メニューの開閉状態をトグル
+  //};
 
-      setAnalyticsData(data);
-      setLoading(false);
-    } catch (err) {
-      setError(err.message);
-      setLoading(false);
-    }
+  /*サイドバーの開閉状態を保持する */
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
   };
 
-  // フォーム送信時の処理
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (!url) {
-      console.log("URLが空です");
-      return;
+  const getAnalyticsData = (propertyId) => {
+    if (!formattedAnalytics || formattedAnalytics.length === 0) {
+      console.warn("formattedAnalytics is empty or undefined.");
+      return [];
     }
-    const propertyId = getPropertyIdFromUrl(url, propertyIds);
+    const filteredAnalytics = formattedAnalytics.filter(
+      (entry) => entry.properties_id === propertyId
+    );
 
-    if (propertyId && propertyId !== selectedPropertyId) {
-      // Property IDが異なる場合にのみセット
-      setSelectedPropertyId(propertyId);
-      fetchAnalyticsDataByPropertyId(propertyId, startDate, endDate);
+    if (filteredAnalytics.length === 0) {
+      console.warn("No analytics data found for Property ID:", propertyId);
+      return [];
     }
+
+    const analyticsData = filteredAnalytics.map((entry) => ({
+      date: entry.date,
+      PV: entry.screen_page_views,
+      CV: entry.conversions,
+      CVR: entry.sessions ? entry.conversions / entry.sessions : 0,
+      UU: entry.sessions,
+    }));
+
+    console.log(
+      "Analytics Data for Property ID",
+      propertyId,
+      ":",
+      analyticsData
+    ); // デバッグ用ログ
+    return analyticsData;
   };
-  /* propertyIdの読み取り */
+
   useEffect(() => {
-    if (selectedPropertyId && startDate && endDate) {
-      fetchAnalyticsDataByPropertyId(selectedPropertyId, startDate, endDate);
+    if (propertyId) {
+      const data = getAnalyticsData(propertyId);
+      console.log("Fetched Data for Property:", data); // デバッグ用ログ
+      setFilteredData(data);
     }
-  }, [selectedPropertyId, startDate, endDate]); // selectedPropertyIdが変更された時にデータを取得
+  }, [propertyId]);
+  // プロパティIDに基づいてanalyticsデータを取得
 
-  const property = filteredProperties.find(
-    (p) => p.properties_id === selectedPropertyId
-  );
+  // 日付範囲に基づいてデータをフィルタリング
+  //const dataForDateRange = filterByDateRange(filteredData, dateRange);
 
-  if (property) {
-    setSelectedProperty(property);
-    console.log("プロパティが見つかりました:", property);
-    // URLに基づいたデータの取得を開始
-    fetchAnalyticsDataByPropertyId(selectedPropertyId, startDate, endDate);
-  } else {
-    console.log("プロパティが見つかりませんでした");
-  }
-
-  const retirievedpropertyId = getPropertyIdFromUrl(url, propertyIds);
-
-  {
-    /*if (retirievedpropertyId) {
-  setSelectedPropertyId(propertyId);
-  fetchAnalyticsDataByPropertyId(propertyId, startDate, endDate);
-  return;
-}*/
-  }
-  console.log("指定されたプロパティIDが見つかりませんでした。");
-
-  {
-    /*// selectedPropertyIdのログ出力
-    console.log("Selected Property ID:", selectedPropertyId);
-
-    // selectedPropertyIdが設定されているか確認する
-    if (!selectedPropertyId) {
-      console.log("選択されたプロパティIDがありません");
-      return;
-    }*/
-  }
-
-  //表示するデータの計算
+  //要修正//////////////////////////////////////////////////////////////////////////////////
+  // 前月のデータを取得
   useEffect(() => {
-    if (analyticsData.length > 0 && selectedProperty) {
-      const filteredAnalytics = analyticsData.filter(
-        (item) => item.property_id === selectedProperty.properties_id
-      );
-
-      //日別の集計
-      const dataByDate = filteredAnalytics.reduce((acc, item) => {
-        const dateStr = item.date;
-        const formattedDate = `${dateStr.substring(4, 6)}/${dateStr.substring(
-          6,
-          8
-        )}`;
-
-        if (!acc[formattedDate]) {
-          acc[formattedDate] = {
-            date: formattedDate,
-            PV: 0,
-            CV: 0,
-            CVR: 0,
-            UU: 0,
-          };
-        }
-
-        acc[formattedDate].PV += item.screen_page_views;
-        acc[formattedDate].CV += item.conversions;
-        acc[formattedDate].UU += item.sessions;
-        acc[formattedDate].CVR = acc[formattedDate].UU
-          ? (acc[formattedDate].CV / acc[formattedDate].UU) * 100
-          : 0;
-
-        return acc;
-      }, {});
-
-      //月別の集計
-      const dataByMonth = filteredAnalytics.reduce((acc, item) => {
-        const dateStr = item.date;
-        const formattedMonth = `${dateStr.substring(0, 4)}/${dateStr.substring(
-          4,
-          6
-        )}`;
-
-        if (!acc[formattedMonth]) {
-          acc[formattedMonth] = {
-            month: formattedMonth,
-            PV: 0,
-            CV: 0,
-            CVR: 0,
-            UU: 0,
-          };
-        }
-        acc[formattedMonth].PV += item.screen_page_views;
-        acc[formattedMonth].CV += item.conversions;
-        acc[formattedMonth].UU += item.active_users;
-        acc[formattedMonth].CVR = acc[formattedMonth].UU
-          ? (acc[formattedMonth].CV / acc[formattedMonth].UU) * 100
-          : 0;
-
-        return acc;
-      }, {});
-
-      // 年別の集計
-      const dataByYear = filteredAnalytics.reduce((acc, item) => {
-        const year = item.date.substring(0, 4); // YYYY
-
-        if (!acc[year]) {
-          acc[year] = {
-            year: year,
-            PV: 0,
-            CV: 0,
-            CVR: 0,
-            UU: 0,
-          };
-        }
-
-        acc[year].PV += item.screen_page_views;
-        acc[year].CV += item.conversions;
-        acc[year].UU += item.active_users;
-        acc[year].SS += item.sessions;
-        acc[year].CVR = acc[year].SS ? (acc[year].CV / acc[year].UU) * 100 : 0;
-
-        return acc;
-      }, {});
-
-      // 日、月、年別のデータを保存
-      setChartData({
-        byDate: Object.values(dataByDate),
-        byMonth: Object.values(dataByMonth),
-        byYear: Object.values(dataByYear),
-      });
+    if (filteredData.length > 0) {
+      const previousData = getPreviousMonthData(filteredData, dateRange);
+      console.log("Previous Month Data:", previousData); // デバッグ用ログ
+      calculateCurrentAndPreviousData(filteredData, previousData);
     }
-  }, [analyticsData, selectedProperty]);
+  }, [filteredData, dateRange]);
 
-  //前月データを計算する
-  const calculatePreviousMonthData = (analyticsData) => {
-    //現在の日付
-    const currentDate = new Date();
-    const previousMonth = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth() - 1,
-      1
-    );
+  // 最新のデータを取得
+  /*const currentData = {
+      PV: dataForDateRange.reduce((acc, curr) => acc + curr.PV, 0),
+      CV: dataForDateRange.reduce((acc, curr) => acc + curr.CV, 0),
+      UU: dataForDateRange.reduce((acc, curr) => acc + curr.UU, 0),
+    };*/
+  const calculateCurrentAndPreviousData = (filteredData, previousData) => {
+    let totalPV = 0,
+      totalCV = 0,
+      totalUU = 0;
+    // ループ処理でPV, CV, UUを集計
+    filteredData.forEach((data) => {
+      totalPV += data.PV || 0;
+      totalCV += data.CV || 0;
+      totalUU += data.UU || 0;
+    });
 
-    //前月のデータをフィルタリング
-    const totals = analyticsData.reduce(
-      (acc, item) => {
-        const itemDate = new Date(item.date);
-        if (
-          itemDate.getMonth() === previousMonth.getMonth() &&
-          itemDate.getFullYear() === previousMonth.getFullYear()
-        ) {
-          acc.PV += item.screen_page_views;
-          acc.CV += item.conversions;
-          acc.UU += item.active_users;
-        }
-        return acc;
-      },
-      { PV: 0, CV: 0, CVR: 0, UU: 0 } // 初期値
-    );
+    // ログに表示
+    console.log("Total PV:", totalPV);
+    console.log("Total CV:", totalCV);
+    console.log("Total UU:", totalUU);
 
-    const CVR = totals.UU ? (totals.CV / totals.UU) * 100 : 0;
-
-    // 合計値とCVRを返す
-    return {
-      PV: totals.PV,
-      CV: totals.CV,
-      UU: totals.UU,
-      CVR: CVR,
+    const currentData = {
+      PV: totalPV,
+      CV: totalCV,
+      UU: totalUU,
     };
+
+    const previousMonthData = {
+      PV: previousData.reduce((acc, curr) => acc + curr.PV, 0),
+      CV: previousData.reduce((acc, curr) => acc + curr.CV, 0),
+      UU: previousData.reduce((acc, curr) => acc + curr.UU, 0),
+    };
+
+    console.log("Current Data:", currentData); // デバッグ用ログ
+    console.log("Previous Month Data:", previousMonthData); // デバッグ用ログ
+
+    //setChartData(dataForDateRange);
+    // サンプルメトリクスの設定
+    setMetrics([
+      {
+        title: "PV (ページ閲覧数)",
+        value: currentData.PV,
+        previousValue: previousMonthData.PV,
+      },
+      {
+        title: "CV (お問い合わせ数)",
+        value: currentData.CV,
+        previousValue: previousMonthData.CV,
+      },
+      {
+        title: "CVR (お問い合わせ率)",
+        value:
+          currentData.UU > 0
+            ? ((currentData.CV / currentData.UU) * 100).toFixed(2) + "%"
+            : "0%", // UU が 0 の場合は "0%" を表示
+        previousValue:
+          previousData.UU > 0
+            ? ((previousData.CV / previousData.UU) * 100).toFixed(2) + "%"
+            : "0%", // 前月の UU が 0 の場合も "0%" を表示
+      },
+      {
+        title: "UU (セッション数)",
+        value: currentData.UU,
+        previousValue: previousMonthData.UU,
+      },
+    ]);
   };
 
-  useEffect(() => {
-    if (analyticsData.length > 0) {
-      const previousMonthData = calculatePreviousMonthData(analyticsData);
-      const newMetricsData = calculateMetrics(metricsData, previousMonthData);
-      setPreviousMonthData(previousMonthData);
-      setMetricsData(newMetricsData);
-    }
-  }, [analyticsData]);
+  //setChartData(dataForDateRange);
+  //}, [propertyId, dateRange]);
 
-  useEffect(() => {
-    let selectedData;
-    switch (dateRange) {
-      case "過去7日間":
-        selectedData = dataByDate;
-        break;
-      case "過去28日間":
-        selectedData = dataByMonth;
-        break;
-      case "過去90日間":
-        selectedData = dataByYear;
-        break;
-      default:
-        selectedData = dataByDate;
-    }
-    //setChartData(selectedData);
-    setMetricsData(calculateMetrics(selectedData)); // メトリクスも更新
-  }, [dateRange, dataByDate, dataByMonth, dataByYear]);
+  const handleMetricChange = (metricTitle) => {
+    setSelectedMetric(metricTitle);
+  };
 
-  const calculateMetrics = (currentData = {}, previousData = {}) => [
-    {
-      title: "PV (ページ閲覧数)",
-      value: currentData.PV || 0,
-      previousValue: previousData.PV || 0,
-    },
-    {
-      title: "CV (お問い合わせ数)",
-      value: currentData.CV || 0,
-      previousValue: previousData.CV || 0,
-    },
-    {
-      title: "CVR (お問い合わせ率)",
-      value: currentData.CVR ? currentData.CVR.toFixed(2) + "%" : "0%",
-      previousValue:
-        previousData.UU > 0 ? previousData.CVR.toFixed(2) + "%" : "0%",
-    },
-    {
-      title: "UU (セッション数)",
-      value: currentData.UU || 0,
-      previousValue: previousData.UU || 0,
-    },
-  ];
-
-  /*Sidebarが開いているときに他の箇所を暗くする */
-  const Overlay = ({ isOpen, toggleMenu }) => (
-    <div
-      className={`overlay ${isOpen ? "visible" : ""}`}
-      onClick={toggleMenu}
-    ></div>
-  );
-
-  //グラフの種類を決定
   const renderContent = () => {
-    switch (selectedMetric) {
-      case "PV (ページ閲覧数)":
-        return <LineChart data={chartData} dataKey="PV" />;
-      case "CV (お問い合わせ数)":
-        return <LineChart data={chartData} dataKey="CV" />;
-      case "CVR (お問い合わせ率)":
-        return <LineChart data={chartData} dataKey="CVR" />;
-      case "UU (セッション数)":
-        return <LineChart data={chartData} dataKey="UU" />;
-      default:
-        return <div>No data available for selected metric</div>;
+    if (!filteredData || filteredData.length === 0) {
+      return <div>No data available for selected metric</div>;
     }
+
+    console.log("Filtered Data:", filteredData); // デバッグ用ログ
+
+    if (selectedMetric === "PV (ページ閲覧数)") {
+      return <LineChart data={filteredData} dataKey="PV" />;
+    }
+    if (selectedMetric === "CV (お問い合わせ数)") {
+      return <LineChart data={filteredData} dataKey="CV" />;
+    }
+    if (selectedMetric === "CVR (お問い合わせ率)") {
+      return <LineChart data={filteredData} dataKey="CVR" />;
+    }
+    if (selectedMetric === "UU (セッション数)") {
+      return <LineChart data={filteredData} dataKey="UU" />;
+    }
+    return <div>No data available for selected metric</div>;
   };
 
   const SearchKeyword = ({ keyword, count }) => (
@@ -703,25 +543,9 @@ const Dashboard = () => {
         url={url}
         setUrl={setUrl}
       />
-
       {/* オーバーレイの追加 */}
       <Overlay isOpen={isOpen} toggleMenu={toggleMenu} />
-
       <main className="dashboard-main">
-        {/*
-        /////////////////////////////////////////////////////////////////
-        <div className="souta">
-          <h1>Dashboard</h1>
-          <p>指定されたURLのスクリーンビューの合計: {totalScreenViews}</p>
-          <LineChart
-            data={[
-              { date: "2024-09-01", PV: 120 },
-              { date: "2024-09-02", PV: 150 },
-              { date: "2024-09-03", PV: 170 },
-            ]}
-            dataKey="CV"
-          />
-        </div>*/}
         {/* サイドバーの表示制御 */}
         <Sidebar isOpen={isOpen} className="sidebar" />
         <div className="dashboard-main-left">
@@ -737,8 +561,9 @@ const Dashboard = () => {
               </SelectTrigger>
               <SelectContent className="select-content">
                 <SelectItem value="過去7日間">過去7日間</SelectItem>
-                <SelectItem value="過去28日間">過去28日間</SelectItem>
+                <SelectItem value="過去30日間">過去30日間</SelectItem>
                 <SelectItem value="過去90日間">過去90日間</SelectItem>
+                <SelectItem value="カスタム">カスタム</SelectItem>
               </SelectContent>
             </Select>
           </div>
