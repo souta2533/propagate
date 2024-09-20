@@ -7,10 +7,6 @@ import { handlerUrlSubmit } from "../lib/submitHandler";
 import { Home, BarChart2, FileText, Search, Settings } from "lucide-react";
 import { FaBars, FaTimes } from "react-icons/fa";
 import {
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -21,33 +17,47 @@ import Link from "next/link";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css"; // 必要なスタイルを読み込み
 config.autoAddCss = false; // 自動的にスタイルを追加しないようにする
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"; /*sidebarのアイコンをimport*/
-import {
-  faHome,
-  faFileAlt,
-  faChartBar,
-} from "@fortawesome/free-solid-svg-icons";
-import { cn } from "@/lib/utils";
+import { cn } from "../lib/utils";
 import { cva } from "class-variance-authority";
-import { Button } from "../components/Button";
-import { Input } from "../components/Input";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/Card";
+import { Button } from "../components/ui/Button";
+import { Input } from "../components/ui/Input";
+import { Card, CardContent } from "../components/ui/Card";
 import {
   Select,
   SelectTrigger,
-  SelectValue,
   SelectContent,
   SelectItem,
-} from "../components/Select";
+} from "../components/ui/Select";
+import Sidebar from "../components/ui/Sidebar";
+import Header from "../components/ui/Header";
+import MetricCard from "../components/ui/MetricCard";
+//import Overlay from "../components/ui/Overlay";
+import LineChart from "../components/graph/LineChart";
+import BarChart from "../components/graph/BarChart";
+import PieChart from "../components/graph/PieChart";
 
 import "../styles/dashboard.css";
 
+// URLからProperty IDを取得する関数
+const getPropertyIdFromUrl = (url, propertyIds) => {
+  // URLに基づいてProperty IDを取得
+  const matchedProperty = propertyIds.find((property) => property.url === url);
+
+  if (matchedProperty) {
+    console.log(`Matched Property ID: ${matchedProperty.properties_id}`);
+    return matchedProperty.properties_id;
+  } else {
+    console.log("指定されたURLに対応するプロパティが見つかりません。");
+    return null;
+  }
+};
+
 const Dashboard = () => {
-//   const user = useUser();
+  //const user = useUser();
   const router = useRouter();
   const [session, setSession] = useState(null);
-  const [error, setError] = useState(null);         // エラーの状態を管理
-  const [loading, setLoading] = useState(true);     // ローディング中かどうかの状態を管理
+  const [error, setError] = useState(null); // エラーの状態を管理
+  const [loading, setLoading] = useState(false); // ローディング中かどうかの状態を管理
   const [accountIds, setAccountIds] = useState([]);
   const [propertyIds, setPropertyIds] = useState([]);
   const [filteredProperties, setFilteredProperties] = useState([]);
@@ -62,50 +72,165 @@ const Dashboard = () => {
   const [url, setUrl] = useState(""); // URLの状態を管理
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [activeMetric, setActiveMetric] = useState("PV"); // 初期値を"PV"に設定
-  const [selectedMetric, setSelectedMetric] = useState("PV");
+  const [activeMetric, setActiveMetric] = useState("PV (ページ閲覧数)"); // 初期値を"PV"に設定
+  const [selectedMetric, setSelectedMetric] = useState("PV (ページ閲覧数)");
+  const [metricsData, setMetricsData] = useState({
+    PV: 0,
+    CV: 0,
+    CVR: 0,
+    UU: 0,
+  });
+  const [previousMonthData, setPreviousMonthData] = useState({
+    PV: 0,
+    CV: 0,
+    CVR: 0,
+    UU: 0,
+  });
+  const [searchKeywords, setSearchKeywords] = useState([]);
+  //const [chartData, setChartData] = useState([]);
   const [dateRange, setDateRange] = useState("過去28日間");
+  const [startDate, setStartDate] = useState(new Date());
+  const [dataByDate, setDataByDate] = useState([]);
+  const [dataByMonth, setDataByMonth] = useState([]);
+  const [dataByYear, setDataByYear] = useState([]);
+  const [endDate, setEndDate] = useState(new Date());
+  const [selectedPropertyId, setSelectedPropertyId] = useState(null);
 
-  /*サイドバーの状態を保持する */
-  const toggleMenu = () => {
-    setIsOpen(!isOpen);
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  const [totalScreenViews, setTotalScreenViews] = useState(0); // スクリーンビューの合計を管理
+  const urls = "https://www.propagate-fsk.tokyo/"; // 使用したいURL
+  const chartData = [
+    { date: "2024-09-01", PV: 120 },
+    { date: "2024-09-02", PV: 150 },
+    { date: "2024-09-03", PV: 170 },
+  ];
+
+  // スクリーンビューを取得する関数
+  const countScreenViewsByPropertyId = async (propertyId) => {
+    try {
+      const { data: properties, error: propertyError } = await supabase
+        .from("PropertyTable")
+        .select("properties_id")
+        .eq("url", url);
+
+      if (propertyError) {
+        throw new Error(`プロパティIDの取得エラー: ${propertyError.message}`);
+      }
+
+      if (properties.length === 0) {
+        console.log("指定されたURLに対応するプロパティが見つかりません。");
+        return 0;
+      }
+
+      const propertyId = properties[0].properties_id;
+      console.log(`取得したプロパティID: ${propertyId}`);
+
+      const { data: analyticsData, error: analyticsError } = await supabase
+        .from("AnalyticsData")
+        .select("screen_page_views")
+        .eq("property_id", propertyId);
+
+      if (analyticsError) {
+        throw new Error(
+          `アナリティクスデータ取得エラー: ${analyticsError.message}`
+        );
+      }
+
+      let totalScreenViews = 0;
+      for (let i = 0; i < analyticsData.length; i++) {
+        totalScreenViews += analyticsData[i].screen_page_views || 0;
+      }
+
+      console.log(
+        `プロパティID ${propertyId} のスクリーンビュー合計: ${totalScreenViews}`
+      );
+      return totalScreenViews;
+    } catch (error) {
+      console.error("countScreenViewsByPropertyId内でのエラー: ", error);
+      return 0;
+    }
   };
 
-  /*グラフの状態を保持する */
-  const handleMetricChange = (value) => {
-    setSelectedMetric(value);
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      const totalViews = await countScreenViewsByPropertyId(url);
+      setTotalScreenViews(totalViews);
+    };
+
+    fetchData();
+  }, [urls]); // URLが変更されたときにデータを再取得
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  const metrics = [
+    {
+      title: "PV (ページ閲覧数)",
+      value: metricsData.PV || 0,
+      previousValue: previousMonthData.PV || 0,
+    },
+    {
+      title: "CV (お問い合わせ数)",
+      value: metricsData.CV || 0,
+      previousValue: previousMonthData.CV || 0,
+    },
+    {
+      title: "CVR (お問い合わせ率)",
+      value: metricsData.CVR ? metricsData.CVR.toFixed(2) + "%" : "0%",
+      previousValue: previousMonthData.CVR
+        ? previousData.CVR.toFixed(2) + "%"
+        : "0%",
+    },
+    {
+      title: "UU (セッション数)",
+      value: metricsData.UU || 0,
+      previousValue: previousMonthData.UU || 0,
+    },
+  ];
+
+  const dateOptions = [
+    { value: "7", label: "過去7日間" },
+    { value: "28", label: "過去28日間" },
+    { value: "90", label: "過去90日間" },
+  ];
 
   // セッションを取得する関数
   const fetchSession = async () => {
     const { data, error } = await supabase.auth.getSession();
     if (error || !data?.session) {
-      console.error('Error fetching session: ', error);
-      setError(error);
-      setLoading(false);
+      console.error("Error fetching session: ", error);
+      setError("セッションの取得に失敗しました");
+      //setLoading(false);
       return;
     }
-
     setSession(data.session);
-    setLoading(false);
+    //setLoading(false);
   };
 
   // useEffectでsessionがnullのときにリトライ
   useEffect(() => {
     if (!session) {
-      setLoading(true);  // ローディング状態に戻す
+      setLoading(true); // ローディング状態に戻す
       fetchSession();
     }
-  }, [session]);  // session が null の場合に再度 fetchSession を実行
+  }, [session]); // session が null の場合に再度 fetchSession を実行
+
+  /*サイドバーの開閉状態を保持する */
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
+  };
+
+  /*グラフの状態を保持する */
+  const handleMetricChange = (metric) => {
+    setSelectedMetric(metric);
+  };
 
   useEffect(() => {
     const fetchAnalyticsData = async () => {
-    if (!session) {
+      if (!session) {
         console.log("Session is null");
         return;
-    }
+      }
 
-    const sessionData = session;
+      const sessionData = session;
 
       if (!sessionData) {
         // router.push('/auth/login');
@@ -114,18 +239,15 @@ const Dashboard = () => {
       }
 
       // 1. Userのemailを取得
-    //   console.log("Session of this: ", sessionData);
-    // console.log("User's auth.uin(): ", sessionData.user.id);
-
+      //   console.log("Session of this: ", sessionData);
+      console.log("User's auth.uin(): ", sessionData.user.id);
 
       // const email_customer = sessionData.user.user_metadata.email;
 
       // 2. CustomerDetailsTableからaccountIdを取得
       const { data: customerDetailsData, error: customerDetailsError } =
-        await supabase
-          .from("CustomerDetailsTable")
-          .select("accounts_id")
-        //   .eq("email_customer", email_customer);
+        await supabase.from("CustomerDetailsTable").select("accounts_id");
+      //   .eq("email_customer", email_customer);
 
       console.log("CustomerDetailsData: ", customerDetailsData);
       if (customerDetailsError) {
@@ -140,7 +262,6 @@ const Dashboard = () => {
       if (accountIds.length > 0) {
         setSelectedAccountId(accountIds[0]);
       }
-
       // 3. PropertyTableからpropertyIdを取得
       const { data: allProperties, error: propertyError } = await supabase
         .from("PropertyTable")
@@ -248,49 +369,296 @@ const Dashboard = () => {
 
   const handlePropertyChange = (e) => {
     const selectedPropertyId = e.target.value;
+    console.log("Selected Property Change:", selectedPropertyId);
+    setSelectedPropertyId(selectedPropertyId); // 追加
     const property = filteredProperties.find(
       (p) => p.properties_id === selectedPropertyId
     );
     setSelectedProperty(property);
   };
 
-  // URLの送信処理
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    handlerUrlSubmit(
-      session.user.email,
-      propertyId,
-      url,
-      setPropertyId,
-      setUrl
-    );
+  /*URLの読み取り */
+  useEffect(() => {
+    if (url) {
+      const propertyId = getPropertyIdFromUrl(url, propertyIds);
+      if (propertyId) {
+        setSelectedPropertyId(propertyId);
+        fetchAnalyticsDataByPropertyId(propertyId, startDate, endDate);
+      }
+    }
+  }, [url, propertyIds, startDate, endDate]); // urlが変更された時にデータを取得
+
+  //入力されたURLに基づいてデータを取得
+  const fetchAnalyticsDataByPropertyId = async (
+    propertyId,
+    startDate,
+    endDate
+  ) => {
+    setLoading(true);
+    try {
+      const formattedStartDate = startDate.toISOString().split("T")[0]; // YYYY-MM-DD形式
+      const formattedEndDate = endDate.toISOString().split("T")[0]; // YYYY-MM-DD形式
+
+      const { data, error } = await supabase
+        .from("AnalyticsData")
+        .select("*")
+        .eq("property_id", propertyId)
+        .gte("date", formattedStartDate)
+        .lte("date", formattedEndDate);
+
+      if (error) {
+        throw new Error(`Error fetching analytics data: ${error.message}`);
+      }
+
+      setAnalyticsData(data);
+      setLoading(false);
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+    }
   };
 
-  /*新しいダッシュボード */
-  /*Sidebarコンポーネント*/
-  const Sidebar = ({ isOpen }) => (
-    <div className={`sidebar ${isOpen ? "open" : ""}`}>
-      <div className="menu-list">
-        <Button variant="ghost" className="menu-button">
-          <Home className="icon" />
-          <div className="icon-text">ホーム</div>
-        </Button>
-        <Button
-          variant="ghost"
-          onClick={() => router.push("/details")}
-          className="menu-button"
-        >
-          <BarChart2 className="icon" />
-          <div className="icon-text">ページ別状況</div>
-        </Button>
+  // フォーム送信時の処理
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-        <Button variant="ghost" className="menu-button">
-          <FileText className="icon" />
-          <div className="icon-text">アナリティクスレポート</div>
-        </Button>
-      </div>
-    </div>
+    if (!url) {
+      console.log("URLが空です");
+      return;
+    }
+    const propertyId = getPropertyIdFromUrl(url, propertyIds);
+
+    if (propertyId && propertyId !== selectedPropertyId) {
+      // Property IDが異なる場合にのみセット
+      setSelectedPropertyId(propertyId);
+      fetchAnalyticsDataByPropertyId(propertyId, startDate, endDate);
+    }
+  };
+  /* propertyIdの読み取り */
+  useEffect(() => {
+    if (selectedPropertyId && startDate && endDate) {
+      fetchAnalyticsDataByPropertyId(selectedPropertyId, startDate, endDate);
+    }
+  }, [selectedPropertyId, startDate, endDate]); // selectedPropertyIdが変更された時にデータを取得
+
+  const property = filteredProperties.find(
+    (p) => p.properties_id === selectedPropertyId
   );
+
+  if (property) {
+    setSelectedProperty(property);
+    console.log("プロパティが見つかりました:", property);
+    // URLに基づいたデータの取得を開始
+    fetchAnalyticsDataByPropertyId(selectedPropertyId, startDate, endDate);
+  } else {
+    console.log("プロパティが見つかりませんでした");
+  }
+
+  const retirievedpropertyId = getPropertyIdFromUrl(url, propertyIds);
+
+  {
+    /*if (retirievedpropertyId) {
+  setSelectedPropertyId(propertyId);
+  fetchAnalyticsDataByPropertyId(propertyId, startDate, endDate);
+  return;
+}*/
+  }
+  console.log("指定されたプロパティIDが見つかりませんでした。");
+
+  {
+    /*// selectedPropertyIdのログ出力
+    console.log("Selected Property ID:", selectedPropertyId);
+
+    // selectedPropertyIdが設定されているか確認する
+    if (!selectedPropertyId) {
+      console.log("選択されたプロパティIDがありません");
+      return;
+    }*/
+  }
+
+  //表示するデータの計算
+  useEffect(() => {
+    if (analyticsData.length > 0 && selectedProperty) {
+      const filteredAnalytics = analyticsData.filter(
+        (item) => item.property_id === selectedProperty.properties_id
+      );
+
+      //日別の集計
+      const dataByDate = filteredAnalytics.reduce((acc, item) => {
+        const dateStr = item.date;
+        const formattedDate = `${dateStr.substring(4, 6)}/${dateStr.substring(
+          6,
+          8
+        )}`;
+
+        if (!acc[formattedDate]) {
+          acc[formattedDate] = {
+            date: formattedDate,
+            PV: 0,
+            CV: 0,
+            CVR: 0,
+            UU: 0,
+          };
+        }
+
+        acc[formattedDate].PV += item.screen_page_views;
+        acc[formattedDate].CV += item.conversions;
+        acc[formattedDate].UU += item.sessions;
+        acc[formattedDate].CVR = acc[formattedDate].UU
+          ? (acc[formattedDate].CV / acc[formattedDate].UU) * 100
+          : 0;
+
+        return acc;
+      }, {});
+
+      //月別の集計
+      const dataByMonth = filteredAnalytics.reduce((acc, item) => {
+        const dateStr = item.date;
+        const formattedMonth = `${dateStr.substring(0, 4)}/${dateStr.substring(
+          4,
+          6
+        )}`;
+
+        if (!acc[formattedMonth]) {
+          acc[formattedMonth] = {
+            month: formattedMonth,
+            PV: 0,
+            CV: 0,
+            CVR: 0,
+            UU: 0,
+          };
+        }
+        acc[formattedMonth].PV += item.screen_page_views;
+        acc[formattedMonth].CV += item.conversions;
+        acc[formattedMonth].UU += item.active_users;
+        acc[formattedMonth].CVR = acc[formattedMonth].UU
+          ? (acc[formattedMonth].CV / acc[formattedMonth].UU) * 100
+          : 0;
+
+        return acc;
+      }, {});
+
+      // 年別の集計
+      const dataByYear = filteredAnalytics.reduce((acc, item) => {
+        const year = item.date.substring(0, 4); // YYYY
+
+        if (!acc[year]) {
+          acc[year] = {
+            year: year,
+            PV: 0,
+            CV: 0,
+            CVR: 0,
+            UU: 0,
+          };
+        }
+
+        acc[year].PV += item.screen_page_views;
+        acc[year].CV += item.conversions;
+        acc[year].UU += item.active_users;
+        acc[year].SS += item.sessions;
+        acc[year].CVR = acc[year].SS ? (acc[year].CV / acc[year].UU) * 100 : 0;
+
+        return acc;
+      }, {});
+
+      // 日、月、年別のデータを保存
+      setChartData({
+        byDate: Object.values(dataByDate),
+        byMonth: Object.values(dataByMonth),
+        byYear: Object.values(dataByYear),
+      });
+    }
+  }, [analyticsData, selectedProperty]);
+
+  //前月データを計算する
+  const calculatePreviousMonthData = (analyticsData) => {
+    //現在の日付
+    const currentDate = new Date();
+    const previousMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() - 1,
+      1
+    );
+
+    //前月のデータをフィルタリング
+    const totals = analyticsData.reduce(
+      (acc, item) => {
+        const itemDate = new Date(item.date);
+        if (
+          itemDate.getMonth() === previousMonth.getMonth() &&
+          itemDate.getFullYear() === previousMonth.getFullYear()
+        ) {
+          acc.PV += item.screen_page_views;
+          acc.CV += item.conversions;
+          acc.UU += item.active_users;
+        }
+        return acc;
+      },
+      { PV: 0, CV: 0, CVR: 0, UU: 0 } // 初期値
+    );
+
+    const CVR = totals.UU ? (totals.CV / totals.UU) * 100 : 0;
+
+    // 合計値とCVRを返す
+    return {
+      PV: totals.PV,
+      CV: totals.CV,
+      UU: totals.UU,
+      CVR: CVR,
+    };
+  };
+
+  useEffect(() => {
+    if (analyticsData.length > 0) {
+      const previousMonthData = calculatePreviousMonthData(analyticsData);
+      const newMetricsData = calculateMetrics(metricsData, previousMonthData);
+      setPreviousMonthData(previousMonthData);
+      setMetricsData(newMetricsData);
+    }
+  }, [analyticsData]);
+
+  useEffect(() => {
+    let selectedData;
+    switch (dateRange) {
+      case "過去7日間":
+        selectedData = dataByDate;
+        break;
+      case "過去28日間":
+        selectedData = dataByMonth;
+        break;
+      case "過去90日間":
+        selectedData = dataByYear;
+        break;
+      default:
+        selectedData = dataByDate;
+    }
+    //setChartData(selectedData);
+    setMetricsData(calculateMetrics(selectedData)); // メトリクスも更新
+  }, [dateRange, dataByDate, dataByMonth, dataByYear]);
+
+  const calculateMetrics = (currentData = {}, previousData = {}) => [
+    {
+      title: "PV (ページ閲覧数)",
+      value: currentData.PV || 0,
+      previousValue: previousData.PV || 0,
+    },
+    {
+      title: "CV (お問い合わせ数)",
+      value: currentData.CV || 0,
+      previousValue: previousData.CV || 0,
+    },
+    {
+      title: "CVR (お問い合わせ率)",
+      value: currentData.CVR ? currentData.CVR.toFixed(2) + "%" : "0%",
+      previousValue:
+        previousData.UU > 0 ? previousData.CVR.toFixed(2) + "%" : "0%",
+    },
+    {
+      title: "UU (セッション数)",
+      value: currentData.UU || 0,
+      previousValue: previousData.UU || 0,
+    },
+  ];
 
   /*Sidebarが開いているときに他の箇所を暗くする */
   const Overlay = ({ isOpen, toggleMenu }) => (
@@ -300,111 +668,21 @@ const Dashboard = () => {
     ></div>
   );
 
-  // Dropdown コンポーネント
-  const Dropdown = ({ isOpen }) => {
-    return (
-      <div className={`sidebar ${isOpen ? "open" : ""}`}>
-        <div className="menu-list">
-          <button className="menu-button">ホーム</button>
-          <button className="menu-button">アナリティクス</button>
-          {/* 追加のメニューボタン */}
-        </div>
-      </div>
-    );
-  };
-
-  const Header = () => (
-    <header className="header">
-      <div className="header-left">
-        <div className="hamburger-icon" onClick={toggleMenu}>
-          {isOpen ? <FaTimes size={30} /> : <FaBars size={30} />}
-        </div>
-        <h1 className="header-title">Propagate Analytics</h1>
-        <Input
-          type="text"
-          placeholder="https://www.propagateinc.com/"
-          className="header-input"
-        />
-      </div>
-      <Button size="icon" variant="ghost" className="header-button">
-        <Settings className="icon" />
-        <span className="sr-only">Settings</span>
-      </Button>
-    </header>
-  );
-
-  const MetricCard = ({ title, value, target, isActive, onClick }) => (
-    <div
-      className={`metric-card ${isActive ? "active" : ""}`} // アクティブなカードにクラスを追加
-      onClick={onClick} // カードがクリックされたときに処理を実行
-    >
-      <div className="metric-card-header">
-        <h3>{title}</h3>
-      </div>
-      <div className="metric-card-content">
-        <div className="metric-value">{value.toLocaleString()}</div>
-      </div>
-    </div>
-  );
-
-  const data = [
-    { name: "8/15", value: 4000 },
-    { name: "8/20", value: 3000 },
-    { name: "8/25", value: 2000 },
-    { name: "8/30", value: 2780 },
-    { name: "9/4", value: 1890 },
-    { name: "9/9", value: 2390 },
-    { name: "9/11", value: 3490 },
-  ];
-
-  const renderChart = () => {
+  //グラフの種類を決定
+  const renderContent = () => {
     switch (selectedMetric) {
-      case "PV":
-        return <LineChartComponent />;
-      case "CV":
-        return <BarChartComponent />;
-      case "CVR":
-      case "SS":
-        return <BarChartComponent dataKey="value" />;
+      case "PV (ページ閲覧数)":
+        return <LineChart data={chartData} dataKey="PV" />;
+      case "CV (お問い合わせ数)":
+        return <LineChart data={chartData} dataKey="CV" />;
+      case "CVR (お問い合わせ率)":
+        return <LineChart data={chartData} dataKey="CVR" />;
+      case "UU (セッション数)":
+        return <LineChart data={chartData} dataKey="UU" />;
       default:
-        return <LineChartComponent />;
+        return <div>No data available for selected metric</div>;
     }
   };
-
-  const LineChartComponent = () => (
-    <ResponsiveContainer width="100%" height={300}>
-      <LineChart
-        data={data}
-        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-      >
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" />
-        <YAxis />
-        <Tooltip />
-        <Line
-          type="monotone"
-          dataKey="value"
-          stroke="#8884d8"
-          activeDot={{ r: 8 }}
-        />
-      </LineChart>
-    </ResponsiveContainer>
-  );
-
-  const BarChartComponent = ({ dataKey }) => (
-    <ResponsiveContainer width="100%" height="100%">
-      <BarChart
-        data={data}
-        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-      >
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" />
-        <YAxis />
-        <Tooltip />
-        <Bar dataKey="value" fill="#8884d8" />
-      </BarChart>
-    </ResponsiveContainer>
-  );
 
   const SearchKeyword = ({ keyword, count }) => (
     <div className="search-keyword">
@@ -416,133 +694,34 @@ const Dashboard = () => {
     </div>
   );
 
-  const metrics = [
-    { title: "PV (ページ閲覧数)", value: 23450, target: 1000, difference: 143 },
-    {
-      title: "CV (お問い合わせ数)",
-      value: 23450,
-      target: 1000,
-      difference: -6,
-    },
-    {
-      title: "CVR (お問い合わせ率)",
-      value: 3.55,
-      target: 2.55,
-      difference: 1.34,
-    },
-    {
-      title: "SS(セッション数)",
-      value: 12345,
-      targe: 23456,
-      difference: 11111,
-    },
-  ];
-
-  const searchKeywords = [
-    { keyword: "サブスクホームページ制作", count: 3280 },
-    { keyword: "東京都Webデザイン会社", count: 2345 },
-    { keyword: "プロパゲート", count: 1034 },
-  ];
-
-  // ダッシュボードの内容を記載
-  /*return (
-      {/* Account ID の選択ドロップダウン */
-  {
-    /*{accountIds.length > 0 && (
-        <div className="select-section">
-          <label htmlFor="accountId">Select Account ID</label>
-          <select
-            id="accountId"
-            value={selectedAccountId || ""}
-            onChange={handleAccountChange}
-          >
-            {accountIds.map((accountId) => (
-              <option key={accountId} value={accountId}>
-                {accountId}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}*/
-  }
-  {
-    /* Property ID の選択ドロップダウン */
-  }
-  {
-    /*{filteredProperties.length > 0 ? (
-        <div className="select-section">
-          <h2>Analytics Properties:</h2>
-          <label htmlFor="propertyId">Select Property ID</label>
-          <select
-            id="propertyId"
-            value={selectedProperty ? selectedProperty.properties_id : ""}
-            onChange={handlePropertyChange}
-          >
-            {filteredProperties.map((prop) => (
-              <option key={prop.properties_id} value={prop.properties_id}>
-                {prop.properties_name}
-              </option>
-            ))}
-          </select>
-
-          {selectedProperty && (
-            <div>
-              <p>
-                <strong>Selected Account ID:</strong>{" "}
-                {selectedProperty.account_id}
-              </p>
-              <p>
-                <strong>Selected Property ID:</strong>{" "}
-                {selectedProperty.properties_id}
-              </p>
-            </div>
-          )}
-        </div>
-      ) : (
-        <p>No Analytics properties found for this account.</p>
-      )}*/
-  }
-  {
-    /* URLとProperty IDの入力と送信ボタン */
-  }
-  {
-    /*<div className="form-section">
-        <h2>Submit Property ID and URL:</h2>
-        <form onSubmit={handleSubmit}>
-          <label htmlFor="propertyId">Enter Property ID</label>
-          <input
-            id="propertyId"
-            type="text"
-            value={propertyId}
-            onChange={(e) => setPropertyId(e.target.value)}
-            placeholder="Property ID"
-            required
-          />
-
-          <label htmlFor="url">Enter URL</label>
-          <input
-            id="url"
-            type="text"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://example.com"
-            required
-          />
-
-          <button type="submit">Submit</button>
-        </form>
-      </div>
-      */
-  }
-
   return (
     <div className="dashboard-container">
-      <Header />
+      <Header
+        isOpen={isOpen}
+        toggleMenu={toggleMenu}
+        handleSubmit={handleSubmit}
+        url={url}
+        setUrl={setUrl}
+      />
 
       {/* オーバーレイの追加 */}
       <Overlay isOpen={isOpen} toggleMenu={toggleMenu} />
 
       <main className="dashboard-main">
+        {/*
+        /////////////////////////////////////////////////////////////////
+        <div className="souta">
+          <h1>Dashboard</h1>
+          <p>指定されたURLのスクリーンビューの合計: {totalScreenViews}</p>
+          <LineChart
+            data={[
+              { date: "2024-09-01", PV: 120 },
+              { date: "2024-09-02", PV: 150 },
+              { date: "2024-09-03", PV: 170 },
+            ]}
+            dataKey="CV"
+          />
+        </div>*/}
         {/* サイドバーの表示制御 */}
         <Sidebar isOpen={isOpen} className="sidebar" />
         <div className="dashboard-main-left">
@@ -554,7 +733,7 @@ const Dashboard = () => {
               className="dashboard-select"
             >
               <SelectTrigger className="select-trigger">
-                <SelectValue placeholder="Select date range" />
+                {dateRange || "日付範囲を選択してください"}
               </SelectTrigger>
               <SelectContent className="select-content">
                 <SelectItem value="過去7日間">過去7日間</SelectItem>
@@ -569,19 +748,18 @@ const Dashboard = () => {
                 {metrics.map((metric, index) => (
                   <MetricCard
                     key={index}
-                    title={metric.title}
-                    value={metric.value}
-                    isActive={selectedMetric === metric.title} // 選択されているかどうかを判定
-                    onClick={() => setSelectedMetric(metric.title)} // クリックで選択メトリクスを変更
+                    title={metric.title} // カードのタイトル
+                    value={metric.value} // カードに表示する値
+                    previousValue={metric.previousValue}
+                    isActive={selectedMetric === metric.title}
+                    onClick={() => handleMetricChange(metric.title)}
                   />
                 ))}
               </div>
               <Card className="chart-card">
                 <CardContent className="chart-card-content">
-                  <CardContent className="chart-card-content">
-                    {renderChart()}{" "}
-                    {/* ここで選択されたメトリクスに応じたグラフを表示 */}
-                  </CardContent>
+                  {renderContent()}{" "}
+                  {/* ここで選択されたメトリクスに応じたグラフを表示 */}
                 </CardContent>
               </Card>
               <div className="dashboard-details">
@@ -596,8 +774,12 @@ const Dashboard = () => {
             <div className="dashboard-sidebar">
               <h3 className="sidebar-title">検索キーワード</h3>
               <div className="search-keywords">
-                {searchKeywords.map((keyword, index) => (
-                  <SearchKeyword key={index} {...keyword} />
+                {searchKeywords.map((keywordItem, index) => (
+                  <SearchKeyword
+                    key={index}
+                    keyword={keywordItem.keyword}
+                    count={keywordItem.count}
+                  />
                 ))}
               </div>
             </div>
@@ -608,4 +790,5 @@ const Dashboard = () => {
     </div>
   );
 };
+
 export default Dashboard;
