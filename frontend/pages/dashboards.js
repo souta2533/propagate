@@ -19,6 +19,46 @@ import PieChart from "../components/graph/PieChart";
 
 import "../styles/dashboard.css";
 
+const PropertyIds = [
+  // サンプルデータ
+  {
+    properties_id: "424732958",
+    properties_name: "Yuya",
+    account_id: "300168308",
+    url: null,
+  },
+  {
+    properties_id: "428269691",
+    properties_name: "gatest",
+    account_id: "300168308",
+    url: null,
+  },
+  {
+    properties_id: "359877627",
+    properties_name: "propagateGA4",
+    account_id: "324522818",
+    url: "https://www.propagateinc.com/",
+  },
+  {
+    properties_id: "425610688",
+    properties_name: "propagate-tfc.tokyo",
+    account_id: "300168308",
+    url: "",
+  },
+  {
+    properties_id: "453492841",
+    properties_name: "AnalyticsTest",
+    account_id: "324522818",
+    url: "",
+  },
+  {
+    properties_id: "452842721",
+    properties_name: "Propagate Analytics",
+    account_id: "300168308",
+    url: "https://www.propagate-fsk.tokyo/",
+  },
+];
+
 const findPropertyIdByUrl = (url) => {
   let propertyId = null;
 
