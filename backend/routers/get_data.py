@@ -40,11 +40,11 @@ async def get_aggregated_data(
         # logging.info(f"Search Console data: {search_console_data}")
 
         # データを集計
-        aggegate_data = aggregate_data(analytics_data, search_console_data)
+        aggregated_data = aggregate_data(analytics_data, search_console_data)
 
         # logging.info(f"Aggregated data: {aggegate_data[0]["query"]}")
 
-        return {"status": "succes", "data": aggegate_data}
+        return {"status": "success", "data": aggregated_data}
     except Exception as e:
         log.error(f"Error: {e}")
         raise HTTPException(status_code=500, detail="Failed to get aggregated data")

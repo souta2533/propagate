@@ -115,12 +115,13 @@ def aggregate_data(analytics_data, search_console_data):
         return dict(sorted_items[:NUM])
     
     # city, country, queryは上位30件のみ渡す
-    for page_path, data in aggregated.items():
-        if 'city' in data:
-            aggregated[base_url][decoded_path]['city'] = get_top_n(data['city'])
-        if 'country' in data:
-            aggregated[base_url][decoded_path]['country'] = get_top_n(data['country'])
-        if 'query' in data:
-            aggregated[base_url][decoded_path]['query'] = get_top_n(data['query'])
+    for base_url, paths in aggregated.items():
+        for page_path, data in paths.items():
+            if 'city' in data:
+                aggregated[base_url][decoded_path]['city'] = get_top_n(data['city'])
+            if 'country' in data:
+                aggregated[base_url][decoded_path]['country'] = get_top_n(data['country'])
+            if 'query' in data:
+                aggregated[base_url][decoded_path]['query'] = get_top_n(data['query'])
 
     return aggregated
