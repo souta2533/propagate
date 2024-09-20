@@ -3,12 +3,15 @@ import React, { useState, useRef, useEffect } from "react";
 import { Settings, UserRoundPen, Mail, LogOut, MailCheck } from "lucide-react";
 import { FaBars, FaTimes } from "react-icons/fa";
 import { Button } from "../ui/Button";
+//import { Select } from "../components/ui/Select";
+import { useRouter } from "next/router";
 import "../../styles/headers.css";
 
 const Header = ({ isOpen, toggleMenu, handleSubmit, url, setUrl }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
+  const router = useRouter();
 
   const toggleDropdown = () => {
     setIsDropdownOpen((prevState) => !prevState);
@@ -29,7 +32,26 @@ const Header = ({ isOpen, toggleMenu, handleSubmit, url, setUrl }) => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [dropdownRef]);
+  }, []);
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleSubmit(e);
+    }
+  };
+
+  {
+    /*
+  const handlePropertyChange = (e) => {
+    const selectedPropertyId = e.target.value;
+    console.log("Selected Property Change:", selectedPropertyId);
+    setSelectedPropertyId(selectedPropertyId); // 追加
+    const property = filteredProperties.find(
+      (p) => p.properties_id === selectedPropertyId
+    );
+    setSelectedProperty(property);
+  };*/
+  }
 
   return (
     <header className="header">
@@ -43,11 +65,26 @@ const Header = ({ isOpen, toggleMenu, handleSubmit, url, setUrl }) => {
             type="text"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://example.com"
+            //onKeyDown={handleKeyDown} //Enterキーを押すと処理が実行
+            placeholder="URLを入力してください"
             className="header-input"
           />
-          {/*<button type="submit"></button>*/}
+          {/*<button type="submit">submit</button>*/}
+          {/*errorMessage && <p className="error">{errorMessage}</p>*/}
         </form>
+        {/*<Select
+          onChange={handlePropertyChange} // ユーザーがプロパティを選択したときに実行
+          value={selectedPropertyId} // 現在選択されているプロパティID
+        >
+          <option value="" disabled>
+            プロパティを選択してください
+          </option>
+          {filteredProperties.map((property) => (
+            <option key={property.properties_id} value={property.properties_id}>
+              {property.properties_name}
+            </option>
+          ))}
+        </Select>*/}
       </div>
       <div className="header-right">
         <Button
@@ -58,7 +95,7 @@ const Header = ({ isOpen, toggleMenu, handleSubmit, url, setUrl }) => {
           onClick={toggleDropdown}
         >
           <Settings className="icon" />
-          <span className="sr-only">Settings</span>
+          <span className="sr-only"></span>
         </Button>
         {isDropdownOpen && (
           <div ref={dropdownRef} className="dropdown-menu">

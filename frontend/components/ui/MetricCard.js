@@ -15,13 +15,13 @@ const getComparisonColor = (change) => {
   } else if (change < 0) {
     return "red";
   } else {
-    return "black";
+    return "gray";
   }
 };
 
 const MetricCard = ({ title, value, previousValue, isActive, onClick }) => {
   //前月比を計算
-  const monthOverMonth = calculateMonthOverMonth(value, previousValue);
+  const monthOverMonth = ((value - previousValue) / (previousValue || 1)) * 100;
 
   return (
     <div

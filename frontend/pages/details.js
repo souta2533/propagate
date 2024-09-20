@@ -4,7 +4,6 @@ import { Button } from "../components/ui/Button";
 import {
   Select,
   SelectTrigger,
-  SelectValue,
   SelectContent,
   SelectItem,
 } from "../components/ui/Select";
@@ -158,11 +157,11 @@ export default function AnalyticsDashboard() {
         return <div>ページ閲覧数のコンテンツ</div>;
       case "CV":
         return <div>お問い合わせ数のコンテンツ</div>;
-      case "UU":
+      case "PVC":
         return <div>ページ訪問者数のコンテンツ</div>;
-      case "IR":
+      case "UU":
         return <div>セッション数のコンテンツ</div>;
-      case "DS":
+      case "CVR":
         return <div>お問い合わせ率のコンテンツ</div>;
       case "UA":
         return <div>流入元デバイスのコンテンツ</div>;
@@ -263,9 +262,7 @@ export default function AnalyticsDashboard() {
         <div className="filter-section">
           <div>
             <Select value={selectedURL} onValueChange={handleURLChange}>
-              <SelectTrigger className="custom-select-trigger">
-                <SelectValue placeholder="URLを選択" />
-              </SelectTrigger>
+              <SelectTrigger className="custom-select-trigger"></SelectTrigger>
 
               <SelectContent className="custom-select-content">
                 {urlList.map((url) => (
@@ -290,9 +287,7 @@ export default function AnalyticsDashboard() {
           </div>
           <div className="date-range">
             <Select value={dateRange} onValueChange={handleDateRangeChange}>
-              <SelectTrigger className="select-trigger">
-                <SelectValue placeholder="期間を選択" />
-              </SelectTrigger>
+              <SelectTrigger className="select-trigger"></SelectTrigger>
               <SelectContent className="select-content">
                 <SelectItem value="過去 7 日間" className="select-menu">
                   過去 7 日間
@@ -357,8 +352,8 @@ export default function AnalyticsDashboard() {
               セッション数
             </button>
             <button
-              onClick={() => handleMetricChange("IR")}
-              className={`tab ${selectedMetric === "IR" ? "active" : ""}`}
+              onClick={() => handleMetricChange("CVR")}
+              className={`tab ${selectedMetric === "CVR" ? "active" : ""}`}
             >
               お問い合わせ率
             </button>

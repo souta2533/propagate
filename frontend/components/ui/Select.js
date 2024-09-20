@@ -3,7 +3,13 @@ import * as SelectPrimitive from "@radix-ui/react-select";
 import { Check, ChevronDown } from "lucide-react";
 import { cn } from "../../lib/utils";
 
-const Select = SelectPrimitive.Root;
+const Select = ({ value, onValueChange, children }) => {
+  return (
+    <SelectPrimitive.Root value={value} onValueChange={onValueChange}>
+      {children}
+    </SelectPrimitive.Root>
+  );
+};
 
 const SelectTrigger = React.forwardRef(
   ({ className, children, ...props }, ref) => (
@@ -53,21 +59,12 @@ const SelectContent = React.forwardRef(
 );
 SelectContent.displayName = SelectPrimitive.Content.displayName;
 
-const SelectLabel = React.forwardRef(({ className, ...props }, ref) => (
-  <SelectPrimitive.Label
-    ref={ref}
-    className={cn("py-1.5 pl-8 pr-2 text-sm font-semibold", className)}
-    {...props}
-  />
-));
-SelectLabel.displayName = SelectPrimitive.Label.displayName;
-
 const SelectItem = React.forwardRef(
   ({ className, children, ...props }, ref) => (
     <SelectPrimitive.Item
       ref={ref}
       className={cn(
-        "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+        "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground",
         className
       )}
       {...props}
@@ -77,61 +74,10 @@ const SelectItem = React.forwardRef(
           <Check className="h-4 w-4" />
         </SelectPrimitive.ItemIndicator>
       </span>
-
       <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
     </SelectPrimitive.Item>
   )
 );
 SelectItem.displayName = SelectPrimitive.Item.displayName;
 
-const SelectSeparator = React.forwardRef(({ className, ...props }, ref) => (
-  <SelectPrimitive.Separator
-    ref={ref}
-    className={cn("-mx-1 my-1 h-px bg-muted", className)}
-    {...props}
-  />
-));
-SelectSeparator.displayName = SelectPrimitive.Separator.displayName;
-
-/*selectの基本スタイルを指定*/
-const customStyles = {
-  control: (provided) => ({
-    ...provided,
-    backgroundColor: "white",
-    border: "1px solid #ccc",
-    padding: "5px",
-  }),
-  menu: (provided) => ({
-    ...provided,
-    backgroundColor: "#f9f9f9",
-    border: "1px solid #ddd",
-  }),
-  option: (provided, state) => ({
-    ...provided,
-    padding: "10px",
-    backgroundColor: state.isFocused ? "#e0e0e0" : "#fff",
-    color: state.isSelected ? "#333" : "#000",
-    cursor: "pointer",
-  }),
-};
-
-const Dropdown = () => (
-  <Select
-    styles={customStyles}
-    options={[
-      { value: "option1", label: "Option 1" },
-      { value: "option2", label: "Option 2" },
-    ]}
-  />
-);
-
-export {
-  Select,
-  SelectGroup,
-  SelectValue,
-  SelectTrigger,
-  SelectContent,
-  SelectLabel,
-  SelectItem,
-  SelectSeparator,
-};
+export { Select, SelectTrigger, SelectContent, SelectItem };
