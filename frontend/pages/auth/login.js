@@ -1,7 +1,7 @@
 import React from "react";
 import { useState } from "react";
 import { useRouter } from "next/router";
-import { supabase } from '../../lib/supabaseClient';
+import { supabase } from "../../lib/supabaseClient";
 import Link from "next/link";
 import "../../styles/login.css";
 
@@ -27,15 +27,15 @@ export default function Login() {
 
     // Supabaseのクライアントを直接使用してログイン
     const { error, data } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      email,
+      password,
     });
 
     if (error) {
-        console.error('ログインエラー: ', error.message);
+      console.error("ログインエラー: ", error.message);
     } else {
-        localStorage.setItem("supabaseSession", JSON.stringify(data.session));
-        router.push('/dashboard');
+      localStorage.setItem("supabaseSession", JSON.stringify(data.session));
+      router.push("/dashboards");
     }
 
     // if (res.ok) {
