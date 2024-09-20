@@ -3,7 +3,11 @@ from urllib.parse import urlparse, unquote
 
 
 NUM = 30
-
+def get_top_n(data_dict, n=NUM):
+        """
+        ソートして上位n件を返す関数
+        """
+        return dict(sorted(data_dict.items(), key=lambda x: x[1], reverse=True)[:n])
 
 def aggregate_data(analytics_data, search_console_data):
     """
@@ -43,8 +47,8 @@ def aggregate_data(analytics_data, search_console_data):
                 "city": defaultdict(int),       # Analytics Dataから取得
                 "device_category": defaultdict(int),
                 "query": defaultdict(int),
-                "clicks": 0,                    
-                "impressions": 0,
+                "click": 0,                    
+                "impression": 0,
                 "ctr": 0,
                 "position": 0,
                 "country": defaultdict(int),
@@ -101,16 +105,16 @@ def aggregate_data(analytics_data, search_console_data):
                 "city": defaultdict(int),       # Analytics Dataから取得
                 "device_category": defaultdict(int),
                 "query": defaultdict(int),
-                "clicks": 0,                    
-                "impressions": 0,
+                "click": 0,                    
+                "impression": 0,
                 "ctr": 0,
                 "position": 0,
                 "country": defaultdict(int),
             }
         
         # クエリの集計
-        aggregated[base_url][decoded_path]['clicks'] += entry.get('clicks', 0)
-        aggregated[base_url][decoded_path]['impressions'] += entry.get('impressions', 0)
+        aggregated[base_url][decoded_path]['click'] += entry.get('click', 0)
+        aggregated[base_url][decoded_path]['impression'] += entry.get('impression', 0)
         aggregated[base_url][decoded_path]['ctr'] += entry.get('ctr', 0)
         aggregated[base_url][decoded_path]['position'] += entry.get('position', 0)
 
@@ -134,16 +138,15 @@ def aggregate_data(analytics_data, search_console_data):
     # CTRの平均値を計算
     for base_url, paths in aggregated.items():
         for path, data in paths.items():
-            if data['impressions'] > 0:
-                data['ctr'] = (data['clicks'] / data['impressions']) * 100
+            if data['impression'] > 0:
+                data['ctr'] = (data['click'] / data['impression']) * 100
             else:
                 data['ctr'] = 0.0
 
-
     # Sortして上位30件を取得する関数
-    def get_top_n(data_dict):
-        sorted_items = sorted(data_dict.items(), key=lambda x: x[1], reverse=True)
-        return dict(sorted_items[:NUM])
+    # def get_top_n(data_dict):
+    #     sorted_items = sorted(data_dict.items(), key=lambda x: x[1], reverse=True)
+    #     return dict(sorted_items[:NUM])
     
     # city, country, queryは上位30件のみ渡す
     for base_url, paths in aggregated.items():
@@ -176,8 +179,8 @@ def aggregate_by_url(aggregated_data):
             "city": defaultdict(int),       # Analytics Dataから取得
             "device_category": defaultdict(int),
             "query": defaultdict(int),
-            "clicks": 0,                    
-            "impressions": 0,
+            "click": 0,                    
+            "impression": 0,
             "ctr": 0,
             "position": 0,
             "country": defaultdict(int),
@@ -191,8 +194,8 @@ def aggregate_by_url(aggregated_data):
             url_summary[base_url]["sessions"] += data["sessions"]
             url_summary[base_url]["engaged_sessions"] += data["engaged_sessions"]
             url_summary[base_url]["total_users"] += data["total_users"]
-            url_summary[base_url]["clicks"] += data["clicks"]
-            url_summary[base_url]["impressions"] += data["impressions"]
+            url_summary[base_url]["click"] += data["click"]
+            url_summary[base_url]["impression"] += data["impression"]
             url_summary[base_url]["ctr"] += data["ctr"]
             url_summary[base_url]["position"] += data["position"]
 
@@ -213,9 +216,17 @@ def aggregate_by_url(aggregated_data):
             url_summary[base_url]["conversion_rate"] = 0.0
         
         # CTRの平均値を計算
-        if url_summary[base_url]["impressions"] > 0:
-            url_summary[base_url]["ctr"] = (url_summary[base_url]["clicks"] / url_summary[base_url]["impressions"]) * 100
+        if url_summary[base_url]["impression"] > 0:
+            url_summary[base_url]["ctr"] = (url_summary[base_url]["click"] / url_summary[base_url]["impression"]) * 100
         else:
             url_summary[base_url]["ctr"] = 0.0
+
+        # city, country, queryは上位30件のみ渡す
+        if 'city' in url_summary[base_url]:
+            url_summary[base_url]['city'] = get_top_n(url_summary[base_url]['city'])
+        if 'country' in url_summary[base_url]:
+            url_summary[base_url]['country'] = get_top_n(url_summary[base_url]['country'])
+        if 'query' in url_summary[base_url]:
+            url_summary[base_url]['query'] = get_top_n(url_summary[base_url]['query'])
 
     return url_summary
