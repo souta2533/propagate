@@ -10,7 +10,7 @@ from utils.batch import batch_process
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 log = logging.getLogger("uvicorn")
 
-NUM_DATA = 200
+# NUM_DATA = 200
 
 
 class PropagateAccountTable:
@@ -568,7 +568,7 @@ async def save_search_console_data(property_id, data, batch_size=50):
         print(f"Property ID: {property_id}")
         print(f"Total data: {len(data)}")
         # バッチ処理
-        for i in range(0, NUM_DATA, batch_size):
+        for i in range(0, len(data), batch_size):
             print(f"Processing batch {i} to {i + batch_size}")
             batch = data[i:i + batch_size]
             save_batch_search_console_data(batch, property_id)
