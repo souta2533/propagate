@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { supabase } from "../lib/supabaseClient";
+import { fetchAggregatedData } from "../lib/getData";
 import DateRange from "../components/ui/DateRange"; // 日付範囲選択のコンポーネント
 import { Card, CardContent } from "../components/ui/Card";
 import {
@@ -220,6 +221,7 @@ const Dashboard = () => {
     }
   };
 
+  // Analytics Dataの取得
   useEffect(() => {
     const fetchAnalyticsData = async () => {
       if (!session) {
@@ -307,6 +309,7 @@ const Dashboard = () => {
     fetchAnalyticsData();
   }, [session]);
 
+  // Search Console Dataの取得
   useEffect(() => {
     /**
      *  以下ではGoogle Search Consoleのデータを取得する処理を追加
