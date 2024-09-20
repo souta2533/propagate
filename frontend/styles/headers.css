@@ -2,6 +2,43 @@
   position: relative;
 }
 
+/* ヘッダー */
+.header {
+  background-color: #ffffff;
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 10000;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px; /* space-x-4 */
+}
+
+.header-title {
+  font-size: 20px; /* text-xl */
+  font-weight: 700; /* font-bold */
+  margin: 0;
+}
+
+.header-input {
+  width: 20rem; /* w-80 */
+  padding: 10px;
+  border-radius: 10px;
+  border: 2px solid #7272722f;
+}
+
+.header-button {
+  /* スタイルはButtonコンポーネントで管理 */
+  border: none;
+  background-color: #ffffff;
+}
+
 .dropdown-menu {
   position: absolute;
   top: 63px; /* ヘッダーの下にメニューを表示するための位置調整 */

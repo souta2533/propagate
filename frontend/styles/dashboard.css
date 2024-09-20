@@ -29,91 +29,9 @@
   justify-content: space-between;
 }
 
-/* ヘッダー */
-.header {
-  background-color: #ffffff;
-  padding: 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #e5e7eb;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  z-index: 10000;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 16px; /* space-x-4 */
-}
-
-.header-title {
-  font-size: 20px; /* text-xl */
-  font-weight: 700; /* font-bold */
-  margin: 0;
-}
-
-.header-input {
-  width: 20rem; /* w-80 */
-  padding: 10px;
-  border-radius: 10px;
-  border: 2px solid #7272722f;
-}
-
-.header-button {
-  /* スタイルはButtonコンポーネントで管理 */
-  border: none;
-  background-color: #ffffff;
-}
-
-/*サイドバーメニュー*/
-.sidebar {
-  display: block;
-  background-color: #ffffff;
-  width: 20%;
-  border-right: 3px solid #7272722f;
-  transition: transform 0.3s ease-in-out;
-}
-
-/*sidebarのmenubutton*/
-.menu-list {
-  width: 100%;
-  padding-top: 50px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.menu-button {
-  width: 100%;
-  background-color: #ffffff;
-  border: none;
-  padding: 10px;
-  display: flex;
-}
-
-.menu-button:hover {
-  background-color: #f9fafb;
-}
-
-.icon {
-  min-height: 20px;
-  min-width: 20px;
-  margin-right: 10px;
-}
-
-.icon-text {
-  text-align: left;
-  font-weight: 600px;
-  display: flex;
-  align-items: center;
-  padding: 10px;
-}
-
 .chart-content {
   border: 1px solid #f6f8f9;
   width: 80%;
-  padding: 5px;
 }
 
 /* メトリックカード */
@@ -184,6 +102,8 @@
   padding: 10px;
   text-align: right;
   max-width: 120px;
+  display: inline-flex;
+  align-items: center; /* 垂直方向に中央揃え */
 }
 
 .dashboard-title {
@@ -193,7 +113,14 @@
 }
 
 .select-trigger {
-  width: 180px; /* w-[180px] */
+  padding: 12px 24px; /* 上下に12px、左右に24pxの余白を追加 */
+  text-align: right; /* テキストを右寄せ */
+  display: flex;
+  align-items: center; /* アイコンとテキストを縦方向に中央揃え */
+  justify-content: space-between; /* アイコンとテキストを両端に配置 */
+  border: 1px solid #ddd; /* 境界線の色を指定 */
+  border-radius: 4px; /* 角を丸める */
+  background-color: #fff; /* 背景色を指定 */
 }
 
 .chart-card-content {

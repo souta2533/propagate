@@ -3,6 +3,7 @@ import React from "react";
 import { Button } from "../ui/Button";
 import { Home, BarChart2, FileText } from "lucide-react";
 import { useRouter } from "next/router";
+import "../../styles/sidebar.css";
 
 const Sidebar = ({ isOpen }) => {
   const router = useRouter();

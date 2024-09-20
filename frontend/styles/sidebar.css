@@ -1,0 +1,44 @@
+/*サイドバーメニュー*/
+.sidebar {
+  display: block;
+  background-color: #ffffff;
+  width: 20%;
+  border-right: 3px solid #7272722f;
+  transition: transform 0.3s ease-in-out;
+}
+/*sidebarのmenubutton*/
+.menu-list {
+  width: 100%;
+  padding-top: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.menu-button {
+  width: 100%;
+  background-color: #ffffff;
+  border: none;
+  padding: 10px;
+  display: inline-flex;
+  align-items: center; /* 垂直方向に中央揃え */
+}
+
+.menu-button:hover {
+  background-color: #f9fafb;
+}
+
+.icon-text {
+  text-align: left;
+  font-weight: 600px;
+  display: flex;
+  align-items: center;
+  padding: 10px;
+}
+
+.icon {
+  vertical-align: middle;
+  min-height: 20px;
+  min-width: 20px;
+  margin-right: 10px;
+}
