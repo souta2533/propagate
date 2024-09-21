@@ -25,7 +25,8 @@ export const buttonVariants = cva(
       variant: "default",
       size: "default",
     },
-  }
+  },
+  { base: "font-family: 'Noto Sans JP', sans-serif;" }
 );
 
 export const Button = React.forwardRef(

@@ -31,18 +31,16 @@ const MetricCard = ({ title, value, previousValue, isActive, onClick }) => {
       <div className="metric-card-header">
         <h3>{title}</h3> {/* カードのタイトルを表示 */}
       </div>
-      <div className="metric-card-content">
-        <div className="metric-value">
-          {value ? value.toLocaleString() : "0"}{" "}
-          {/* 数字をフォーマットして表示 */}
-        </div>
-        <div
-          className="metric-comparison"
-          style={{ color: getComparisonColor(monthOverMonth) }}
-        >
-          {monthOverMonth !== 0 ? `${monthOverMonth.toFixed(2)}%` : "±0"}
-          {monthOverMonth > 0 ? "▲" : monthOverMonth < 0 ? "▼" : ""}
-        </div>
+      <div className="metric-value">
+        {value ? value.toLocaleString() : "0"}{" "}
+        {/* 数字をフォーマットして表示 */}
+      </div>
+      <div
+        className="metric-comparison"
+        style={{ color: getComparisonColor(monthOverMonth) }}
+      >
+        {monthOverMonth !== 0 ? `${monthOverMonth.toFixed(2)}%` : "±0"}
+        {monthOverMonth > 0 ? "▲" : monthOverMonth < 0 ? "▼" : ""}
       </div>
     </div>
   );

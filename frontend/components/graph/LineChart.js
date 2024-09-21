@@ -11,29 +11,30 @@ const LineChart = ({ data, dataKey }) => {
       {
         label: dataKey,
         data: data.map((item) => item[dataKey]),
-        borderColor: "#000000",
-        backgroundColor: "rgba(136, 132,216,0.2 )",
+        borderColor: "#3399cc",
+        backgroundColor: "rgba(64, 224,208,0.2 )",
         fill: true,
         tension: 0.1,
+        borderWidth: 1,
+        pointRadius: 0,
       },
     ],
   };
 
   const options = {
     responsive: true,
-    maintainAspectRatio: true, //元の比を守る
+    maintainAspectRatio: false, //元の比を守る
     scales: {
       x: {
-        title: {
-          display: true,
-          text: "Date",
+        ticks: {
+          autoSkip: true,
+          maxTicksLimit: 5, //X軸のラベル表示
+        },
+        grid: {
+          display: false,
         },
       },
       y: {
-        title: {
-          display: true,
-          text: "Value",
-        },
         beginAtZero: true, //Y軸を０に設定
       },
     },
@@ -42,7 +43,7 @@ const LineChart = ({ data, dataKey }) => {
         enabled: true,
       },
       legend: {
-        display: false,
+        display: false, //凡例
       },
     },
   };
@@ -55,7 +56,7 @@ const LineChart = ({ data, dataKey }) => {
   };
 
   return (
-    <div className="App" style={divStyle}>
+    <div className="line-chart" style={divStyle}>
       <Line data={graphData} options={options} />
     </div>
   );

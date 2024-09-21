@@ -1,0 +1,62 @@
+[data-state="open"] .content {
+  animation: fadeIn 0.5s ease-in-out forwards;
+}
+
+[data-state="closed"] .content {
+  animation: fadeOut 0.5s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+.select-trigger {
+  background-color: #ffffff;
+  border: none;
+}
+
+.select-content {
+  opacity: 1;
+  z-index: 1000;
+  background-color: #ffffff;
+  border: 1px solid #cccccc;
+  border-radius: 10px;
+}
+
+.select-items {
+  background-color: #ffffff;
+  border: 1px solid #cccccc;
+  overflow: hidden;
+}
+
+.select-item {
+  background-color: #ffffff;
+  padding: 10px;
+  align-items: center;
+}
+
+.dropdown-entering {
+  animation: dropdown 1s ease-out forwards;
+}
+
+.dropdown-exiting {
+  animation: dropdown 1s ease-in reverse forwards;
+}

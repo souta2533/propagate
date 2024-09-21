@@ -1,9 +1,10 @@
+@import url(http://fonts.googleapis.com/earlyaccess/notosansjp.css);
 /*サイドバーメニュー*/
 .sidebar {
   display: block;
   background-color: #ffffff;
   width: 20%;
-  border-right: 3px solid #7272722f;
+  border-right: 1px solid #cccccc;
   transition: transform 0.3s ease-in-out;
 }
 /*sidebarのmenubutton*/
@@ -19,9 +20,10 @@
   width: 100%;
   background-color: #ffffff;
   border: none;
-  padding: 10px;
+  padding: 10px 10px 10px 15px;
   display: inline-flex;
   align-items: center; /* 垂直方向に中央揃え */
+  font-family: "Noto sans jp", sans-serif;
 }
 
 .menu-button:hover {
@@ -41,4 +43,19 @@
   min-height: 20px;
   min-width: 20px;
   margin-right: 10px;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* 半透明の黒で背景を暗くする */
+  z-index: 1000; /* 他のコンテンツよりも前面に表示 */
+  display: none; /* デフォルトでは非表示 */
+}
+
+.overlay.active {
+  display: block; /* アクティブ時に表示 */
 }

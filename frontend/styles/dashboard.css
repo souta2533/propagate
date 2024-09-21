@@ -1,9 +1,12 @@
 /* dashboard.css */
+@import url(http://fonts.googleapis.com/earlyaccess/notosansjp.css);
 /* レイアウト全体 */
 .dashboard-container {
   display: flex;
   flex-direction: column;
-  background-color: #f3f4f6; /* bg-gray-100 */
+  background-color: #ffffff; /* bg-gray-100 */
+  font-family: "Noto Sans JP", sans-serif;
+  font-size: 100%;
 }
 
 /* メインコンテンツ */
@@ -25,19 +28,25 @@
   display: flex;
   flex: 1;
   padding: 0;
-  margin-left: 10px;
-  justify-content: space-between;
 }
 
-.chart-content {
-  border: 1px solid #f6f8f9;
+.center-content {
   width: 80%;
+  margin: 30px;
+  border: 1px solid #7272722f;
+  border-radius: 15px;
+  overflow: hidden;
 }
 
 /* メトリックカード */
 .metric-card {
-  border-right: 1px solid #f9fafb;
-  padding: 10px 10px 0 10px;
+  background-color: #72727211;
+  border-right: 1px solid #f3f3f3;
+  padding: 10px 10px 10px 10px;
+  transition: 0.5s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .metric-card-content {
@@ -46,7 +55,7 @@
 }
 
 .metrics-grid {
-  background-color: white;
+  background-color: #ffffff;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 0;
@@ -57,35 +66,31 @@
 }
 
 .metric-card:hover {
-  background-color: #f9fafb;
+  background-color: #ffffff;
+  transition: 0.5s;
 }
 
 .metric-card.active {
-  background-color: #f9fafb;
-  border-bottom: 2px solid #59e3d0;
+  background-color: #ffffff;
 }
 
 .metric-card-header {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  padding-bottom: 8px; /* pb-2 */
-}
-
-.metric-card-title {
-  font-size: 0.875rem; /* text-sm */
-  font-weight: 600; /* font-medium */
-  margin: 0;
+  font-size: 10px;
+  color: #666666;
 }
 
 .metric-value {
-  font-size: 2rem; /* text-2xl */
-  font-weight: 700; /* font-bold */
+  font-size: 25px;
+  font-weight: 700;
 }
 
-.metric-subtext {
-  font-size: 0.75rem; /* text-xs */
+.metric-comparison {
+  font-size: 15px; /* text-xs */
   color: #f9fafb; /* text-muted-foreground */
+}
+
+.chart-content {
+  padding: 10px;
 }
 
 /*メインのヘッダ*/
@@ -93,17 +98,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px;
-}
-
-.dashboard-header button {
-  background-color: #ffffff;
-  border: none;
-  padding: 10px;
-  text-align: right;
-  max-width: 120px;
-  display: inline-flex;
-  align-items: center; /* 垂直方向に中央揃え */
+  padding: 0 10px 0 10px;
+  border-bottom: 1px solid #cccccc;
 }
 
 .dashboard-title {
@@ -113,30 +109,45 @@
 }
 
 .select-trigger {
-  padding: 12px 24px; /* 上下に12px、左右に24pxの余白を追加 */
-  text-align: right; /* テキストを右寄せ */
+  padding: 10px 20px;
   display: flex;
   align-items: center; /* アイコンとテキストを縦方向に中央揃え */
-  justify-content: space-between; /* アイコンとテキストを両端に配置 */
-  border: 1px solid #ddd; /* 境界線の色を指定 */
-  border-radius: 4px; /* 角を丸める */
-  background-color: #fff; /* 背景色を指定 */
+  background-color: #ffffff; /* 背景色を指定 */
+  font-family: "Noto Sans JP", sans-serif;
+  border: none;
+}
+
+.select-menu {
+  width: auto;
+  padding: 5px 10px;
+  text-align: right;
+  font-family: "Noto Sans JP", sans-serif;
+  font-size: 15px;
+  border: none;
+  transition: 0.5s;
 }
 
 .chart-card-content {
-  background-color: #f9fafb;
+  width: 100%;
+  background-color: #ffffff;
   padding-top: 24px; /* pt-6 */
+}
+
+.chart-card-content canvas {
+  width: 100%;
 }
 
 /*詳細ページボタン*/
 .dashboard-details {
-  background-color: #f9fafb;
-  text-align: right;
+  text-align: left;
 }
 
 .details-button {
-  background-color: #f9fafb;
+  background-color: #f0f0f0;
   border: none;
+  border-radius: 20px;
+  padding: 5px 10px;
+  font-family: "Noto Sans JP", sans-serif;
 }
 
 .details-button:hover {
@@ -145,17 +156,19 @@
 
 /* 検索欄 */
 .dashboard-sidebar {
-  background-color: #f6f8f9;
-  margin-left: 10px;
-  width: auto;
-  border: 2px solid #f9fafb;
-  padding: 20px;
+  background-color: #ffffff;
+  margin-left: 5px;
+  margin-top: 30px;
+  width: 20%;
+  border: 1px solid #cccccc;
+  border-radius: 15px;
+  padding: 10px;
 }
 
 .sidebar-title {
-  font-size: 1.125rem; /* text-lg */
-  font-weight: 600; /* font-semibold */
-  margin: 8px 0; /* mb-4 */
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
 }
 
 .search-keywords {
@@ -202,24 +215,41 @@
 
 /*suggestのスペース*/
 .suggest-space {
+  padding: 20px;
   background-color: #ffffff;
   width: 100%;
-  height: 100px;
   margin: 20px 10px;
-  border: 1px solid #c7c7c7;
+  border: 1px solid #cccccc;
+  border-radius: 10px;
 }
 
 /* スマホサイズのみハンバーガーメニューを表示 */
 .hamburger-icon {
   display: none; /* デフォルトでは非表示 */
 }
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* 半透明の黒で背景を暗くする */
+  z-index: 10000; /* 他のコンテンツよりも前面に表示 */
+  display: none; /* デフォルトでは非表示 */
+}
+
+.overlay.active {
+  display: block; /* アクティブ時に表示 */
+}
+
 /* レスポンシブコンテナ */
 @media (max-width: 768px) {
-  html,
+  /*html,
   body {
     width: 100vw;
     height: 100vh;
-  }
+  }*/
   .dashboard-container {
     display: flex;
     flex-direction: column;
@@ -228,8 +258,7 @@
   }
 
   .header {
-    width: 100%;
-    height: 100%;
+    width: 100vw;
     min-width: 768px;
   }
   .dashboard-main {
@@ -241,7 +270,6 @@
   .dashboard-header {
     width: 100%;
     height: 100%;
-    min-width: 768px;
   }
 
   .sidebar {
@@ -268,11 +296,14 @@
   }
 
   .dashboard-main-right {
-    width: 100%;
-    height: 100%;
+    width: 100vw;
     display: flex;
     flex-direction: column;
     margin: 0;
+  }
+
+  .center-content {
+    width: 100%;
   }
 
   .metrics-grid {
@@ -295,7 +326,7 @@
   }
 
   .chart-content {
-    width: 100vh;
+    width: 100%;
   }
 
   .dashboard-sidebar {

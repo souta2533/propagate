@@ -588,19 +588,30 @@ const Dashboard = () => {
               onValueChange={setDateRange}
               className="dashboard-select"
             >
-              <SelectTrigger className="select-trigger">
+              <SelectTrigger
+                className="select-trigger"
+                onClick={() => setIsOpen(!isOpen)}
+              >
                 {dateRange || "日付範囲を選択してください"}
               </SelectTrigger>
-              <SelectContent className="select-content">
-                <SelectItem value="過去7日間">過去7日間</SelectItem>
-                <SelectItem value="過去30日間">過去30日間</SelectItem>
-                <SelectItem value="過去90日間">過去90日間</SelectItem>
-                <SelectItem value="カスタム">カスタム</SelectItem>
+              <SelectContent className={isOpen ? "open" : "closed"}>
+                <SelectItem value="過去7日間" className="select-menu">
+                  過去7日間
+                </SelectItem>
+                <SelectItem value="過去30日間" className="select-menu">
+                  過去30日間
+                </SelectItem>
+                <SelectItem value="過去90日間" className="select-menu">
+                  過去90日間
+                </SelectItem>
+                <SelectItem value="カスタム" className="select-menu">
+                  カスタム
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="dashboard-main-right">
-            <div className="chart-content">
+            <div className="center-content">
               <div className="metrics-grid">
                 {metrics.map((metric, index) => (
                   <MetricCard
@@ -613,19 +624,23 @@ const Dashboard = () => {
                   />
                 ))}
               </div>
-              <Card className="chart-card">
-                <CardContent className="chart-card-content">
-                  {renderContent()}{" "}
-                  {/* ここで選択されたメトリクスに応じたグラフを表示 */}
-                </CardContent>
-              </Card>
-              <div className="dashboard-details">
-                <button
-                  onClick={() => router.push("/details")}
-                  className="details-button"
-                >
-                  ページ別詳細はこちら
-                </button>
+              <div className="chart-content">
+                <Card className="chart-card">
+                  <CardContent className="chart-card-content">
+                    <div className="chart">
+                      {renderContent()}{" "}
+                      {/* ここで選択されたメトリクスに応じたグラフを表示 */}
+                    </div>
+                  </CardContent>
+                </Card>
+                <div className="dashboard-details">
+                  <button
+                    onClick={() => router.push("/details")}
+                    className="details-button"
+                  >
+                    詳細
+                  </button>
+                </div>
               </div>
             </div>
             <div className="dashboard-sidebar">
