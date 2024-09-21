@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { supabase } from "../lib/supabaseClient";
+import { fetchAggregatedDataFromDashboard } from "../lib/getData";
 import DateRange from "../components/ui/DateRange"; // 日付範囲選択のコンポーネント
 import { Card, CardContent } from "../components/ui/Card";
 import {
@@ -135,7 +136,16 @@ const Dashboard = () => {
   const [selectedAccountId, setSelectedAccountId] = useState(null);
   const [filteredProperties, setFilteredProperties] = useState([]);
   const [searchConsoleData, setSearchConsoleData] = useState([]);
-
+  const [startDate, setStartDate] = useState(() => {
+    const date = new Date();
+    date.setMonth(date.getMonth() - 1); // 今日から1ヶ月前の日付を設定
+    return date.toISOString().split("T")[0]; // YYYY-MM-DD 形式で取得
+  });
+  const [endDate, setEndDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
+  const [aggregatedData, setAggregatedData] = useState({});
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////
   const [propertyId, setPropertyId] = useState(null);
   const [chartData, setChartData] = useState([]);
   const [dateRange, setDateRange] = useState("過去7日間");
@@ -387,6 +397,7 @@ const Dashboard = () => {
       setFilteredData(data);
     }
   }, [propertyId]);
+
   // プロパティIDに基づいてanalyticsデータを取得
 
   // 日付範囲に基づいてデータをフィルタリング
@@ -401,6 +412,58 @@ const Dashboard = () => {
     }
   }, [filteredData, dateRange]);
 
+  // 集計データを取得
+  useEffect(() => {
+    const fetchAggregatedData = async () => {
+      if (
+        !session ||
+        !propertyIds ||
+        propertyIds.length === 0 ||
+        !startDate ||
+        !endDate
+      ) {
+        console.warn("Property ID, Start Date, or End Date is missing.");
+        return;
+      }
+
+      const jwtToken = session.access_token;
+      if (!jwtToken) {
+        console.error("JWT Token is missing.");
+        return;
+      }
+
+      const aggregatedDataByPropertyId = {};
+
+      for (const property of propertyIds) {
+        const propertyId = property.properties_id;
+        try {
+          const aggregatedData = await fetchAggregatedDataFromDashboard(
+            jwtToken,
+            propertyId,
+            startDate,
+            endDate
+          );
+
+          if (aggregatedData) {
+            aggregatedDataByPropertyId[propertyId] = aggregatedData;
+          }
+        } catch (error) {
+          console.error("Error fetching aggregated data:", error);
+        }
+      }
+      console.log("Aggregated Data:", aggregatedDataByPropertyId); // デバッグ用ログ
+      setAggregatedData(aggregatedDataByPropertyId);
+    };
+
+    fetchAggregatedData();
+  }, [session, propertyIds, startDate, endDate]);
+
+  // 最新のデータを取得
+  /*const currentData = {
+      PV: dataForDateRange.reduce((acc, curr) => acc + curr.PV, 0),
+      CV: dataForDateRange.reduce((acc, curr) => acc + curr.CV, 0),
+      UU: dataForDateRange.reduce((acc, curr) => acc + curr.UU, 0),
+    };*/
   const calculateCurrentAndPreviousData = (filteredData, previousData) => {
     let totalPV = 0,
       totalCV = 0,
