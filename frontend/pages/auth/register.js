@@ -54,42 +54,49 @@ const Register = () => {
   };
 
   return (
-    <div className="container flex-center">
-      {/* 右上にログインリンクを配置 */}
-      <Link href="/auth/login" className="login-link">
-        ログインはこちら
-      </Link>
-      <div className="form-container">
-        <h1 className="text-center">新規会員登録</h1>
+    <div className="register-container">
+      <div className="register-form">
+        <h1 className="register-text">新規会員登録</h1>
         {error && <p className="error-msg">{error}</p>}
         {success && <p className="success-msg">{success}</p>}
-        <form onSubmit={handleRegister}>
+        <form className="main-form" onSubmit={handleRegister}>
           <div className="form-group">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email" className="text-group">
+              メール
+            </label>
             <input
               type="email"
               id="email"
-              className="form-input"
+              className="input-group"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
           <div className="form-group">
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password" className="text-group">
+              パスワード
+            </label>
             <input
               type="password"
               id="password"
-              className="form-input"
+              className="input-group"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
           </div>
-          <button type="submit" className="submit-btn">
-            Register
+          <button type="submit" className="register-button">
+            新規登録
           </button>
         </form>
+        <button
+          onClick={() => router.push("/auth/login")}
+          type="submit"
+          className="login-button"
+        >
+          ログインはこちら
+        </button>
       </div>
     </div>
   );

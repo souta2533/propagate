@@ -1,134 +1,132 @@
 /* login.css */
-body, html {
-    height: 100%;
-    margin: 0;
-    font-family: 'Arial', sans-serif;
-    background-color: #f8f8f8;
-    color: #333;
+@import url(https://fonts.googleapis.com/earlyaccess/notosansjp.css);
+
+.register-content {
+  display: flex;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+  padding: 30px 0;
+  margin: 0;
+  font-family: "Noto Sans JP", sans-serif;
+  font-size: 100%;
+  color: #333;
+  background-color: #9bcdf15f;
 }
 
-.min-h-screen {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    height: 100vh;
+.login-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background-color: #ffffff;
+  border-radius: 10px;
+  width: 30%;
+  height: 80%;
+  padding: 32px 48px;
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.1);
 }
 
-.flex-grow {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    background-color: #f8f8f8;
+.main-form {
+  width: 100%;
 }
 
-.w-full {
-    width: 100%;
+.login-text {
+  font-size: 20px;
 }
 
-.max-w-sm {
-    max-width: 24rem;
+.email-form {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  width: 100%;
 }
 
-.bg-white {
-    background-color: #fff;
+.email-text {
+  margin-bottom: 4px;
 }
 
-.rounded-lg {
-    border-radius: 0.5rem;
+.email-input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #cccccc;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
 }
 
-.shadow-md {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+.password-form {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  width: 100%;
 }
 
-.p-6 {
-    padding: 1.5rem;
+.password-text {
+  margin-bottom: 4px;
 }
 
-.text-2xl {
-    font-size: 1.5rem;
+.password-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #cccccc;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+  margin-bottom: 4px;
 }
 
-.font-bold {
-    font-weight: bold;
+.forget-password {
+  background-color: #ffffff;
+  border: none;
+  text-align: left;
+  margin-bottom: 15px;
 }
 
-.mb-6 {
-    margin-bottom: 1.5rem;
+.login-button {
+  width: 100%;
+  padding: 16px 0;
+  border: 2px solid #005bac;
+  border-radius: 10px;
+  color: #005bac;
+  background-color: #ffffff;
+  font-size: 18px;
+  font-family: "Noto Sans JP", sans-serif;
+  font-weight: 500px;
+  margin-bottom: 20px;
 }
 
-.text-center {
-    text-align: center;
+.login-button:hover {
+  background-color: #005bac;
+  color: white;
+  transition: 0.5s;
 }
 
-.text-red-500 {
-    color: #f56565;
+.register-button {
+  width: 100%;
+  padding: 16px 0;
+  border: none;
+  border-radius: 10px;
+  color: #ffffff;
+  background-color: #427ebe;
+  font-size: 18px;
+  font-family: "Noto Sans JP", sans-serif;
+  font-weight: 500px;
 }
 
-.mb-4 {
-    margin-bottom: 1rem;
-}
-
-.block {
-    display: block;
-}
-
-.text-gray-700 {
-    color: #4a5568;
-}
-
-.w-full {
-    width: 100%;
-}
-
-.p-2 {
-    padding: 0.5rem;
-}
-
-.border {
-    border: 1px solid #d2d6dc;
-}
-
-.rounded {
-    border-radius: 0.25rem;
-}
-
-.mt-1 {
-    margin-top: 0.25rem;
-}
-
-.bg-green-500 {
-    background-color: #48bb78;
-}
-
-.text-white {
-    color: #fff;
-}
-
-.py-3 {
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
-}
-
-.hover\:bg--600:hover {
-    background-color: #38a169;
-}
-
-.transition-colors {
-    transition: background-color 0.3s ease;
+.register-button:hover {
+  background-color: #005bac;
+  color: white;
+  transition: 0.5s;
 }
 
 /* 新規会員登録リンクのスタイル */
 .signup-link {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    font-size: 14px;
-    color: black; /* ブルー */
-    text-decoration: none;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 14px;
+  color: black; /* ブルー */
+  text-decoration: none;
 }
 
 .signup-link:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }

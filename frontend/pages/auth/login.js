@@ -54,51 +54,55 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* 新規会員登録リンクを右上に配置 */}
-      <Link href="/auth/register" className="signup-link">
-        新規会員登録はこちらー＞
-      </Link>
+    <div className="register-content">
       {/* ログインフォーム */}
-      <div className="flex-grow">
-        <div className="w-full max-w-sm bg-white rounded-lg shadow-md p-6">
-          <h1 className="text-2xl font-bold mb-6 text-center">ログイン</h1>
-          {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-          <form onSubmit={handleLogin}>
-            <div className="mb-4">
-              <label htmlFor="email" className="block text-gray-700">
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                className="w-full p-2 border border-gray-300 rounded mt-1"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div className="mb-6">
-              <label htmlFor="password" className="block text-gray-700">
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                className="w-full p-2 border border-gray-300 rounded mt-1"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
+      <div className="login-form">
+        <h1 className="login-text">ログイン</h1>
+        {error && <p className="error-message">{error}</p>}
+        <form className="main-form" onSubmit={handleLogin}>
+          <div className="email-form">
+            <label htmlFor="email" className="email-text">
+              メール
+            </label>
+            <input
+              type="email"
+              id="email"
+              className="email-input"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="password-form">
+            <label htmlFor="password" className="password-text">
+              パスワード
+            </label>
+            <input
+              type="password"
+              id="password"
+              className="password-input"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
             <button
-              type="submit"
-              className="w-full bg-green-500 text-white py-3 rounded-lg hover:bg--600 transition-colors"
+              onClick={() => router.push("/auth/register")}
+              className="forget-password"
             >
-              Log In
+              パスワードを忘れた方はこちら
             </button>
-          </form>
-        </div>
+            <button type="submit" className="login-button">
+              ログイン
+            </button>
+          </div>
+        </form>
+        <button
+          onClick={() => router.push("/auth/register")}
+          type="submit"
+          className="register-button"
+        >
+          新規登録はこちら
+        </button>
       </div>
     </div>
   );
