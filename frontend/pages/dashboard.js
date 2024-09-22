@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
+import { Search } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import { fetchAggregatedDataFromDashboard } from "../lib/getData";
-import DateRange from "../components/ui/DateRange"; // 日付範囲選択のコンポーネント
 import { Card, CardContent } from "../components/ui/Card";
 import {
   Select,
@@ -15,8 +15,6 @@ import Header from "../components/ui/Header";
 import MetricCard from "../components/ui/MetricCard";
 import Overlay from "../components/ui/Overlay";
 import LineChart from "../components/graph/LineChart";
-import BarChart from "../components/graph/BarChart";
-import PieChart from "../components/graph/PieChart";
 
 import "../styles/dashboard.css";
 
@@ -335,6 +333,8 @@ const Dashboard = () => {
       }
     }
     console.log("Found Property ID:", propertyId); // デバッグ用ログ
+    setPropertyId[propertyId];
+    setUrl[url];
     return propertyId;
   };
 
@@ -370,7 +370,7 @@ const Dashboard = () => {
 
     if (filteredAnalytics.length === 0) {
       console.warn("No analytics data found for Property ID:", propertyId);
-      return [];
+      return [0, 0, 0];
     }
 
     const analyticsData = filteredAnalytics.map((entry) => ({
@@ -397,11 +397,6 @@ const Dashboard = () => {
       setFilteredData(data);
     }
   }, [propertyId]);
-
-  // プロパティIDに基づいてanalyticsデータを取得
-
-  // 日付範囲に基づいてデータをフィルタリング
-  //const dataForDateRange = filterByDateRange(filteredData, dateRange);
 
   //要修正//////////////////////////////////////////////////////////////////////////////////
   // 前月のデータを取得
@@ -458,12 +453,6 @@ const Dashboard = () => {
     fetchAggregatedData();
   }, [session, propertyIds, startDate, endDate]);
 
-  // 最新のデータを取得
-  /*const currentData = {
-      PV: dataForDateRange.reduce((acc, curr) => acc + curr.PV, 0),
-      CV: dataForDateRange.reduce((acc, curr) => acc + curr.CV, 0),
-      UU: dataForDateRange.reduce((acc, curr) => acc + curr.UU, 0),
-    };*/
   const calculateCurrentAndPreviousData = (filteredData, previousData) => {
     let totalPV = 0,
       totalCV = 0,
@@ -539,7 +528,6 @@ const Dashboard = () => {
     if (!filteredData || filteredData.length === 0) {
       return <LineChart data={sampledata} dataKey="PV" />;
     }
-    <div>上欄にURLを入力してください</div>;
 
     if (selectedMetric === "PV (ページ閲覧数)") {
       return <LineChart data={filteredData} dataKey="PV" />;
@@ -555,6 +543,24 @@ const Dashboard = () => {
     }
     return <div>URLを入力してください</div>;
   };
+
+  function getQuery(searchData, searchId) {
+    // 最後の / を削除
+    const sanitizedUrl = url.replace(/\/+$/, "");
+    console.log(sanitizedUrl); // "https://www.propagateinc.com"
+
+    const queryData = searchData[searchId]?.[sanitizedUrl]?.query;
+
+    if (!queryData) {
+      return [];
+    }
+
+    const sortedEntries = Object.entries(queryData).sort((a, b) => b[1] - a[1]);
+    const topQueries = sortedEntries.slice(0, 7);
+    return topQueries;
+  }
+
+  const topQueries = getQuery(aggregatedData, propertyId);
 
   const SearchKeyword = ({ keyword, count }) => (
     <div className="search-keyword">
@@ -646,11 +652,11 @@ const Dashboard = () => {
             <div className="dashboard-sidebar">
               <h3 className="sidebar-title">検索キーワード</h3>
               <div className="search-keywords">
-                {searchKeywords.map((keywordItem, index) => (
+                {topQueries.map((Item, index) => (
                   <SearchKeyword
                     key={index}
-                    keyword={keywordItem.keyword}
-                    count={keywordItem.count}
+                    keyword={Item[0]}
+                    count={Item[1]}
                   />
                 ))}
               </div>
