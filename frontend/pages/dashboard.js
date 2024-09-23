@@ -2,9 +2,11 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { Search } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
+import { useSessionData } from "../hooks/useSessionData";
 import { useAnalyticsData  } from "../hooks/useAnalyticsData";
 import { useSearchConsoleData } from "../hooks/useSearchConsoleData";
-import { fetchAggregatedDataFromDashboard } from "../lib/getData";
+import { useAggregatedData } from "../hooks/useAggregatedData";
+import { fetchAggregatedData } from "../lib/getData";
 import { Card, CardContent } from "../components/ui/Card";
 import {
   Select,
@@ -150,6 +152,22 @@ const Dashboard = () => {
   const [filteredData, setFilteredData] = useState([]);
   const router = useRouter();
 
+  // Sessionの取得
+  const { fetchedSession, loading: sessionLoading } = useSessionData();
+  useEffect(() => {
+    if (sessionLoading) return; // sessionがないかロード中の場合は何もしない
+
+    if (!fetchedSession){
+      router.push("/auth/login");
+      return;
+    }
+
+    if (fetchedSession) {
+      console.log("Fetched Session: ", fetchedSession);
+      setSession(fetchedSession);
+    }
+  }, [router, fetchedSession, sessionLoading]);
+
   // データの初期化
   const [analyticsData, setAnalyticsData] = useState([]);
   const [propertyIds, setPropertyIds] = useState([]);
@@ -187,27 +205,72 @@ const Dashboard = () => {
     }
   }, [propertyIds, searchConsoleError, searchConsoleLoading, refetchSearchConsoleData]);
 
+  // 集計データを取得
+  const {data: fetchedAggregatedData, error: aggregatedError, isLoading: aggregatedLoading, refetch: refetchAggregatedData} = useAggregatedData(session, propertyIds, startDate, endDate);
+
+  useEffect(() => {
+    if (!session || !propertyIds.length || !startDate || !endDate || aggregatedLoading) return; // session, propertyIds, startDate
+
+    if (aggregatedError) {
+      console.error("Error fetching aggregated data:", aggregatedError);
+      refetchAggregatedData(session, propertyIds, startDate, endDate); // エラー時にリフェッチ
+    }
+
+    if (fetchedAggregatedData) {
+      console.log("Fetched Aggregated Data: ", fetchedAggregatedData);
+      setAggregatedData(fetchedAggregatedData);
+    };
+  }, [session, propertyIds, startDate, endDate, aggregatedError, aggregatedLoading, refetchAggregatedData]);
+
+  /** 以下日付変更が起こった際に集計データを取得する関数 */
+  useEffect(() => {
+    const fetchAggregatedData = async () => {
+      if (
+        !session ||
+        !propertyIds ||
+        propertyIds.length === 0 ||
+        !startDate ||
+        !endDate
+      ) {
+        console.warn("Property ID, Start Date, or End Date is missing.");
+        return;
+      }
+
+      const jwtToken = session.access_token;
+      if (!jwtToken) {
+        console.error("JWT Token is missing.");
+        return;
+      }
+
+      const aggregatedDataByPropertyId = {};
+
+      for (const property of propertyIds) {
+        const propertyId = property.properties_id;
+        try {
+          const aggregatedData = await fetchAggregatedDataFromDashboard(
+            jwtToken,
+            propertyId,
+            startDate,
+            endDate
+          );
+
+          if (aggregatedData) {
+            aggregatedDataByPropertyId[propertyId] = aggregatedData;
+          }
+        } catch (error) {
+          console.error("Error fetching aggregated data:", error);
+        }
+      }
+      console.log("Aggregated Data:", aggregatedDataByPropertyId); // デバッグ用ログ
+      setAggregatedData(aggregatedDataByPropertyId);
+    };
+
+    fetchAggregatedData();
+  }, [session, propertyIds, startDate, endDate]);
+
   // // データのデバッグ
   console.log("Analytics Data: ", analyticsData);
   console.log("Search Console Data: ", searchConsoleData);
-
-  // useEffectでsessionがnullのときにリトライ
-  useEffect(() => {
-    // セッションを取得する関数
-    const fetchSession = async () => {
-      const { data, error } = await supabase.auth.getSession();
-      if (error || !data?.session) {
-        console.error("Error fetching session: ", error);
-        router.push("/auth/login");
-        //setLoading(false);
-        return;
-      }
-      setSession(data.session);
-      //setLoading(false);
-    };
-    
-     fetchSession();
-  }, [router]); // session が null の場合に再度 fetchSession を実行
 
   // フォーム送信時の処理
   const handleSubmit = (e) => {
@@ -219,174 +282,6 @@ const Dashboard = () => {
       console.error("該当するプロパティが見つかりません");
     }
   };
-
-  // useEffect(() => {
-  //   if (!session) {
-  //     console.log("Session is null. Redirecting to login...");
-  //     router.push("/auth/login");  // セッションがない場合にはリダイレクト
-  //     return;
-  //   }
-  
-  //   // セッションがある場合は状態をセット
-  //   setSession(session);
-  // }, [session, router]);
-  
-  // useEffect(() => {
-  //   // Analyticsデータを取得
-  //   const { data: analyticsData, error: analyticsError, isLoading } = useAnalyticsData(session);
-  //   if (analyticsError) {
-  //     console.error("Error fetching analytics data:", analyticsError);
-  //     return;
-  //   } else {
-  //     setAnalyticsData(analyticsData);
-  //     // PropertyIDのリストを取得
-  //     const propertyIds = analyticsData?.allProperties.map((p) => p.properties_id);
-  //     setPropertyIds(propertyIds);
-  //   }
-  // }, [session]);
-
-  // useEffect(() => {
-  //   // Search Consoleデータを取得
-  //   const {
-  //     data: searchConsoleData,
-  //     error: searchConsoleError,
-  //     isLoading: searchConsoleLoading,
-  //   } = useSearchConsoleData(propertyIds);
-  //   if (searchConsoleError) {
-  //     console.error("Error fetching search console data:", searchConsoleError);
-  //     return;
-  //   } else {
-  //     setSearchConsoleData(searchConsoleData);
-  //   }
-  // }, [propertyIds]);
-
-  // useEffect(() => {
-  //   const fetchAnalyticsData = async () => {
-  //     if (!session) {
-  //       console.log("Session is null");
-  //       return;
-  //     }
-
-  //     const sessionData = session;
-
-  //     if (!sessionData) {
-  //       // router.push('/auth/login');
-  //     } else {
-  //       setSession(sessionData);
-  //     }
-
-  //     // 1. Userのemailを取得
-  //     //   console.log("Session of this: ", sessionData);
-  //     console.log("User's auth.uin(): ", sessionData.user.id);
-
-  //     // const email_customer = sessionData.user.user_metadata.email;
-
-  //     // 2. CustomerDetailsTableからaccountIdを取得
-  //     const { data: customerDetailsData, error: customerDetailsError } =
-  //       await supabase.from("CustomerDetailsTable").select("accounts_id");
-  //     //   .eq("email_customer", email_customer);
-
-  //     console.log("CustomerDetailsData: ", customerDetailsData);
-  //     if (customerDetailsError) {
-  //       console.error("Error fetching accountIds:", customerDetailsError);
-  //       return;
-  //     }
-
-  //     const accountIds = customerDetailsData.map((item) => item.accounts_id);
-  //     setAccountIds(accountIds); // ['1', '2']
-  //     console.log("AccountIds: ", accountIds);
-
-  //     if (accountIds.length > 0) {
-  //       setSelectedAccountId(accountIds[0]);
-  //     }
-  //     // 3. PropertyTableからpropertyIdを取得
-  //     const { data: allProperties, error: propertyError } = await supabase
-  //       .from("PropertyTable")
-  //       .select("properties_id, properties_name, account_id, url")
-  //       .in("account_id", accountIds);
-
-  //     if (propertyError) {
-  //       console.error("Error fetching property ids:", propertyError);
-  //       return;
-  //     }
-  //     // console.log('Properties: ', allProperties);
-
-  //     setPropertyIds(allProperties); // [{account_id, properties_id, properties_name}]
-  //     console.log("PropertyIds: ", allProperties); // デバッグ用
-
-  //     // 最初のaccountIdに紐づくpropertyIdを取得
-  //     if (accountIds.length > 0) {
-  //       const initialFilteredProperties = allProperties.filter(
-  //         (p) => p.account_id === accountIds[0]
-  //       );
-  //       setFilteredProperties(initialFilteredProperties);
-  //       if (initialFilteredProperties.length > 0) {
-  //         setSelectedProperty(initialFilteredProperties[0]); // {account_id, properties_id, properties_name}
-  //       }
-  //     }
-
-  //     // 4. GoogleAnalyticsDataのデータを取得
-  //     const propertyIds = allProperties.map((p) => p.properties_id);
-  //     const { data: allAnalytics, error: analyticsError } = await supabase
-  //       .from("AnalyticsData")
-  //       .select("*")
-  //       .in("property_id", propertyIds);
-
-  //     if (analyticsError) {
-  //       console.error("Error fetching analytics data:", analyticsError);
-  //       return;
-  //     }
-
-  //     setAnalyticsData(allAnalytics); 
-  //     console.log("Analytics: ", allAnalytics);
-
-  //     // pagePathのリストを取得
-  //     const pathList = new Set(allAnalytics.map((item) => item.page_path));
-  //     console.log("PathList: ", pathList);
-  //   };
-
-  //   fetchAnalyticsData();
-  // }, [session]);
-
-  // useEffect(() => {
-  //   /**
-  //    *  以下ではGoogle Search Consoleのデータを取得する処理を追加
-  //    */
-  //   const fetchSearchConsoleData = async () => {
-  //     try {
-  //       console.log("PropertyIds: ", propertyIds);
-  //       // 全てのPropertyIDからSearch Consoleのデータを取得
-  //       let allSearchConsoleData = {};
-
-  //       for (const property of propertyIds) {
-  //         const { properties_id } = property;
-
-  //         const { data, error: searchConsoleError } = await supabase
-  //           .from("SearchConsoleDataTable")
-  //           .select("*")
-  //           .eq("property_id", properties_id)
-  //           .limit(1000);
-
-  //         if (searchConsoleError) {
-  //           console.error(
-  //             "Error fetching search console data:",
-  //             searchConsoleError
-  //           );
-  //           continue;
-  //         }
-
-  //         // 取得したデータを辞書形式に追加
-  //         allSearchConsoleData[properties_id] = data;
-  //       }
-  //       console.log("Search Console Data: ", allSearchConsoleData);
-
-  //       setSearchConsoleData(allSearchConsoleData);
-  //     } catch (error) {
-  //       console.error("Error fetching search console data:", error);
-  //     }
-  //   };
-  //   fetchSearchConsoleData();
-  // }, [propertyIds]);
 
   const findPropertyIdByUrl = (url) => {
     let propertyId = null;
@@ -478,50 +373,50 @@ const Dashboard = () => {
   }, [filteredData, dateRange]);
 
   // 集計データを取得
-  useEffect(() => {
-    const fetchAggregatedData = async () => {
-      if (
-        !session ||
-        !propertyIds ||
-        propertyIds.length === 0 ||
-        !startDate ||
-        !endDate
-      ) {
-        console.warn("Property ID, Start Date, or End Date is missing.");
-        return;
-      }
+  // useEffect(() => {
+  //   const fetchAggregatedData = async () => {
+  //     if (
+  //       !session ||
+  //       !propertyIds ||
+  //       propertyIds.length === 0 ||
+  //       !startDate ||
+  //       !endDate
+  //     ) {
+  //       console.warn("Property ID, Start Date, or End Date is missing.");
+  //       return;
+  //     }
 
-      const jwtToken = session.access_token;
-      if (!jwtToken) {
-        console.error("JWT Token is missing.");
-        return;
-      }
+  //     const jwtToken = session.access_token;
+  //     if (!jwtToken) {
+  //       console.error("JWT Token is missing.");
+  //       return;
+  //     }
 
-      const aggregatedDataByPropertyId = {};
+  //     const aggregatedDataByPropertyId = {};
 
-      for (const property of propertyIds) {
-        const propertyId = property.properties_id;
-        try {
-          const aggregatedData = await fetchAggregatedDataFromDashboard(
-            jwtToken,
-            propertyId,
-            startDate,
-            endDate
-          );
+  //     for (const property of propertyIds) {
+  //       const propertyId = property.properties_id;
+  //       try {
+  //         const aggregatedData = await fetchAggregatedDataFromDashboard(
+  //           jwtToken,
+  //           propertyId,
+  //           startDate,
+  //           endDate
+  //         );
 
-          if (aggregatedData) {
-            aggregatedDataByPropertyId[propertyId] = aggregatedData;
-          }
-        } catch (error) {
-          console.error("Error fetching aggregated data:", error);
-        }
-      }
-      console.log("Aggregated Data:", aggregatedDataByPropertyId); // デバッグ用ログ
-      setAggregatedData(aggregatedDataByPropertyId);
-    };
+  //         if (aggregatedData) {
+  //           aggregatedDataByPropertyId[propertyId] = aggregatedData;
+  //         }
+  //       } catch (error) {
+  //         console.error("Error fetching aggregated data:", error);
+  //       }
+  //     }
+  //     console.log("Aggregated Data:", aggregatedDataByPropertyId); // デバッグ用ログ
+  //     setAggregatedData(aggregatedDataByPropertyId);
+  //   };
 
-    fetchAggregatedData();
-  }, [session, propertyIds, startDate, endDate]);
+  //   fetchAggregatedData();
+  // }, [session, propertyIds, startDate, endDate]);
 
   const calculateCurrentAndPreviousData = (filteredData, previousData) => {
     let totalPV = 0,

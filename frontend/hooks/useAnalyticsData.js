@@ -35,7 +35,7 @@ const fetchAnalyticsData = async (session) => {
 
     const accountIds = customerDetailsData.map((item) => item.accounts_id);
     // setAccountIds(accountIds); // ['1', '2']
-    console.log("AccountIds: ", accountIds);
+    // console.log("AccountIds: ", accountIds);
 
     // 3. PropertyTableからpropertyIdを取得
     const { data: allProperties, error: propertyError } = await supabase
@@ -47,7 +47,7 @@ const fetchAnalyticsData = async (session) => {
       console.error("Error fetching property ids:", propertyError);
       return;
     }
-    console.log("PropertyIds: ", allProperties); // デバッグ用
+    // console.log("PropertyIds: ", allProperties); // デバッグ用
 
     // 最初のaccountIdに紐づくpropertyIdを取得
     if (accountIds.length > 0) {
@@ -69,7 +69,7 @@ const fetchAnalyticsData = async (session) => {
     }
 
     // setAnalyticsData(allAnalytics); 
-    console.log("Analytics: ", allAnalytics);
+    // console.log("Analytics: ", allAnalytics);
 
     return { allAnalytics, allProperties};
   };

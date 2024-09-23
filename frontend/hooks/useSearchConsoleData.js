@@ -28,7 +28,7 @@ const fetchSearchConsoleData = async (propertyIds) => {
         // 取得したデータを辞書形式に追加
         allSearchConsoleData[properties_id] = data;
       }
-      console.log("Search Console Data: ", allSearchConsoleData);
+    //   console.log("Search Console Data: ", allSearchConsoleData);
       return allSearchConsoleData;
 
     //   setSearchConsoleData(allSearchConsoleData);

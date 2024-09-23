@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import { useSessionData } from "../hooks/useSessionData";
+import { useAnalyticsData  } from "../hooks/useAnalyticsData";
+import { useSearchConsoleData } from "../hooks/useSearchConsoleData";
+import { useAggregatedData } from "../hooks/useAggregatedData";
 import { Button } from "../components/ui/Button";
 import {
   Select,
@@ -51,6 +56,63 @@ export default function AnalyticsDashboard() {
     const day = `0${date.getDate()}`.slice(-2);
     return `${year}/${month}/${day}`;
   };
+
+  const { fetchedSession, loading } = useSessionData();
+  
+  useEffect(() => {
+    if (!fetchedSession && !loading) {
+      router.push('/auth/login');
+    } else {
+      console.log('fetchedSession: ', fetchedSession);
+    }
+  }, [fetchedSession, loading, router]);
+
+  // データの初期化
+  const [analyticsData, setAnalyticsData] = useState([]);
+  const [propertyIds, setPropertyIds] = useState([]);
+  const [searchConsoleData, setSearchConsoleData] = useState([]);
+  const [aggregatedData, setAggregatedData] = useState([]);
+
+  // useAnalyticsDataでデータを取得する
+  const {data: fetchedAnalyticsData, error: analyticsError, isLoading: analyticsLoading, refetch: refetchAnalyticsData} = useAnalyticsData(fetchedSession, setPropertyIds);
+  useEffect(() => {
+    if (analyticsError) {
+      console.error('Error fetching analytics data:', analyticsError);
+    } 
+    
+    if (fetchedAnalyticsData) {
+      console.log('fetchedAnalyticsData:', fetchedAnalyticsData);
+      setAnalyticsData(fetchedAnalyticsData.allAnalytics);
+      setPropertyIds(fetchedAnalyticsData.allProperties);
+    }
+  }, [fetchedAnalyticsData, analyticsError, router]);
+
+  // useSearchConsoleDataでデータを取得する
+  const {data: fetchedSearchConsoleData, error: searchConsoleError, isLoading: searchConsoleLoading, refetch: refetchSearchConsoleData} = useSearchConsoleData(propertyIds);
+  useEffect(() => {
+    if (searchConsoleError) {
+      console.error('Error fetching search console data:', searchConsoleError);
+    } 
+    
+    if (fetchedSearchConsoleData) {
+      console.log('fetchedSearchConsoleData:', fetchedSearchConsoleData);
+      setSearchConsoleData(fetchedSearchConsoleData); 
+    }
+  }, [fetchedSearchConsoleData, searchConsoleError, router]);
+
+  // useAggregatedDataでデータを取得する
+  const {data: fetchedAggregatedData, error: aggregatedError, isLoading: aggregatedLoading, refetch: refetchAggregatedData} = useAggregatedData(fetchedSession, propertyIds, startDate, endDate);
+  useEffect(() => {
+    if (aggregatedError) {
+      console.error('Error fetching aggregated data:', aggregatedError);
+      refetchAggregatedData();
+    }
+
+    if (fetchedAggregatedData) {
+      console.log('fetchedAggregatedData:', fetchedAggregatedData);
+      setAggregatedData(fetchedAggregatedData);
+    }
+  }, [fetchedAggregatedData, aggregatedError, router]);
 
   /*日付を表示形式に整える*/
   useEffect(() => {
