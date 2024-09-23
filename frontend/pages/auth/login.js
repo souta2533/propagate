@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/router";
 import { supabase } from "../../lib/supabaseClient";
 import Link from "next/link";
-import "../../styles/login.css";
+import "../../styles/auth/login.css";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -86,6 +86,7 @@ export default function Login() {
               required
             />
             <button
+              type="button"
               onClick={() => router.push("/auth/register")}
               className="forget-password"
             >
@@ -95,14 +96,14 @@ export default function Login() {
               ログイン
             </button>
           </div>
+          <button
+            onClick={() => router.push("/auth/register")}
+            type="button"
+            className="register-button"
+          >
+            新規登録はこちら
+          </button>
         </form>
-        <button
-          onClick={() => router.push("/auth/register")}
-          type="submit"
-          className="register-button"
-        >
-          新規登録はこちら
-        </button>
       </div>
     </div>
   );

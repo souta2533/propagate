@@ -49,10 +49,7 @@ const LineChart = ({ data, dataKey }) => {
   };
 
   const divStyle = {
-    marginLeft: "auto",
-    marginRight: "auto",
-    margin: "0",
-    width: "100%",
+    height: "350px",
   };
 
   return (

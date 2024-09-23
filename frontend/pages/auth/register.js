@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useRouter } from "next/router";
 import { supabase } from "../../lib/supabaseClient";
 import Link from "next/link";
-import "../../styles/register.css";
+import "../../styles/auth/register.css";
 
 const Register = () => {
   const [email, setEmail] = useState("");
