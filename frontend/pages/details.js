@@ -22,6 +22,11 @@ import PieChart from "../components/graph/PieChart";
 import "../styles/AnalyticsDashboard.css";
 
 export default function AnalyticsDashboard() {
+  const sampledata = [
+    { date: "2024-09-01", PV: 0, CV: 0, CVR: 0, UU: 0 },
+    { date: "2024-09-02", PV: 0, CV: 0, CVR: 0, UU: 0 },
+    { date: "2024-09-03", PV: 0, CV: 0, CVR: 0, UU: 0 },
+  ];
   const [dateRange, setDateRange] = useState("過去 28 日間");
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedMetric, setSelectedMetric] = useState("PV");
@@ -48,13 +53,13 @@ export default function AnalyticsDashboard() {
   };
 
   const selectChart = () => {
-    switch (selectedTab) {
+    switch (selectedMetric) {
       case "PV":
         return <LineChart data={sampledata} dataKey="PV" />;
       case "CV":
         return <LineChart data={sampledata} dataKey="CV" />;
       case "TU":
-        return <LineChart data={filteredData} dataKey="TU" />;
+        return <LineChart data={sampledata} dataKey="TU" />;
       case "UU":
         return <LineChart data={sampledata} dataKey="UU" />;
       case "CVR":
@@ -62,7 +67,7 @@ export default function AnalyticsDashboard() {
       case "SD":
         return <LineChart data={sampledata} dataKey="SD" />;
       case "VR":
-        return <LineChart data={filteredData} dataKey="VR" />;
+        return <LineChart data={sampledata} dataKey="VR" />;
       case "RU":
         return <LineChart data={sampledata} dataKey="RU" />;
       case "SK":
@@ -87,19 +92,6 @@ export default function AnalyticsDashboard() {
       </div>
       <div className="graph-control">
         <div className="filter-section">
-          <div>
-            <Select value={selectedURL} onValueChange={handleURLChange}>
-              <SelectTrigger className="custom-select-trigger"></SelectTrigger>
-
-              <SelectContent className="custom-select-content">
-                {urlList.map((url) => (
-                  <SelectItem key={url.id} value={url.value}>
-                    {url.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
           <div className="date-range">
             <Select value={dateRange} onValueChange={handleDateRangeChange}>
               <SelectTrigger className="select-trigger"></SelectTrigger>
@@ -206,11 +198,7 @@ export default function AnalyticsDashboard() {
           </Select>
         </div>
       </div>
-      <div className="chart">
-        <ResponsiveContainer width="100%" height="100%">
-          {selectChart()}
-        </ResponsiveContainer>
-      </div>
+      <div className="chart">{selectChart()}</div>
     </div>
   );
 }
