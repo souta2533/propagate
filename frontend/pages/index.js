@@ -375,7 +375,7 @@ export default function Home() {
         setUserRole('admin');
       } else {
         // ホストでない場合，ユーザのログインページへリダイレクト
-        // router.push('/auth/login');
+        router.push('/auth/login');
         console.log("User is not an admin", role);
       }
     };
@@ -388,7 +388,7 @@ export default function Home() {
 
     initialize();
     fetchAnalyticsProperties();
-  }, [session, status]);
+  }, [session, status, router.pathname]);
 
   /**
    * コンポーネントがマウントされたときに
