@@ -163,7 +163,7 @@ const Dashboard = () => {
     const { data, error } = await supabase.auth.getSession();
     if (error || !data?.session) {
       console.error("Error fetching session: ", error);
-      setError("セッションの取得に失敗しました");
+      router.push("/auth/login");
       //setLoading(false);
       return;
     }

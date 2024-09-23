@@ -1,7 +1,5 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, EmailStr
-import json
 
 from routers import properties, db, analytics, search_console, user_input_handler, register, get_data
 from db.db_operations import save_email_customer
