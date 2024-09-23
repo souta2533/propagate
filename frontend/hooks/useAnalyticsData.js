@@ -68,9 +68,6 @@ const fetchAnalyticsData = async (session) => {
       return;
     }
 
-    // setAnalyticsData(allAnalytics); 
-    // console.log("Analytics: ", allAnalytics);
-
     return { allAnalytics, allProperties};
   };
 

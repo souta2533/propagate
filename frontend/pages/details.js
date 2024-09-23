@@ -85,7 +85,7 @@ export default function AnalyticsDashboard() {
       setAnalyticsData(fetchedAnalyticsData.allAnalytics);
       setPropertyIds(fetchedAnalyticsData.allProperties);
     }
-  }, [analyticsError, router]);
+  }, [fetchedSession, analyticsError, router]);
 
   // useSearchConsoleDataでデータを取得する
   const {data: fetchedSearchConsoleData, error: searchConsoleError, isLoading: searchConsoleLoading, refetch: refetchSearchConsoleData} = useSearchConsoleData(propertyIds);
@@ -98,7 +98,7 @@ export default function AnalyticsDashboard() {
       console.log('fetchedSearchConsoleData:', fetchedSearchConsoleData);
       setSearchConsoleData(fetchedSearchConsoleData); 
     }
-  }, [searchConsoleError, router]);
+  }, [propertyIds, searchConsoleError, router]);
 
   // useAggregatedDataでデータを取得する
   const {data: fetchedAggregatedData, error: aggregatedError, isLoading: aggregatedLoading, refetch: refetchAggregatedData} = useAggregatedData(fetchedSession, propertyIds, startDate, endDate);
@@ -116,7 +116,7 @@ export default function AnalyticsDashboard() {
       console.log('fetchedAggregatedData:', fetchedAggregatedData);
       setAggregatedData(fetchedAggregatedData);
     }
-  }, [aggregatedError, router]);
+  }, [fetchedSession, propertyIds, startDate, endDate, aggregatedError, router]);
 
   /*日付を表示形式に整える*/
   useEffect(() => {
