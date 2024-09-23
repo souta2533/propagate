@@ -31,8 +31,7 @@ export const useSessionData = () => {
 
         // クリーンアップ
         return () => {
-            console.log("Unsubscribing from auth changes", authListener);
-            authListener?.unsubscribe();
+            authListener?.subscription.unsubscribe();
         };
     }, []);
 
