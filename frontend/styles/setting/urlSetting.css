@@ -1,7 +1,7 @@
 /* login.css */
 @import url(https://fonts.googleapis.com/earlyaccess/notosansjp.css);
 
-.register-content {
+.urlsetting-container {
   display: flex;
   justify-content: center;
   width: 100vw;
@@ -14,15 +14,15 @@
   background-color: #9bcdf15f;
 }
 
-.login-form {
+.urlsetting-form {
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
+  justify-content: center;
   background-color: #ffffff;
   border-radius: 10px;
   width: 30%;
-  height: 80%;
+  height: 30%;
   padding: 32px 48px;
   box-shadow: 0 6px 8px rgba(0, 0, 0, 0.1);
 }
@@ -31,72 +31,23 @@
   width: 100%;
 }
 
-.login-text {
+.url-text {
   font-size: 20px;
 }
 
-.email-form {
+.url-form {
   display: flex;
   flex-direction: column;
   text-align: left;
   width: 100%;
 }
 
-.email-text {
-  margin-bottom: 4px;
-}
-
-.email-input {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 15px;
-  border: 1px solid #cccccc;
-  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
-}
-
-.password-form {
-  display: flex;
-  flex-direction: column;
-  text-align: left;
-  width: 100%;
-}
-
-.password-text {
-  margin-bottom: 4px;
-}
-
-.password-input {
+.url-input {
   width: 100%;
   padding: 10px;
   border: 1px solid #cccccc;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
-  margin-bottom: 4px;
-}
-
-.forget-password {
-  background-color: #ffffff;
-  border: none;
-  text-align: left;
   margin-bottom: 15px;
-}
-
-.login-button {
-  width: 100%;
-  padding: 16px 0;
-  border: 2px solid #005bac;
-  border-radius: 10px;
-  color: #005bac;
-  background-color: #ffffff;
-  font-size: 18px;
-  font-family: "Noto Sans JP", sans-serif;
-  font-weight: 500px;
-  margin-bottom: 20px;
-}
-
-.login-button:hover {
-  background-color: #005bac;
-  color: white;
-  transition: 0.5s;
 }
 
 .register-button {
@@ -109,6 +60,7 @@
   font-size: 18px;
   font-family: "Noto Sans JP", sans-serif;
   font-weight: 500px;
+  margin-bottom: 15px;
 }
 
 .register-button:hover {
@@ -117,16 +69,20 @@
   transition: 0.5s;
 }
 
-/* 新規会員登録リンクのスタイル */
-.signup-link {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  font-size: 14px;
-  color: black; /* ブルー */
-  text-decoration: none;
+.dashboard-button {
+  width: 100%;
+  padding: 16px 0;
+  border: 1px solid #427ebe;
+  border-radius: 10px;
+  color: #427ebe;
+  background-color: #ffffff;
+  font-size: 18px;
+  font-family: "Noto Sans JP", sans-serif;
+  font-weight: 500px;
 }
 
-.signup-link:hover {
-  text-decoration: underline;
+.dashboard-button:hover {
+  background-color: #005bac;
+  color: #ffffff;
+  transition: 0.5s;
 }

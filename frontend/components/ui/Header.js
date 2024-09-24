@@ -5,7 +5,7 @@ import { FaBars, FaTimes } from "react-icons/fa";
 import { Button } from "../ui/Button";
 //import { Select } from "../components/ui/Select";
 import { useRouter } from "next/router";
-import "../../styles/headers.css";
+import "../../styles/components/headers.css";
 
 const Header = ({ isOpen, toggleMenu, handleSubmit, url, setUrl }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -69,22 +69,7 @@ const Header = ({ isOpen, toggleMenu, handleSubmit, url, setUrl }) => {
             placeholder="URLを入力してください"
             className="header-input"
           />
-          {/*<button type="submit">submit</button>*/}
-          {/*errorMessage && <p className="error">{errorMessage}</p>*/}
         </form>
-        {/*<Select
-          onChange={handlePropertyChange} // ユーザーがプロパティを選択したときに実行
-          value={selectedPropertyId} // 現在選択されているプロパティID
-        >
-          <option value="" disabled>
-            プロパティを選択してください
-          </option>
-          {filteredProperties.map((property) => (
-            <option key={property.properties_id} value={property.properties_id}>
-              {property.properties_name}
-            </option>
-          ))}
-        </Select>*/}
       </div>
       <div className="header-right">
         <Button
@@ -109,13 +94,17 @@ const Header = ({ isOpen, toggleMenu, handleSubmit, url, setUrl }) => {
             </Button>
             <Button
               variant="ghost"
-              onClick={() => router.push("/details")}
+              onClick={() => router.push("/setting/addAccount")}
               className="menu-button"
             >
               <Mail className="icon" />
-              <div className="icon-text">メール設定</div>
+              <div className="icon-text">アカウント追加</div>
             </Button>
-            <Button variant="ghost" className="menu-button">
+            <Button
+              variant="ghost"
+              onClick={() => router.push("/setting/logout")}
+              className="menu-button"
+            >
               <LogOut className="icon" />
               <div className="icon-text">ログアウト</div>
             </Button>
