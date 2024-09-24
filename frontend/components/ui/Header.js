@@ -7,14 +7,42 @@ import { Button } from "../ui/Button";
 import { useRouter } from "next/router";
 import "../../styles/components/headers.css";
 
-const Header = ({ isOpen, toggleMenu, handleSubmit, url, setUrl }) => {
+const Header = ({ isOpen, toggleMenu, handleSubmit, url, setUrl, urlList }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [filteredUrls, setFilteredUrls] = useState([]); // フィルタリングされたURL
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
   const router = useRouter();
 
   const toggleDropdown = () => {
     setIsDropdownOpen((prevState) => !prevState);
+  };
+
+  // URLリストに新しいURLを追加
+  const addUrlToList = (newUrl) => {
+    if (newUrl && !urlList.includes(newUrl)) {
+      setUrlList((prevList) => [...prevList, newUrl]);
+    }
+  };
+
+  // URLの入力に応じてフィルタリングされたリストを更新
+  useEffect(() => {
+    if (url) {
+      const filtered = urlList.filter((item) =>
+        item.toLowerCase().includes(url.toLowerCase())
+      );
+      setFilteredUrls(filtered);
+      setIsDropdownOpen(filtered.length > 0); // 一致する項目がある場合はドロップダウンを開く
+    } else {
+      setFilteredUrls([]);
+      setIsDropdownOpen(false);
+    }
+  }, [url, urlList]);
+
+  // URLリストの項目をクリックしたときにそのURLをインプットにセット
+  const handleSelectUrl = (selectedUrl) => {
+    setUrl(selectedUrl);
+    setIsDropdownOpen(false); // ドロップダウンを閉じる
   };
 
   useEffect(() => {
@@ -62,13 +90,26 @@ const Header = ({ isOpen, toggleMenu, handleSubmit, url, setUrl }) => {
         <h1 className="header-title">Propagate Analytics</h1>
         <form onSubmit={handleSubmit}>
           <input
-            type="text"
+            type="url"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             //onKeyDown={handleKeyDown} //Enterキーを押すと処理が実行
-            placeholder="URLを入力してください"
+            placeholder="URL追加メニューでURLを追加してください"
             className="header-input"
           />
+          {isDropdownOpen && (
+            <ul className="dropdown-list">
+              {filteredUrls.map((item, index) => (
+                <li
+                  key={index}
+                  className="dropdown-item"
+                  onClick={() => handleSelectUrl(item)} // クリックでURLを選択
+                >
+                  {item}
+                </li>
+              ))}
+            </ul>
+          )}
         </form>
       </div>
       <div className="header-right">

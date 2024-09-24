@@ -248,11 +248,11 @@
 
 /* レスポンシブコンテナ */
 @media (max-width: 768px) {
-  /*html,
+  html,
   body {
-    width: 100vw;
+    min-width: 100vw;
     height: 100vh;
-  }*/
+  }
   .dashboard-container {
     display: flex;
     flex-direction: column;
@@ -262,7 +262,11 @@
 
   .header {
     width: 100vw;
-    min-width: 768px;
+  }
+
+  .header-input {
+    width: auto;
+    overflow: auto;
   }
   .dashboard-main {
     flex-direction: column;
@@ -307,6 +311,7 @@
 
   .center-content {
     width: 100%;
+    border: none;
   }
 
   .metrics-grid {
@@ -321,15 +326,19 @@
   .metric-card {
     min-width: 250px; /* カードの最小幅 */
     flex: 0 0 250px; /* カードを固定幅に */
-    background-color: #ffffff;
+    background-color: #72727211;
     padding: 20px;
     border: 1px solid #ccc;
     border-radius: 10px;
     scroll-snap-align: start; /* スクロール停止位置 */
   }
 
+  .metric-card:active {
+    background-color: #ffffff;
+  }
   .chart-content {
     width: 100%;
+    height: auto;
   }
 
   .dashboard-sidebar {

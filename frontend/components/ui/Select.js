@@ -2,6 +2,8 @@ import * as React from "react";
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { Check, ChevronDown } from "lucide-react";
 import { cn } from "../../lib/utils";
+import DatePicker from "react-datepicker"; // カレンダーライブラリのインポート
+import "react-datepicker/dist/react-datepicker.css"; // カレンダーのCSS
 import styles from "../../styles/components/select.css";
 
 const Select = ({ value, onValueChange, children }) => {
@@ -73,4 +75,21 @@ const SelectItem = React.forwardRef(
 );
 SelectItem.displayName = SelectPrimitive.Item.displayName;
 
-export { Select, SelectTrigger, SelectContent, SelectItem };
+const DateRangePicker = ({ startDate, endDate, setStartDate, setEndDate }) => (
+  <div className="date-picker-container">
+    <DatePicker
+      selected={startDate}
+      onChange={(dates) => {
+        const [start, end] = dates;
+        setStartDate(start);
+        setEndDate(end);
+      }}
+      startDate={startDate}
+      endDate={endDate}
+      selectsRange
+      inline
+    />
+  </div>
+);
+
+export { Select, SelectTrigger, SelectContent, SelectItem, DateRangePicker };

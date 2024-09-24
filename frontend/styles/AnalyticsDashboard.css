@@ -184,12 +184,14 @@ option {
   }
   .dashboard-header {
     width: 100vw;
+    border: none;
   }
   .graph-control {
     width: 100vw;
   }
   .chart {
     width: 100vw;
+    height: auto;
   }
   .tabs {
     overflow-x: auto;

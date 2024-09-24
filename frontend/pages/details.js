@@ -39,6 +39,7 @@ export default function AnalyticsDashboard() {
   const [timeGranularity, setTimeGranularity] = useState("日別");
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [formattedAnalytics, setFormattedAnalytics] = useState([]);
   const router = useRouter();
   const formatDate = (date) => {
     const year = date.getFullYear();
@@ -46,6 +47,45 @@ export default function AnalyticsDashboard() {
     const day = `0${date.getDate()}`.slice(-2);
     return `${year}/${month}/${day}`;
   };
+
+  const NOTpropertyIds = [
+    {
+      account_id: "300168308",
+      properties_id: "424732958",
+      properties_name: "Yuya",
+      url: null,
+    },
+    {
+      account_id: "300168308",
+      properties_id: "428269691",
+      properties_name: "gatest",
+      url: null,
+    },
+    {
+      account_id: "324522818",
+      properties_id: "359877627",
+      properties_name: "propagateGA4",
+      url: "https://www.propagateinc.com/",
+    },
+    {
+      account_id: "300168308",
+      properties_id: "425610688",
+      properties_name: "propagate-tfc.tokyo",
+      url: "",
+    },
+    {
+      account_id: "324522818",
+      properties_id: "453492841",
+      properties_name: "AnalyticsTest",
+      url: "",
+    },
+    {
+      account_id: "300168308",
+      properties_id: "452842721",
+      properties_name: "Propagate Analytics",
+      url: "https://www.propagate-fsk.tokyo/",
+    },
+  ];
 
   const { fetchedSession, loading } = useSessionData();
 
@@ -130,18 +170,7 @@ export default function AnalyticsDashboard() {
     router,
   ]);
 
-  /*日付を表示形式に整える*/
-  useEffect(() => {
-    // 例として過去7日間を設定
-    const today = new Date();
-    const pastDate = new Date();
-    pastDate.setDate(today.getDate() - 7);
-
-    setStartDate(pastDate);
-    setEndDate(today);
-  }, []);
-
-  /*グラフの日付選択*/
+  /*グラフの日付選択
   const handleDateSelect = (range) => {
     if (range && range.from && range.to) {
       setStartDate(range.from);
@@ -149,6 +178,21 @@ export default function AnalyticsDashboard() {
       setShowCalendar(false); // カレンダーを閉じる
     }
   };
+  */
+
+  //グラフに描画するデータの作成
+  useEffect(() => {
+    const formattedAnalyticsData = analyticsData.map((entry) => ({
+      properties_id: entry.property_id, // property_idをproperties_idに変換
+      date: entry.date, // dateをそのまま使用
+      screen_page_views: entry.screen_page_views || 0, // screen_page_viewsを使用
+      conversions: entry.conversions || 0, // conversionsを使用
+      sessions: entry.sessions || 0, // sessionsを使用
+    }));
+
+    setFormattedAnalytics(formattedAnalyticsData);
+    console.log("Formatted Analytics:", formattedAnalyticsData);
+  }, [analyticsData]); // analyticsDataが変更された時に実行
 
   const generateData = (metric, granularity, startDate, endDate) => {
     if (!startDate || !endDate) return [];
@@ -206,26 +250,110 @@ export default function AnalyticsDashboard() {
     setSelectedMetric(value);
   };
 
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  function getQuery(searchData, searchId, object) {
+    // 最後の / を削除
+    //const sanitizedUrl = url.replace(/\/+$/, "");
+    //console.log(sanitizedUrl);
+    console.log("propertyId:", 359877627);
+    console.log("aggregatedData;", aggregatedData);
+    const queryData =
+      searchData[searchId]?.["https://www.propagateinc.com"]?.query;
+    console.log("QueryData: ", queryData);
+    if (!queryData) {
+      return [];
+    }
+    const sortedEntries = Object.entries(queryData).sort((a, b) => b[1] - a[1]);
+    const top7Queries = sortedEntries.slice(0, 7);
+    console.log("top7Queries: ", top7Queries);
+    return top7Queries;
+  }
+
+  const topQueries = getQuery(aggregatedData, 359877627, "query");
+  console.log("topQueries", topQueries);
+  const topDevices = getQuery(aggregatedData, 359877627, "");
+  const topCountries = getQuery(aggregatedData, 359877627, "query");
+
+  const fakeData = [
+    359877627,
+    "https://www.propagateinc.com",
+    { key: "active_users", value: 0 },
+    { key: "city", value: {} },
+    { key: "click", value: 1788 },
+    { key: "conversion_rate", value: 0 },
+    { key: "conversions", value: 0 },
+    {
+      key: "country",
+      value: {
+        jpn: 966,
+        vnm: 15,
+        usa: 4,
+        kor: 3,
+        idn: 2,
+        other: 1,
+      },
+    },
+    { key: "ctr", value: 17.491684601839168 },
+    {
+      key: "device_category",
+      value: {
+        desktop: 41,
+        smartphone: 60,
+      },
+    },
+    { key: "engaged_sessions", value: 0 },
+    { key: "impression", value: 10222 },
+    { key: "position", value: 3836 },
+    {
+      key: "query",
+      value: {
+        プロパゲート: 89,
+        株式会社プロパゲート: 63,
+        "wix サービス終了": 29,
+        プロパゲート株式会社: 25,
+        "インスタ dm 自動送信": 24,
+        // その他のクエリもここに追加できます
+      },
+    },
+    { key: "screen_page_views", value: 0 },
+    { key: "sessions", value: 0 },
+    { key: "total_users", value: 0 },
+  ];
+
+  //グラフに描画するデータの作成
+  useEffect(() => {
+    const formattedAnalyticsData = analyticsData.map((entry) => ({
+      properties_id: entry.property_id, // property_idをproperties_idに変換
+      date: entry.date, // dateをそのまま使用
+      screen_page_views: entry.screen_page_views || 0, // screen_page_viewsを使用
+      conversions: entry.conversions || 0, // conversionsを使用
+      sessions: entry.sessions || 0, // sessionsを使用
+    }));
+
+    setFormattedAnalytics(formattedAnalyticsData);
+    console.log("Formatted Analytics:", formattedAnalyticsData);
+  }, [analyticsData]); // analyticsDataが変更された時に実行
+
   const selectChart = () => {
     switch (selectedMetric) {
       case "PV":
-        return <LineChart data={sampledata} dataKey="PV" />;
+        return <LineChart data={formattedAnalytics} dataKey="PV" />;
       case "CV":
-        return <LineChart data={sampledata} dataKey="CV" />;
+        return <LineChart data={formattedAnalytics} dataKey="CV" />;
       case "TU":
-        return <LineChart data={sampledata} dataKey="TU" />;
+        return <LineChart data={formattedAnalytics} dataKey="TU" />;
       case "UU":
-        return <LineChart data={sampledata} dataKey="UU" />;
+        return <LineChart data={formattedAnalytics} dataKey="UU" />;
       case "CVR":
-        return <LineChart data={sampledata} dataKey="CVR" />;
+        return <LineChart data={formattedAnalytics} dataKey="CVR" />;
       case "SD":
-        return <LineChart data={sampledata} dataKey="SD" />;
+        return <BarChart data={topDevices} />; //流入元デバイス
       case "VR":
-        return <LineChart data={sampledata} dataKey="VR" />;
+        return <BarChart data={topCountries} />; //流入者属性
       case "RU":
-        return <LineChart data={sampledata} dataKey="RU" />;
+        return <PieChart data={topQueries} />; //流入元URL
       case "SK":
-        return <LineChart data={sampledata} dataKey="SK" />;
+        return <BarChart data={topQueries} />; //検索キーワード
       default:
         return <LineChart data={sampledata} dataKey="PV" />;
     }

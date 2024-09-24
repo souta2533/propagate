@@ -3,10 +3,10 @@ import { Pie } from "react-chartjs-2";
 
 const PieChart = ({ data }) => {
   const chartData = {
-    labels: Object.keys(data), // ラベル（セクション名）
+    labels: data.map((item) => item[0]), // ラベル（セクション名）
     datasets: [
       {
-        data: Object.values(data), // 各セクションの値
+        data: data.map((item) => item[1]), // 各セクションの値
         backgroundColor: ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"], // セクションの色
         borderColor: ["#ffffff"], // 境界線の色
         borderWidth: 1, // 境界線の幅
