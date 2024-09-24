@@ -1,7 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { usePropertyIdSetting } from "../../hooks/usePropertyIdSetting";
 import styles from "../../styles/setting/urlSetting.css";
 
 export default function UrlSetting() {
