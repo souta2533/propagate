@@ -17,6 +17,7 @@ const LineChart = ({ data, dataKey }) => {
         tension: 0.1,
         borderWidth: 1,
         pointRadius: 0,
+        pointHitRadius: 20,
       },
     ],
   };
@@ -28,7 +29,7 @@ const LineChart = ({ data, dataKey }) => {
       x: {
         ticks: {
           autoSkip: true,
-          maxTicksLimit: 5, //X軸のラベル表示
+          maxTicksLimit: 20, //X軸のラベル表示
         },
         grid: {
           display: false,
@@ -40,7 +41,14 @@ const LineChart = ({ data, dataKey }) => {
     },
     plugins: {
       tooltip: {
-        enabled: true,
+        enabled: true, //ツールチップを有効にする
+        callbacks: {
+          function(context) {
+            const label = context.dataset.label || "";
+            const value = context.raw;
+            return `${label}: ${value}`;
+          },
+        },
       },
       legend: {
         display: false, //凡例

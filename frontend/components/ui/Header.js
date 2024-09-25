@@ -56,9 +56,9 @@ const Header = ({ isOpen, toggleMenu, handleSubmit, url, setUrl }) => {
   return (
     <header className="header">
       <div className="header-left">
-        <div className="hamburger-icon" onClick={toggleMenu}>
+        {/*<div className="hamburger-icon" onClick={toggleMenu}>
           {isOpen ? <FaTimes size={30} /> : <FaBars size={30} />}
-        </div>
+        </div>*/}
         <h1 className="header-title">Propagate Analytics</h1>
         <form onSubmit={handleSubmit}>
           <input

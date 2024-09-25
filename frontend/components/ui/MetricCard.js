@@ -1,13 +1,6 @@
 // MetricCard.js
 import React from "react";
 
-const calculateMonthOverMonth = (currentValue, previousValue) => {
-  if (previousValue === 0) {
-    return currentValue === 0 ? 0 : 100;
-  }
-  return (currentValue / previousValue) * 100;
-};
-
 //前月比の色を決定する
 const getComparisonColor = (change) => {
   if (change > 0) {
@@ -20,9 +13,16 @@ const getComparisonColor = (change) => {
 };
 
 const MetricCard = ({ title, value, previousValue, isActive, onClick }) => {
-  //前月比を計算
-  const monthOverMonth = ((value - previousValue) / (previousValue || 1)) * 100;
-
+  const currentValue = parseFloat(value) || 0;
+  const prevValue = parseFloat(previousValue) || 0;
+  let comValue;
+  if (currentValue - prevValue === currentValue) {
+    comValue = "-";
+  } else if (title === "CVR (お問い合わせ率)") {
+    comValue = (currentValue - prevValue).toFixed(2);
+  } else {
+    comValue = currentValue - prevValue;
+  }
   return (
     <div
       className={`metric-card ${isActive ? "active" : ""}`} // アクティブなカードにスタイルを追加
@@ -37,10 +37,13 @@ const MetricCard = ({ title, value, previousValue, isActive, onClick }) => {
       </div>
       <div
         className="metric-comparison"
-        style={{ color: getComparisonColor(monthOverMonth) }}
+        style={{ color: getComparisonColor(comValue) }}
       >
-        {monthOverMonth !== 0 ? `${monthOverMonth.toFixed(2)}%` : "±0"}
-        {monthOverMonth > 0 ? "▲" : monthOverMonth < 0 ? "▼" : ""}
+        {comValue > 0
+          ? `${comValue}増加▲`
+          : comValue < 0
+          ? `${comValue}減少▼`
+          : (comValue = 0 ? "±0" : "-")}
       </div>
     </div>
   );

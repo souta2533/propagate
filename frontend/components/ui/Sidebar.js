@@ -6,7 +6,13 @@ import { useRouter } from "next/router";
 import "../../styles/components/sidebar.css";
 
 const Sidebar = ({ isOpen }) => {
+  //detailsのリンクにpropertyIdを紐づける
+  const handelButtonClick = (propertyId) => {
+    router.push(`/${propertyId}/details`);
+  };
   const router = useRouter();
+  const { propertyId } = router.query;
+
   return (
     <div className={`sidebar ${isOpen ? "open" : ""}`}>
       <div className="menu-list">
@@ -20,7 +26,7 @@ const Sidebar = ({ isOpen }) => {
         </Button>
         <Button
           variant="ghost"
-          onClick={() => router.push("/details")}
+          onClick={() => handelButtonClick(propertyId)}
           className="menu-button"
         >
           <BarChart2 className="icon" />

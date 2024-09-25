@@ -111,6 +111,22 @@
   margin: 16px;
 }
 
+/*react-select では以下のクラス名が自動的に付与されます：
+
+.react-select__control: コントロール全体（ドロップダウンの表示部分）。
+.react-select__menu: ドロップダウンメニュー全体。
+.react-select__option: 各オプション項目。
+.react-select__single-value: 選択された値を表示する部分。
+.react-select__placeholder: プレースホルダー部分。*/
+
+.custom-select {
+  min-width: 150px;
+}
+
+.react-select__control {
+  min-width: 150px;
+}
+
 .select-trigger {
   padding: 10px 20px;
   display: flex;
