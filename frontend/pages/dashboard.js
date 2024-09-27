@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { Search } from "lucide-react";
+import { FaSearch } from "react-icons/fa";
 import { supabase } from "../lib/supabaseClient";
 import { useSessionData } from "../hooks/useSessionData";
 import { useAnalyticsData } from "../hooks/useAnalyticsData";
@@ -160,6 +160,39 @@ const Dashboard = () => {
     { date: "2024-09-30", PV: 1498, CV: 76, CVR: 5.07, UU: 1210 },
   ];
 
+  const sampledata2 = [
+    { date: "2024-09-01", PV: 0, CV: 102, CVR: 6.42, UU: 1321 },
+    { date: "2024-09-02", PV: 1498, CV: 76, CVR: 5.07, UU: 1210 },
+    { date: "2024-09-03", PV: 1678, CV: 123, CVR: 7.33, UU: 1456 },
+    { date: "2024-09-04", PV: 1543, CV: 110, CVR: 7.13, UU: 1345 },
+    { date: "2024-09-05", PV: 1398, CV: 134, CVR: 9.59, UU: 1234 },
+    { date: "2024-09-06", PV: 1487, CV: 89, CVR: 5.98, UU: 1123 },
+    { date: "2024-09-07", PV: 1734, CV: 145, CVR: 8.36, UU: 1432 },
+    { date: "2024-09-08", PV: 1599, CV: 102, CVR: 6.38, UU: 1321 },
+    { date: "2024-09-09", PV: 1478, CV: 76, CVR: 5.14, UU: 1210 },
+    { date: "2024-09-10", PV: 1345, CV: 123, CVR: 9.14, UU: 1456 },
+    { date: "2024-09-11", PV: 1689, CV: 110, CVR: 6.51, UU: 1345 },
+    { date: "2024-09-12", PV: 1534, CV: 134, CVR: 8.74, UU: 1234 },
+    { date: "2024-09-13", PV: 1456, CV: 89, CVR: 6.11, UU: 1123 },
+    { date: "2024-09-14", PV: 1723, CV: 145, CVR: 8.41, UU: 1432 },
+    { date: "2024-09-15", PV: 1589, CV: 102, CVR: 6.42, UU: 1321 },
+    { date: "2024-09-16", PV: 1498, CV: 76, CVR: 5.07, UU: 1210 },
+    { date: "2024-09-17", PV: 1678, CV: 123, CVR: 7.33, UU: 1456 },
+    { date: "2024-09-18", PV: 1543, CV: 110, CVR: 7.13, UU: 1345 },
+    { date: "2024-09-19", PV: 1398, CV: 134, CVR: 9.59, UU: 1234 },
+    { date: "2024-09-20", PV: 1487, CV: 89, CVR: 5.98, UU: 1123 },
+    { date: "2024-09-21", PV: 1734, CV: 145, CVR: 8.36, UU: 1432 },
+    { date: "2024-09-22", PV: 1599, CV: 102, CVR: 6.38, UU: 1321 },
+    { date: "2024-09-23", PV: 1478, CV: 76, CVR: 5.14, UU: 1210 },
+    { date: "2024-09-24", PV: 1345, CV: 123, CVR: 9.14, UU: 1456 },
+    { date: "2024-09-25", PV: 1689, CV: 110, CVR: 6.51, UU: 1345 },
+    { date: "2024-09-26", PV: 1534, CV: 134, CVR: 8.74, UU: 1234 },
+    { date: "2024-09-27", PV: 1456, CV: 89, CVR: 6.11, UU: 1123 },
+    { date: "2024-09-28", PV: 1723, CV: 145, CVR: 8.41, UU: 1432 },
+    { date: "2024-09-29", PV: 1589, CV: 102, CVR: 6.42, UU: 1321 },
+    { date: "2024-09-30", PV: 1498, CV: 76, CVR: 5.07, UU: 1210 },
+  ];
+
   // サンプルメトリクスデータ
   const sampleMetrics = [
     {
@@ -211,7 +244,7 @@ const Dashboard = () => {
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////
   const [propertyId, setPropertyId] = useState(null);
   const [chartData, setChartData] = useState([]);
-  const [dateRange, setDateRange] = useState("全期間");
+  const [dateRange, setDateRange] = useState("過去7日間");
   const [selectedOption, setSelectedOption] = useState(null);
   const [showCalendar, setShowCalendar] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -353,7 +386,7 @@ const Dashboard = () => {
 
     if (fetchedAggregatedData) {
       console.log("Aggregated Data: ", fetchedAggregatedData);
-      //setAggregatedData(fetchedAggregatedData);
+      setAggregatedData(fetchedAggregatedData);
     }
   }, [
     session,
@@ -407,6 +440,7 @@ useCallback:
         const propertyId = property.properties_id;
         try {
           const aggregatedData = await fetchAggregatedDataFromDashboard(
+            ////////////////////////////////////////////////要確認
             jwtToken,
             propertyId,
             startDate,
@@ -420,8 +454,8 @@ useCallback:
           console.error("Error fetching aggregated data:", error);
         }
       }
-      console.log("Aggregated Data:", aggregatedDataByPropertyId); // デバッグ用ログ
-      setAggregatedData(aggregatedDataByPropertyId);
+      //console.log("Aggregated Data:", aggregatedDataByPropertyId); // デバッグ用ログ
+      //setAggregatedData(aggregatedDataByPropertyId);///////////////////////////////////////////////////////////////要確認
     };
 
     fetchAggregatedData();
@@ -464,13 +498,25 @@ useCallback:
 
   //Dachboardに表示するための加工したデータをformattedAnalyticsに格納
   useEffect(() => {
-    const formattedAnalyticsData = analyticsData.map((entry) => ({
-      properties_id: entry.property_id, // property_idをproperties_idに変換
-      date: entry.date, // dateをそのまま使用
-      screen_page_views: entry.screen_page_views || 0, // screen_page_viewsを使用
-      conversions: entry.conversions || 0, // conversionsを使用
-      sessions: entry.sessions || 0, // sessionsを使用
-    }));
+    if (!analyticsData || analyticsData.length === 0) {
+      console.warn("analyticsDataが空です");
+      return;
+    }
+
+    const formattedAnalyticsData = analyticsData.map((entry) => {
+      // YYYYMMDD形式の日付をYYYY-MM-DDに変換
+      const formattedDate = `${entry.date.slice(0, 4)}-${entry.date.slice(
+        4,
+        6
+      )}-${entry.date.slice(6, 8)}`;
+      return {
+        properties_id: entry.property_id, // property_idをproperties_idに変換
+        date: formattedDate, // 表示を変更
+        screen_page_views: entry.screen_page_views || 0, // screen_page_viewsを使用
+        conversions: entry.conversions || 0, // conversionsを使用
+        sessions: entry.sessions || 0, // sessionsを使用};
+      };
+    });
 
     setFormattedAnalytics(formattedAnalyticsData);
     console.log("Formatted Analytics:", formattedAnalyticsData);
@@ -494,7 +540,15 @@ useCallback:
 
     if (filteredAnalytics.length === 0) {
       console.warn("No analytics data found for Property ID:", propertyId);
-      return [0, 0, 0];
+      return [
+        {
+          date: "",
+          PV: 0,
+          CV: 0,
+          CVR: 0,
+          UU: 0,
+        },
+      ];
     }
 
     const analyticsData = filteredAnalytics.map((entry) => ({
@@ -506,6 +560,8 @@ useCallback:
         : 0, // CVRをパーセント表示
       UU: entry.sessions || 0,
     }));
+
+    return analyticsData;
   };
 
   const parseDate = (dateStr) => new Date(dateStr);
@@ -513,54 +569,111 @@ useCallback:
   const filterDataByDateRange = (data, range) => {
     const now = new Date();
     console.log("nowDate:", now);
+    //setEndDate(now);
     let startDate;
 
     switch (range) {
       case "過去7日間":
         startDate = new Date(now);
         startDate.setDate(now.getDate() - 7);
+        setStartDate(startDate);
         console.log("StartDate:", startDate);
         break;
       case "過去28日間":
         startDate = new Date(now);
         startDate.setDate(now.getDate() - 28);
+        setStartDate(startDate);
         console.log("StartDate:", startDate);
         break;
       case "過去90日間":
         startDate = new Date(now);
         startDate.setDate(now.getDate() - 90);
+        setStartDate(startDate);
         console.log("StartDate:", startDate);
         break;
       case "先月":
         startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        setStartDate(startDate);
         console.log("StartDate:", startDate);
         now.setMonth(now.getMonth(), 0); // 先月の最後の日
         break;
       case "先々月":
         startDate = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+        setStartDate(startDate);
         console.log("StartDate:", startDate);
         now.setMonth(now.getMonth() - 1, 0); // 先々月の最後の日
         break;
       case "1年間":
         startDate = new Date(now);
         startDate.setFullYear(now.getFullYear() - 1);
+        setStartDate(startDate);
         console.log("StartDate:", startDate);
         break;
       case "全期間":
         //startDate = parseDate(data[data.length - 1].date); // データの最古の日付
+        startDate = new Date(now);
+        startDate.setFullYear(now.getFullYear() - 1);
+        setStartDate(startDate);
+        console.log("StartDate:", startDate);
         break;
       default:
+        console.log("DATA:", data);
         return data;
     }
-    //フィルタリング
-    const filtered = data.filter((item) => {
-      const itemDate = parseDate(item.date);
-      return itemDate >= startDate && itemDate <= now;
-    });
-    console.log("FILTDATA:", filtered);
-    setFilteredData(filtered); // 絞り込んだデータを保存
-    return filtered;
+
+    if (Array.isArray(data)) {
+      const filteredData = fillMissingDates(data, startDate, now);
+      console.log("DatefilteredData :", filteredData);
+      return filteredData;
+    } else {
+      console.error("データが配列ではありません: ", data);
+      return generateZeroData();
+    }
   }; //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>589
+
+  const fillMissingDates = (data, startDate, endDate) => {
+    const result = [];
+    const currentDate = new Date(startDate);
+    const dataMap = new Map();
+
+    data.forEach((item) => {
+      dataMap.set(item.date, item);
+    });
+
+    // 開始日と終了日の差分を一度に生成し、配列を作成する
+    for (
+      let d = new Date(endDate);
+      d >= new Date(startDate);
+      d.setDate(d.getDate() - 1)
+    ) {
+      const formattedDate = d.toISOString().split("T")[0]; // YYYY-MM-DD形式で日付をフォーマット
+
+      // Mapに該当日付のデータがあれば、それをresultに追加、なければ0データを追加
+      result.push(
+        dataMap.get(formattedDate) || {
+          date: formattedDate,
+          PV: 0,
+          CV: 0,
+          CVR: 0,
+          UU: 0,
+        }
+      );
+    }
+
+    return result;
+  };
+
+  const generateZeroData = () => {
+    return [
+      {
+        date: new Date().toISOString().split("T")[0], // デフォルトで現在の日付,
+        PV: 0,
+        CV: 0,
+        CVR: 0,
+        UU: 0,
+      },
+    ];
+  };
 
   /*{showCalendar && (
                   <DateRangePicker
@@ -579,11 +692,11 @@ useCallback:
     console.log("selectedOption:", selectedOption.value);
   };
 
-  //AnalyticsData, DateRange, filteredDataに呼応してフィルタリング
+  //AnalyticsData, DateRange, filteredDataに呼応してフィルタリング//////////////////////////////////////////////////////////////////////////////////////////////////////Dataの変更場所
   useEffect(() => {
-    if (analyticsData.length > 0) {
+    if (formattedAnalytics.length > 0) {
       console.log("DateRange:", dateRange);
-      const filtered = filterDataByDateRange(sampledata1, dateRange); //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>516
+      const filtered = filterDataByDateRange(formattedAnalytics, dateRange); //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>516
       setFilteredData(filtered);
     }
   }, [dateRange, analyticsData]);
@@ -591,7 +704,7 @@ useCallback:
   useEffect(() => {
     if (filteredData.length > 0) {
       console.log("FilteredData:", filteredData);
-      const previousData = getPreviousData(sampledata1, dateRange); //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>603
+      const previousData = getPreviousData(formattedAnalytics, dateRange); //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>603
       console.log("PreData:", previousData);
       calculateCurrentAndPreviousData(filteredData, previousData); //>>>>>>>>>>>>>>>646
     }
@@ -651,19 +764,25 @@ useCallback:
         console.log("preStart:", previousStartDate);
         console.log("preEnd:", previousEndDate);
         break;
-      case "全期間":
-        //startDate = parseDate(data[data.length - 1].date); // データの最古の日付
-        break;
+      //case "全期間":
+      //previousStartDate = parseDate(data[data.length - 1].date); // データの最古の日付
+      //break;
 
       default:
         return [];
     }
-
-    const previousData = data.filter((item) => {
-      const itemDate = new Date(item.date);
-      return itemDate >= previousStartDate && itemDate <= previousEndDate;
-    });
-    return previousData;
+    if (Array.isArray(data)) {
+      const previousData = fillMissingDates(
+        data,
+        previousStartDate,
+        previousEndDate
+      );
+      console.log("PreviousData :", previousData);
+      return previousData;
+    } else {
+      console.error("データが配列ではありません: ", data);
+      return generateZeroData();
+    }
   }; //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>597
 
   const calculateCurrentAndPreviousData = (filteredData, previousData) => {
@@ -681,9 +800,9 @@ useCallback:
     });
 
     previousData.forEach((data) => {
-      prePV += data.PV || 0;
-      preCV += data.CV || 0;
-      preUU += data.UU || 0;
+      prePV += data.screen_page_views || 0;
+      preCV += data.conversions || 0;
+      preUU += data.sessions || 0;
     });
 
     const currentData = {
@@ -700,7 +819,6 @@ useCallback:
 
     console.log("Current Data:", currentData); // デバッグ用ログ
     console.log("Previous Data:", preData); // デバッグ用ログ
-    console.log("RESULT:", (currentData.PV / preData.PV) * 100);
     //setChartData(dataForDateRange);
     // サンプルメトリクスの設定
     setMetrics([
@@ -736,8 +854,8 @@ useCallback:
   useEffect(() => {
     if (propertyId) {
       const data = getAnalyticsData(propertyId);
-      const filtered = filterDataByDateRange(data, dateRange);
       console.log("data:", data);
+      const filtered = filterDataByDateRange(data, dateRange);
       console.log("dateRange", dateRange);
       console.log("Fetched Data for Property:", data); // デバッグ用ログ
       console.log("filtered data:", filtered);
@@ -754,7 +872,18 @@ useCallback:
 
   const renderContent = () => {
     if (!filteredData || filteredData.length === 0) {
-      return <LineChart data={sampledata1} dataKey="PV" />;
+      if (selectedMetric === "PV (ページ閲覧数)") {
+        return <LineChart data={sampledata2} dataKey="PV" />;
+      }
+      if (selectedMetric === "CV (お問い合わせ数)") {
+        return <LineChart data={sampledata2} dataKey="CV" />;
+      }
+      if (selectedMetric === "CVR (お問い合わせ率)") {
+        return <LineChart data={sampledata2} dataKey="CVR" />;
+      }
+      if (selectedMetric === "UU (セッション数)") {
+        return <LineChart data={sampledata2} dataKey="UU" />;
+      }
     }
 
     if (selectedMetric === "PV (ページ閲覧数)") {
@@ -792,7 +921,7 @@ useCallback:
 
   const SearchKeyword = ({ keyword, count }) => (
     <div className="search-keyword">
-      <Search className="search-icon" />
+      <FaSearch className="search-icon" />
       <div className="search-info">
         <p className="search-keyword-text">{keyword}</p>
         <p className="search-count-text">{count}回の検索結果</p>

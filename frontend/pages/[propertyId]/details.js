@@ -195,12 +195,11 @@ export default function Details() {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [formattedAnalytics, setFormattedAnalytics] = useState([]);
+  const [filteredData, setFilteredData] = useState(null);
   const [pagePath, setpagePath] = useState("");
-  const [selectedPagePath, setSelectedPagePath] = useState(null);
-  const [selectedDateRange, setSelectedDateRange] = useState(null);
+  const [selectedPagePath, setSelectedPagePath] = useState("/");
+  const [selectedDateRange, setSelectedDateRange] = useState("過去7日間");
   const router = useRouter();
-
-  const { propertyId } = router.query;
 
   const formatDate = (date) => {
     const year = date.getFullYear();
@@ -214,6 +213,7 @@ export default function Details() {
   useEffect(() => {
     if (!fetchedSession && !loading) {
       router.push("/auth/login");
+      return;
     } else {
       console.log("fetchedSession: ", fetchedSession);
     }
@@ -221,9 +221,18 @@ export default function Details() {
 
   // データの初期化
   const [analyticsData, setAnalyticsData] = useState([]);
+  const [propertyId, setpropertyId] = useState(null);
   const [propertyIds, setPropertyIds] = useState([]);
   const [searchConsoleData, setSearchConsoleData] = useState([]);
   const [aggregatedData, setAggregatedData] = useState([]);
+
+  useEffect(() => {
+    if (router.query.propertyId) {
+      setpropertyId(router.query.propertyId);
+    }
+  }, [router.query.propertyId]);
+
+  console.log("PropertyId:", propertyId);
 
   // useAnalyticsDataでデータを取得する
   const {
@@ -232,6 +241,7 @@ export default function Details() {
     isLoading: analyticsLoading,
     refetch: refetchAnalyticsData,
   } = useAnalyticsData(fetchedSession, setPropertyIds);
+
   useEffect(() => {
     if (analyticsError) {
       console.error("Error fetching analytics data:", analyticsError);
@@ -294,15 +304,27 @@ export default function Details() {
 
   //グラフに描画するデータの作成
   useEffect(() => {
-    const formattedAnalyticsData = analyticsData.map((entry) => ({
-      properties_id: entry.property_id, // property_idをproperties_idに変換
-      date: entry.date, // dateをそのまま使用
-      screen_page_views: entry.screen_page_views || 0, // screen_page_viewsを使用
-      conversions: entry.conversions || 0, // conversionsを使用
-      sessions: entry.sessions || 0, // sessionsを使用
-      total_users: entry.total_users || 0,
-    }));
+    if (!analyticsData || analyticsData.length === 0) {
+      console.warn("analyticsDataが空です");
+      return;
+    }
 
+    const formattedAnalyticsData = analyticsData.map((entry) => {
+      // YYYYMMDD形式の日付をYYYY-MM-DDに変換
+      const formattedDate = `${entry.date.slice(0, 4)}-${entry.date.slice(
+        4,
+        6
+      )}-${entry.date.slice(6, 8)}`;
+      return {
+        properties_id: entry.property_id, // property_idをproperties_idに変換
+        date: formattedDate, // dateをそのまま使用
+        screen_page_views: entry.screen_page_views || 0, // screen_page_viewsを使用
+        conversions: entry.conversions || 0, // conversionsを使用
+        total_users: entry.total_users || 0,
+        sessions: entry.sessions || 0, // sessionsを使用
+        click: entry.click || 0,
+      };
+    });
     setFormattedAnalytics(formattedAnalyticsData);
     console.log("Formatted Analytics:", formattedAnalyticsData);
   }, [analyticsData]); // analyticsDataが変更された時に実行
@@ -315,9 +337,10 @@ export default function Details() {
     setSelectedURL(url);
   };
 
-  const handleDateRangeChange = (value) => {
-    setDateRange(value);
-    setShowCalendar(value === "カスタム");
+  const handleSelectDateChange = (selectedOption) => {
+    setDateRange(selectedOption.value);
+    setSelectedDateRange(selectedOption);
+    console.log("selectedDateRangeOption:", selectedOption.value);
   };
 
   const handleSelectPathChange = (selectedOption) => {
@@ -328,7 +351,7 @@ export default function Details() {
     setSelectedMetric(value);
   };
 
-  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  /////////////////////////////////////////////////////////////////////////////////////////////////////
   function getQuery(searchData, searchId, object = "") {
     // 最後の / を削除
     //const sanitizedUrl = url.replace(/\/+$/, "");
@@ -365,67 +388,258 @@ export default function Details() {
   console.log("topQueries", topQueries);
   const topDevices = getQuery(aggregatedData, propertyId, "device_category");
   console.log("topDevices", topDevices);
-  const topCountries = getQuery(aggregatedData, propertyId, "country");
-  console.log("topQueries", topCountries);
-
-  //グラフに描画するデータの作成
-  useEffect(() => {
-    const formattedAnalyticsData = analyticsData.map((entry) => ({
-      properties_id: entry.property_id, // property_idをproperties_idに変換
-      date: entry.date, // dateをそのまま使用
-      screen_page_views: entry.screen_page_views || 0, // screen_page_viewsを使用
-      conversions: entry.conversions || 0, // conversionsを使用
-      sessions: entry.sessions || 0, // sessionsを使用
-    }));
-
-    setFormattedAnalytics(formattedAnalyticsData);
-    console.log("Formatted Analytics:", formattedAnalyticsData);
-  }, [analyticsData]); // analyticsDataが変更された時に実行
-
-  const handleSelectDateChange = (selectedOption) => {
-    setDateRange(selectedOption.value); // 選択されたオプションを状態に保存
-    setSelectedDateRange(selectedOption);
-    console.log("selectedOption:", selectedOption.value);
-  };
+  const topCountries = getQuery(
+    aggregatedData,
+    propertyId,
+    aggregatedData[propertyId] ? "city" : "country"
+  );
+  console.log("topCountries", topCountries);
 
   const selectChart = () => {
-    switch (selectedMetric) {
-      case "PV":
+    if (!filteredData || filteredData.length === 0) {
+      if (selectedMetric === "PV") {
         return <LineChart data={sampledata} dataKey="PV" />;
-      case "CV":
+      } else if (selectedMetric === "CV") {
         return <LineChart data={sampledata} dataKey="CV" />;
-      case "TU":
+      } else if (selectedMetric === "TU") {
         return (
           <div>
             <LineChart data={sampledata} dataKey="TU" />;
-            <Table data={topDevices} />;
           </div>
         );
-      case "UU":
+      } else if (selectedMetric === "UU") {
         return <LineChart data={sampledata} dataKey="UU" />;
-      case "CVR":
+      } else if (selectedMetric === "CVR") {
         return <LineChart data={sampledata} dataKey="CVR" />;
-      case "SD":
+      } else if (selectedMetric === "SD") {
         return (
           <div>
             <BarChart data={topDevices} />;
-            <Table data={topDevices} />;
           </div>
         );
-      case "VR":
-        return <BarChart data={topCountries} />; //流入者属性
-      case "RU":
-        return <PieChart data={topQueries} />; //流入元URL
-      case "SK":
+      } else if (selectedMetric === "VR") {
+        return <BarChart data={topCountries} />; // 流入者属性
+      } else if (selectedMetric === "RU") {
+        return <PieChart data={topQueries} />; // 流入元URL
+      } else if (selectedMetric === "SK") {
         return (
           <div>
-            <BarChart data={topQueries} />;
+            {/*<BarChart data={topQueries} />;*/}
             <PercentageTable data={topQueries} />;
           </div>
         );
-      default:
+      } else if (selectedMetric === "TC") {
+        return <LineChart data={sampledata} />; // 総クリック数
+      } else {
         return <LineChart data={sampledata} dataKey="PV" />;
+      }
     }
+    if (selectedMetric === "PV") {
+      return <LineChart data={filteredData} dataKey="PV" />;
+    } else if (selectedMetric === "CV") {
+      return <LineChart data={filteredData} dataKey="CV" />;
+    } else if (selectedMetric === "TU") {
+      return (
+        <div>
+          <LineChart data={filteredData} dataKey="TU" />;
+        </div>
+      );
+    } else if (selectedMetric === "UU") {
+      return <LineChart data={filteredData} dataKey="UU" />;
+    } else if (selectedMetric === "CVR") {
+      return <LineChart data={filteredData} dataKey="CVR" />;
+    } else if (selectedMetric === "SD") {
+      return (
+        <div>
+          <PercentageTable data={topDevices} title="流入元デバイス" />;
+        </div>
+      );
+    } else if (selectedMetric === "VR") {
+      return <PercentageTable data={topCountries} title="流入者属性" />; // 流入者属性
+    } else if (selectedMetric === "RU") {
+      return <PieChart data={topQueries} />; // 流入元URL
+    } else if (selectedMetric === "SK") {
+      return (
+        <div>
+          {/*<BarChart data={topQueries} />;*/}
+          <PercentageTable data={topQueries} title="検索キーワード" />;
+        </div>
+      );
+    } else if (selectedMetric === "TC") {
+      return <LineChart data={filteredData} />; // 総クリック数
+    } else {
+      return <LineChart data={sampledata} dataKey="PV" />;
+    }
+  };
+
+  const parseDate = (dateStr) => new Date(dateStr);
+
+  useEffect(() => {
+    if (propertyId && dateRange) {
+      const data = getAnalyticsData(propertyId);
+      console.log("data:", data);
+      const filtered = filterDataByDateRange(data, dateRange);
+      console.log("dateRange", dateRange);
+      console.log("Fetched Data for Property:", data); // デバッグ用ログ
+      console.log("filtered data:", filtered);
+      setFilteredData(filtered);
+    }
+  }, [propertyId, dateRange]);
+
+  const getAnalyticsData = (propertyId) => {
+    if (!formattedAnalytics || formattedAnalytics.length === 0) {
+      console.warn("formattedAnalytics is empty or undefined.");
+      return [];
+    }
+    const filteredAnalytics = formattedAnalytics.filter(
+      (entry) => entry.properties_id === propertyId
+    );
+
+    console.log("FileterdAnalyticD: ", filteredAnalytics);
+
+    if (filteredAnalytics.length === 0) {
+      console.warn("No analytics data found for Property ID:", propertyId);
+      return [
+        {
+          date: "",
+          PV: 0,
+          CV: 0,
+          TU: 0,
+          CVR: 0,
+          UU: 0,
+          TC: 0,
+        },
+      ];
+    }
+    // analyticsDataの定義
+    const analyticsData = filteredAnalytics.map((entry) => ({
+      date: entry.date,
+      PV: entry.screen_page_views || 0,
+      CV: entry.conversions || 0,
+      TU: entry.total_users || 0,
+      CVR: entry.sessions
+        ? ((entry.conversions / entry.sessions) * 100).toFixed(2)
+        : 0, // CVRをパーセント表示
+      UU: entry.sessions || 0,
+      TC: entry.click || 0,
+    }));
+
+    console.log("FileterdAnalyticD: ", filteredAnalytics);
+
+    return analyticsData;
+  };
+
+  const filterDataByDateRange = (data, range) => {
+    const now = new Date();
+    console.log("nowDate:", now);
+    //setEndDate(now);
+    let startDate;
+
+    switch (range) {
+      case "過去7日間":
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - 7);
+        setStartDate(startDate);
+        console.log("StartDate:", startDate);
+        break;
+      case "過去28日間":
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - 28);
+        setStartDate(startDate);
+        console.log("StartDate:", startDate);
+        break;
+      case "過去90日間":
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() - 90);
+        setStartDate(startDate);
+        console.log("StartDate:", startDate);
+        break;
+      case "先月":
+        startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        setStartDate(startDate);
+        console.log("StartDate:", startDate);
+        now.setMonth(now.getMonth(), 0); // 先月の最後の日
+        break;
+      case "先々月":
+        startDate = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+        setStartDate(startDate);
+        console.log("StartDate:", startDate);
+        now.setMonth(now.getMonth() - 1, 0); // 先々月の最後の日
+        break;
+      case "1年間":
+        startDate = new Date(now);
+        startDate.setFullYear(now.getFullYear() - 1);
+        setStartDate(startDate);
+        console.log("StartDate:", startDate);
+        break;
+      case "全期間":
+        //startDate = parseDate(data[data.length - 1].date); // データの最古の日付
+        startDate = new Date(now);
+        startDate.setFullYear(now.getFullYear() - 1);
+        setStartDate(startDate);
+        console.log("StartDate:", startDate);
+        break;
+      default:
+        console.log("DATA:", data);
+        return data;
+    }
+
+    if (Array.isArray(data)) {
+      const filteredData = fillMissingDates(data, startDate, now);
+      console.log("DatefilteredData :", filteredData);
+      return filteredData;
+    } else {
+      console.error("データが配列ではありません: ", data);
+      return generateZeroData();
+    }
+  }; //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>589
+
+  const fillMissingDates = (data, startDate, endDate) => {
+    const result = [];
+    const currentDate = new Date(startDate);
+    const dataMap = new Map();
+
+    data.forEach((item) => {
+      dataMap.set(item.date, item);
+    });
+
+    // 開始日と終了日の差分を一度に生成し、配列を作成する
+    for (
+      let d = new Date(endDate);
+      d >= new Date(startDate);
+      d.setDate(d.getDate() - 1)
+    ) {
+      const formattedDate = d.toISOString().split("T")[0]; // YYYY-MM-DD形式で日付をフォーマット
+
+      // Mapに該当日付のデータがあれば、それをresultに追加、なければ0データを追加
+      result.push(
+        dataMap.get(formattedDate) || {
+          date: formattedDate,
+          PV: 0,
+          CV: 0,
+          TU: 0,
+          CVR: 0,
+          UU: 0,
+          TC: 0,
+        }
+      );
+    }
+
+    return result;
+  };
+
+  const generateZeroData = () => {
+    return [
+      {
+        date: new Date().toISOString().split("T")[0], // デフォルトで現在の日付,
+        PV: 0,
+        CV: 0,
+        TU: 0,
+        CVR: 0,
+        UU: 0,
+        TC: 0,
+      },
+    ];
   };
 
   return (
@@ -445,6 +659,7 @@ export default function Details() {
         <div className="filter-section">
           <div className="date-range">
             <Select
+              className="custom-select"
               value={selectedPagePath}
               onChange={handleSelectPathChange}
               options={pagePathOptions}
@@ -527,6 +742,12 @@ export default function Details() {
               className={`tab ${selectedMetric === "SK" ? "active" : ""}`}
             >
               検索キーワード
+            </button>
+            <button
+              onClick={() => handleMetricChange("TC")}
+              className={`tab ${selectedMetric === "TC" ? "active" : ""}`}
+            >
+              クリック数
             </button>
           </div>
         </div>

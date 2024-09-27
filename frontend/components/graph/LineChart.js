@@ -4,13 +4,26 @@ import { Chart, registerables } from "chart.js";
 
 Chart.register(...registerables);
 
-const LineChart = ({ data, dataKey }) => {
+// データを日付で昇順にソートする関数
+const sortDataByDate = (data) => {
+  return data.sort((a, b) => new Date(a.date) - new Date(b.date));
+};
+
+const LineChart = ({ data = [], dataKey }) => {
+  if (!data || data.length === 0) {
+    console.warn("Data is empty or null");
+    return <div>No data available</div>;
+  }
+
+  // 日付順にソート
+  const sortedData = sortDataByDate(data);
+
   const graphData = {
     labels: data.map((item) => item.date),
     datasets: [
       {
         label: dataKey,
-        data: data.map((item) => item[dataKey]),
+        data: sortedData.map((item) => item[dataKey]),
         borderColor: "#3399cc",
         backgroundColor: "rgba(64, 224,208,0.2 )",
         fill: true,

@@ -4,6 +4,7 @@
 .header {
   background-color: #ffffff;
   padding: 10px;
+  margin: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -17,12 +18,13 @@
 .header-left {
   display: flex;
   align-items: center;
-  gap: 16px; /* space-x-4 */
+  gap: 16px;
 }
 
 .header-title {
-  font-size: 20px; /* text-xl */
-  font-weight: 700; /* font-bold */
+  font-size: 20px;
+  font-weight: 700;
+  padding-left: 5px;
   margin: 0;
 }
 

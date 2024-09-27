@@ -107,6 +107,10 @@ button {
   font-weight: bold;
   border-bottom: 3px solid black;
 }
+
+.custom-select {
+  min-width: 150px;
+}
 .chart-controls {
   display: flex;
   justify-content: space-between;

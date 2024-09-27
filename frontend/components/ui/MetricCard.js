@@ -16,9 +16,8 @@ const MetricCard = ({ title, value, previousValue, isActive, onClick }) => {
   const currentValue = parseFloat(value) || 0;
   const prevValue = parseFloat(previousValue) || 0;
   let comValue;
-  if (currentValue - prevValue === currentValue) {
-    comValue = "-";
-  } else if (title === "CVR (お問い合わせ率)") {
+
+  if (title === "CVR (お問い合わせ率)") {
     comValue = (currentValue - prevValue).toFixed(2);
   } else {
     comValue = currentValue - prevValue;
@@ -42,7 +41,7 @@ const MetricCard = ({ title, value, previousValue, isActive, onClick }) => {
         {comValue > 0
           ? `${comValue}増加▲`
           : comValue < 0
-          ? `${comValue}減少▼`
+          ? `${Math.abs(comValue)}減少▼`
           : (comValue = 0 ? "±0" : "-")}
       </div>
     </div>

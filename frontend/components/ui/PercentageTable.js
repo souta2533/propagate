@@ -1,14 +1,24 @@
 import React from "react";
 import "../../styles/components/percentageTable.css"; // スタイルを別のCSSファイルに記述
 
-const PercentageTable = ({ data }) => {
+const PercentageTable = ({ data, title, subtitle }) => {
+  // データが存在しない、または不正な場合は何も表示しない
+  if (!Array.isArray(data) || data.length === 0) {
+    return <p>No data available</p>;
+  }
+
   // 総数を計算
   const total = data.reduce((acc, item) => acc + item[1], 0);
 
+  // データがすべて0の場合の処理
+  if (total === 0) {
+    return <p>No valid data available</p>;
+  }
+
   return (
     <div className="percentage-table">
-      <h3 className="table-title"></h3>
-      <p className="table-subtitle">視聴回数・過去28日間</p>
+      <h3 className="table-title">{title}</h3>
+      <p className="table-subtitle">{subtitle}</p>
       <div className="table-content">
         {data.map((item, index) => {
           // 各項目の割合を計算
@@ -17,7 +27,11 @@ const PercentageTable = ({ data }) => {
           return (
             <div key={index} className="table-row">
               <div className="label">{item[0]}</div>
-              <div className="bar">
+              <div
+                className="bar"
+                aria-label={`Bar for ${item[0]} showing ${percentage}%`}
+                role="progressbar"
+              >
                 <div
                   className="bar-fill"
                   style={{

@@ -38,7 +38,12 @@
   height: 60%;
   border: 1px solid #7272722f;
   border-radius: 15px;
+  margin-left: 20px;
   overflow: hidden;
+}
+
+.chart-content {
+  padding: 10px;
 }
 
 /* メトリックカード */
@@ -90,11 +95,6 @@
 .metric-comparison {
   font-size: 15px; /* text-xs */
   color: #f9fafb; /* text-muted-foreground */
-}
-
-.chart-content {
-  padding: 10px;
-  height: 500px;
 }
 
 /*メインのヘッダ*/
@@ -207,9 +207,9 @@
 }
 
 .search-icon {
-  height: 15px; /* h-4 */
-  width: 15px; /* w-4 */
-  color: #6b7280; /* text-gray-500 */
+  height: 15px;
+  width: 15px;
+  color: #6b7280;
   background-color: #ebecec;
   padding: 10px;
   border-radius: 10px;
@@ -237,14 +237,10 @@
   padding: 20px;
   background-color: #ffffff;
   margin-top: 20px;
+  margin-left: 20px;
   border: 1px solid #cccccc;
   border-radius: 10px;
   height: 150px;
-}
-
-/* スマホサイズのみハンバーガーメニューを表示 */
-.hamburger-icon {
-  display: none; /* デフォルトでは非表示 */
 }
 
 .overlay {
