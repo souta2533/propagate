@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useSessionData } from "../hooks/useSessionData";
+import { useDataByDayFromDetails } from "../hooks/useGetDataByDay"
 import { useAnalyticsData } from "../hooks/useAnalyticsData";
 import { useSearchConsoleData } from "../hooks/useSearchConsoleData";
 import { useAggregatedData } from "../hooks/useAggregatedData";
@@ -68,6 +69,7 @@ export default function AnalyticsDashboard() {
   }, [fetchedSession, loading, router]);
 
   // データの初期化
+  const [dataByDayFromDetails, setDataByDayFromDetails] = useState([]);
   const [analyticsData, setAnalyticsData] = useState([]);
   const [propertyIds, setPropertyIds] = useState([]);
   const [searchConsoleData, setSearchConsoleData] = useState([]);
@@ -109,6 +111,29 @@ export default function AnalyticsDashboard() {
       setSearchConsoleData(fetchedSearchConsoleData);
     }
   }, [propertyIds, searchConsoleError, router]);
+
+  // 日毎, page_pathごとのデータを取得
+  const {
+    data: fetchedDataByDayFromDetails,
+    error: dataByDayError,
+    isLoading: dataByDayLoading,
+    refetch: refetchDataByDayFromDetails,
+  } = useDataByDayFromDetails(fetchedSession, propertyIds, startDate, endDate);
+  useEffect(() => {
+    if (dataByDayLoading) {
+      console.log("Loading data by day...");
+      return;
+    }
+    if (dataByDayError) {
+      console.error("Error fetching data by day:", dataByDayError);
+      refetchDataByDayFromDetails();
+    }
+
+    if (fetchedDataByDayFromDetails) {
+      console.log("fetchedDataByDayFromDetails:", fetchedDataByDayFromDetails);
+      setDataByDayFromDetails(fetchedDataByDayFromDetails);
+    }
+  }, [fetchedSession, propertyIds, startDate, endDate, dataByDayError, router]);
 
   // useAggregatedDataでデータを取得する
   const {

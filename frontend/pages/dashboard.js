@@ -384,19 +384,22 @@ const Dashboard = () => {
   }
 
   useEffect(() => {
-    if (!session || !propertyIds || !startDate || !endDate) {
-      console.log("Null something");
-      return;
-    }
+    if (!session || !propertyIds || !startDate || !endDate) return;
 
     if (dataByDayError) {
       console.error("Error fetching data by day:", dataByDayError); //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
       refetchDataByDay(session, propertyIds, startDate, endDate);
-    } else if (fetchedDataByDay) {
-      console.log("Fetched Data By Day: ", fetchedDataByDay);
+    } else if (
+      fetchedDataByDay &&
+      Object.values(fetchedDataByDay).some(
+        (data) => Object.values(data).length > 0
+      )
+    ) {
+      console.log("Data By Day: ", fetchedDataByDay);
       setDataByDay(fetchedDataByDay);
+    } else {
+      console.log("Data By Day is empty");
     }
-    console.log("ErrorDBD:", dataByDay);
   }, [
     session,
     propertyIds,
