@@ -72,9 +72,9 @@ async def get_data_by_day_from_details(
         search_console_table = SearchConsoleDataTable(supabase)
         search_console_data = await search_console_table.fetch_data(propertyId, startDate, endDate, jwt_token)
 
-        data_by_page_path = data_by_page_path(analytics_data, search_console_data)
+        data = data_by_page_path(analytics_data, search_console_data)
 
-        return {"status": "success", "data": data_by_page_path}
+        return {"status": "success", "data": data}
     
     except Exception as e:
         log.error(f"Error: {e}")

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useSessionData } from "../../hooks/useSessionData";
+import { useDataByDayFromDetails } from "../../hooks/useGetDataByDay"
 import { useAnalyticsData } from "../../hooks/useAnalyticsData";
 import { useSearchConsoleData } from "../../hooks/useSearchConsoleData";
 import { useAggregatedData } from "../../hooks/useAggregatedData";
@@ -192,8 +193,14 @@ export default function Details() {
   const [selectedMetric, setSelectedMetric] = useState("PV");
   const [urlList, seturlList] = useState("");
   const [timeGranularity, setTimeGranularity] = useState("日別");
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+  const [startDate, setStartDate] = useState(() => {
+    const date = new Date();
+    date.setMonth(date.getMonth() - 1); // 今日から1ヶ月前の日付を設定
+    return date.toISOString().split("T")[0]; // YYYY-MM-DD 形式で取得
+  });
+  const [endDate, setEndDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
   const [formattedAnalytics, setFormattedAnalytics] = useState([]);
   const [filteredData, setFilteredData] = useState(null);
   const [pagePath, setpagePath] = useState("");
@@ -220,6 +227,7 @@ export default function Details() {
   }, [fetchedSession, loading, router]);
 
   // データの初期化
+  const [dataByDayFromDetails, setDataByDayFromDetails] = useState([]);
   const [analyticsData, setAnalyticsData] = useState([]);
   const [propertyId, setpropertyId] = useState(null);
   const [propertyIds, setPropertyIds] = useState([]);
@@ -232,7 +240,7 @@ export default function Details() {
     }
   }, [router.query.propertyId]);
 
-  console.log("PropertyId:", propertyId);
+  // console.log("PropertyId:", propertyId);
 
   // useAnalyticsDataでデータを取得する
   const {
@@ -255,6 +263,7 @@ export default function Details() {
   }, [fetchedSession, analyticsError, router]);
 
   // useSearchConsoleDataでデータを取得する
+  console.log("PropertyIds:", propertyIds);
   const {
     data: fetchedSearchConsoleData,
     error: searchConsoleError,
@@ -271,6 +280,30 @@ export default function Details() {
       setSearchConsoleData(fetchedSearchConsoleData);
     }
   }, [propertyIds, searchConsoleError, router]);
+
+  // 日毎, page_pathごとのデータを取得
+  const {
+    data: fetchedDataByDayFromDetails,
+    error: dataByDayError,
+    isLoading: dataByDayLoading,
+    refetch: refetchDataByDayFromDetails,
+  } = useDataByDayFromDetails(fetchedSession, propertyIds, startDate, endDate);
+  useEffect(() => {
+    console.log("トリガー");
+    if (dataByDayLoading) {
+      console.log("Loading data by day...");
+      return;
+    }
+    if (dataByDayError) {
+      console.error("Error fetching data by day:", dataByDayError);
+      refetchDataByDayFromDetails();
+    }
+
+    if (fetchedDataByDayFromDetails && Object.values(fetchedDataByDayFromDetails).some(data => Object.values(data).length > 0)) {
+      console.log("fetchedDataByDayFromDetails:", fetchedDataByDayFromDetails);
+      setDataByDayFromDetails(fetchedDataByDayFromDetails);
+    }
+  }, [fetchedDataByDayFromDetails]);
 
   // useAggregatedDataでデータを取得する
   const {
@@ -381,13 +414,13 @@ export default function Details() {
     return top7Queries;
   }
 
-  console.log("AGGREGATED:", aggregatedData);
+  // console.log("AGGREGATED:", aggregatedData);
   const topQueries = getQuery(aggregatedData, propertyId, "query");
-  console.log("AG:", aggregatedData);
-  console.log("propertyID:", propertyId);
-  console.log("topQueries", topQueries);
+  // console.log("AG:", aggregatedData);
+  // console.log("propertyID:", propertyId);
+  // console.log("topQueries", topQueries);
   const topDevices = getQuery(aggregatedData, propertyId, "device_category");
-  console.log("topDevices", topDevices);
+  // console.log("topDevices", topDevices);
   const topCountries = getQuery(
     aggregatedData,
     propertyId,

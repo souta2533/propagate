@@ -46,7 +46,7 @@ export const useDataByDay = (session, propertyIds, startDate, endDate) => {
     });
 };
 
-// 日毎のデータを取得（detail用）
+// 日ごとのデータを取得（detail用）
 const fetchDataFromDetails = async (session, propertyIds, startDate, endDate) => {
     if (!session || !propertyIds || !startDate || !endDate) {
         console.warn("Session or propertyIds is null");
