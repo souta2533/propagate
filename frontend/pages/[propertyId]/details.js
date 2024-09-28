@@ -345,6 +345,8 @@ export default function Details() {
 
   const handleSelectPathChange = (selectedOption) => {
     setSelectedPagePath(selectedOption);
+    setpagePath(selectedOption.value);
+    console.log("PagePath:", pagePath);
   };
 
   const handleMetricChange = (value) => {
@@ -383,16 +385,13 @@ export default function Details() {
 
   console.log("AGGREGATED:", aggregatedData);
   const topQueries = getQuery(aggregatedData, propertyId, "query");
-  console.log("AG:", aggregatedData);
   console.log("propertyID:", propertyId);
   console.log("topQueries", topQueries);
   const topDevices = getQuery(aggregatedData, propertyId, "device_category");
   console.log("topDevices", topDevices);
-  const topCountries = getQuery(
-    aggregatedData,
-    propertyId,
-    aggregatedData[propertyId] ? "city" : "country"
-  );
+  const topCountries = getQuery(aggregatedData, propertyId, "country");
+  console.log("topCountries", topCountries);
+  const topCities = getQuery(aggregatedData, propertyId, "city");
   console.log("topCountries", topCountries);
 
   const selectChart = () => {
@@ -425,7 +424,12 @@ export default function Details() {
         return (
           <div>
             {/*<BarChart data={topQueries} />;*/}
-            <PercentageTable data={topQueries} />;
+            <PercentageTable
+              data={topQueries}
+              subtitle="上位7項目"
+              className="Percentage-graph"
+            />
+            ;
           </div>
         );
       } else if (selectedMetric === "TC") {
@@ -451,18 +455,45 @@ export default function Details() {
     } else if (selectedMetric === "SD") {
       return (
         <div>
-          <PercentageTable data={topDevices} title="流入元デバイス" />;
+          <PercentageTable
+            data={topDevices}
+            title="流入元デバイス"
+            subtitle="上位7項目"
+            className="Percentage-graph"
+          />
+          ;
         </div>
       );
     } else if (selectedMetric === "VR") {
-      return <PercentageTable data={topCountries} title="流入者属性" />; // 流入者属性
+      return (
+        <div className="details-graph">
+          <PercentageTable
+            data={topCities}
+            title="流入者属性（国内）"
+            subtitle="上位7項目"
+            className="Percentage-graph"
+          />
+          <PercentageTable
+            data={topCountries}
+            title="流入者属性（国外）"
+            subtitle="上位7項目"
+            className="Percentage-graph"
+          />
+        </div>
+      ); // 流入者属性
     } else if (selectedMetric === "RU") {
       return <PieChart data={topQueries} />; // 流入元URL
     } else if (selectedMetric === "SK") {
       return (
         <div>
           {/*<BarChart data={topQueries} />;*/}
-          <PercentageTable data={topQueries} title="検索キーワード" />;
+          <PercentageTable
+            data={topQueries}
+            title="検索キーワード"
+            subtitle="上位7項目"
+            className="Percentage-graph"
+          />
+          ;
         </div>
       );
     } else if (selectedMetric === "TC") {

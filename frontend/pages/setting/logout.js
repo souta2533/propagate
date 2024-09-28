@@ -40,7 +40,7 @@ export default function UrlSetting() {
               />
             </div>
             <button
-              className="register-button"
+              className="logout-button"
               type="submit"
               onClick={() => handleUrl}
             >

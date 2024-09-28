@@ -35,8 +35,13 @@ const Header = ({ isOpen, toggleMenu, handleSubmit, url, setUrl }) => {
   }, []);
 
   const handleKeyDown = (e) => {
-    if (e.key === "Enter") {
-      handleSubmit(e);
+    e.preventDefault();
+    if (url) {
+      console.log("Submitted URL:", url);
+      // dashboardにURLをクエリパラメータとして渡してリダイレクト
+      router.push(`/dashboard?url=${encodeURIComponent(url)}`);
+    } else {
+      alert("URLを追加してください。");
     }
   };
 

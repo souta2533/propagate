@@ -207,11 +207,13 @@
 }
 
 .search-icon {
+  font-size: 16px;
   height: 15px;
   width: 15px;
   color: #6b7280;
   background-color: #ebecec;
   padding: 10px;
+  margin-right: 8px;
   border-radius: 10px;
 }
 

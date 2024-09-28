@@ -251,6 +251,7 @@ const Dashboard = () => {
   const [url, setUrl] = useState(""); // URL用のstate
   const [metrics, setMetrics] = useState(sampleMetrics); // メトリクスのstate
   const [selectedMetric, setSelectedMetric] = useState("PV (ページ閲覧数)"); // 選択中のメトリクス
+  const [inputValue, setInputValue] = useState(""); // ここで useState を使って定義
 
   const [dataForDateRange, setDataForDateRange] = useState([]);
   const [formattedAnalytics, setFormattedAnalytics] = useState([]);
@@ -271,7 +272,8 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (router.query.url) {
-      setUrl(decodeURIComponent(router.query.url));
+      const decodedUrl = decodeURIComponent(router.query.url);
+      setInputValue(decodedUrl);
     }
   }, [router.query.url]);
 
@@ -561,6 +563,7 @@ useCallback:
       UU: entry.sessions || 0,
     }));
 
+    console.log("ANADATA:", analyticsData);
     return analyticsData;
   };
 
@@ -853,13 +856,14 @@ useCallback:
 
   useEffect(() => {
     if (propertyId) {
+      console.log("PROID:", propertyId);
       const data = getAnalyticsData(propertyId);
       console.log("data:", data);
-      const filtered = filterDataByDateRange(data, dateRange);
+      const filtered = filterDataByDateRange(data, dateRange); //>>>>>>>>>>>>>>>>>>>>>>>>>>>>-300
       console.log("dateRange", dateRange);
       console.log("Fetched Data for Property:", data); // デバッグ用ログ
       console.log("filtered data:", filtered);
-      setFilteredData(filtered);
+      setFilteredData(data); //..........................................................................修正！
     }
   }, [propertyId, dateRange]);
 
@@ -917,17 +921,47 @@ useCallback:
     return topQueries;
   }
 
+  function getQuery2(data, searchId) {
+    const queryCountMap = new Map();
+
+    // 各エントリのqueryを集計
+    data.forEach((entry) => {
+      const query = entry.searchId;
+      if (queryCountMap.has(query)) {
+        queryCountMap.set(query, queryCountMap.get(query) + 1);
+      } else {
+        queryCountMap.set(query, 1);
+      }
+    });
+
+    // Mapを配列に変換し、頻度順にソート
+    const sortedQueries = Array.from(queryCountMap.entries()).sort(
+      (a, b) => b[1] - a[1]
+    );
+
+    // 上位7つを取得
+    const top7Queries = sortedQueries.slice(0, 7);
+
+    return top7Queries;
+  }
+
   const topQueries = getQuery(aggregatedData, propertyId);
 
-  const SearchKeyword = ({ keyword, count }) => (
-    <div className="search-keyword">
-      <FaSearch className="search-icon" />
-      <div className="search-info">
-        <p className="search-keyword-text">{keyword}</p>
-        <p className="search-count-text">{count}回の検索結果</p>
+  const SearchKeyword = ({ keyword, count }) => {
+    // キーワードが空のときは何も表示しない
+    if (!keyword) {
+      return null;
+    }
+    return (
+      <div className="search-keyword">
+        <FaSearch className="search-icon" />
+        <div className="search-info">
+          <p className="search-keyword-text">{keyword}</p>
+          <p className="search-count-text">{count}回の検索結果</p>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="dashboard-container">
@@ -939,7 +973,7 @@ useCallback:
         setUrl={setUrl}
       />
       {/* オーバーレイの追加 */}
-      <Overlay isOpen={isOpen} toggleMenu={toggleMenu} />
+      {/*<Overlay isOpen={isOpen} toggleMenu={toggleMenu} />*/}
       <main className="dashboard-main">
         {/* サイドバーの表示制御 */}
         <Sidebar isOpen={isOpen} className="sidebar" />

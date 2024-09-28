@@ -360,18 +360,6 @@ export default function AnalyticsDashboard() {
                 ))}
               </SelectContent>
             </Select>
-
-            {/* 選択されたURLを表示する部分
-          {selectedURL && (
-            <div style={{ marginTop: "20px" }}>
-              <p>
-                選択されたURL:{" "}
-                <a href={selectedURL} target="_blank" rel="noopener noreferrer">
-                  {selectedURL}
-                </a>
-              </p>
-            </div>
-          )*/}
           </div>
           <div className="date-range">
             <Select value={dateRange} onValueChange={handleDateRangeChange}>
@@ -477,33 +465,6 @@ export default function AnalyticsDashboard() {
               <SelectItem value="views">コンテンツ ごとの視聴回数</SelectItem>
             </SelectContent>
           </Select>
-          {/*グラフの種類をコントロール
-        <div className="chart-type-controls">
-          <Select value={chartType} onValueChange={handleChartTypeChange}>
-            <SelectTrigger className="custom-select-trigger">
-              <SelectValue placeholder="グラフタイプ" />
-            </SelectTrigger>
-            <SelectContent className="custom-select-content">
-              <SelectItem value="折れ線グラフ">折れ線グラフ</SelectItem>
-              <SelectItem value="棒グラフ">棒グラフ</SelectItem>
-              <SelectItem value="エリアチャート">エリアチャート</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select
-            value={timeGranularity}
-            onValueChange={handleTimeGranularityChange}
-          >
-            <SelectTrigger className="select-trigger">
-              <SelectValue placeholder="時間単位" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="日別">日別</SelectItem>
-              <SelectItem value="月別">月別</SelectItem>
-              <SelectItem value="年別">年別</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        */}
         </div>
       </div>
       <div className="chart">
@@ -511,31 +472,6 @@ export default function AnalyticsDashboard() {
           {renderChart()}
         </ResponsiveContainer>
       </div>
-      {/*
-      <table className="data-table">
-        <thead>
-          <tr>
-            <th>コンテンツ</th>
-            <th>視聴回数</th>
-            <th>総再生時間（単位：時間）</th>
-            <th>平均視聴時間</th>
-            <th>インプレッション数</th>
-            <th>インプレッションのクリック率</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>合計</td>
-            <td>-</td>
-            <td>-</td>
-            <td>-</td>
-            <td>-</td>
-            <td>-</td>
-            <td>-</td>
-          </tr>
-        </tbody>
-      </table>
-      */}
     </div>
   );
 }

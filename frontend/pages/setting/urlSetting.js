@@ -7,18 +7,35 @@ export default function UrlSetting() {
   const [url, setUrl] = useState("");
   const router = useRouter();
 
+  // URL登録処理の実装
+  const handleUrl = (e) => {
+    e.preventDefault(); // フォーム送信時のページリロードを防止
+    if (url) {
+      // URLの登録ロジックをここに追加
+      console.log("登録されたURL: ", url);
+      alert(`URL: ${url} が登録されました！`);
+      // 登録後にdashboardへリダイレクト
+      router.push({
+        pathname: "/dashboard",
+        query: { url: encodeURIComponent(url) },
+      });
+    } else {
+      alert("URLを入力してください。");
+    }
+  };
+
   return (
     <div className="urlsetting-container">
       <div className="urlsetting-form">
         <h1 className="url-text">URL設定ページ</h1>
-        <form className="main-form">
+        <form className="main-form" onSubmit={handleUrl}>
           <div className="url-form">
             <input
               type="url"
               id="url"
               className="url-input"
               value={url}
-              onChage={(e) => setUrl(e.target.value)}
+              onChange={(e) => setUrl(e.target.value)}
               placeholder="登録するURLを入力してください"
               required
             ></input>
