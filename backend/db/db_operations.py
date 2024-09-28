@@ -220,18 +220,18 @@ class AnalyticsData:
                 response = self.supabase \
                     .table("AnalyticsData") \
                     .select("""
-                    date,
-                    page_location,
-                    page_path, 
-                    device_category, 
-                    city, 
-                    screen_page_views, 
-                    conversions, 
-                    active_users, 
-                    sessions, 
-                    engaged_sessions, 
-                    total_users
-                    """) \
+                        date,
+                        page_location,
+                        page_path, 
+                        device_category, 
+                        city, 
+                        screen_page_views, 
+                        conversions, 
+                        active_users, 
+                        sessions, 
+                        engaged_sessions, 
+                        total_users
+                        """) \
                     .eq("property_id", property_id) \
                     .gte('date', start_date) \
                     .lte('date', end_date) \
