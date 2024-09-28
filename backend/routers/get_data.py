@@ -43,7 +43,7 @@ async def get_aggregated_data_from_dashboard(
         aggregated_data = aggregate_data(analytics_data, search_console_data)
         aggregated_data_by_url = aggregate_by_url(aggregated_data)
 
-        # logging.info(f"Aggregated data: {aggegate_data[0]["query"]}")
+        logging.info(f"Aggregated data: {aggregated_data_by_url}")
 
         return {"status": "success", "data": aggregated_data_by_url}
     except Exception as e:
