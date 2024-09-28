@@ -9,6 +9,146 @@ def get_top_n(data_dict, n=NUM):
         """
         return dict(sorted(data_dict.items(), key=lambda x: x[1], reverse=True)[:n])
 
+def data_by_date(analytics_data, search_console_data):
+    """
+        日付ごとにデータを集計する関数
+        ページパスは考慮せず, URLごとに集計
+    """
+    if analytics_data is None:
+        analytics_data = []
+    if search_console_data is None:
+        search_console_data = []
+
+    # 日付ごとにデータを集計
+    data_by_date = defaultdict(dict)
+
+    # Analytics Dataの処理
+    for entry in analytics_data:
+        page_location = entry.get("page_location")
+        if not page_location:
+            continue
+
+        date = entry.get("date")
+        if not date:
+            continue
+
+        # URLからドメイン部分を取得
+        parsed_url = urlparse(page_location)
+        base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+        if date not in data_by_date[base_url]:
+            # 日付ごとに初期データを設定
+            data_by_date[base_url][date] = {
+                "screen_page_views": 0,
+                "conversions": 0,
+                "conversion_rate": 0.0,
+                "active_users": 0,
+                "sessions": 0,
+                "engaged_sessions": 0,
+                "total_users": 0,
+                "city": defaultdict(int),       # Analytics Dataから取得
+                "device_category": defaultdict(int),
+                "query": defaultdict(int),
+                "click": 0,                    
+                "impression": 0,
+                "ctr": 0,
+                "position": 0,
+                "country": defaultdict(int),
+            }
+        
+        # 数値項目の計算
+        data_by_date[base_url][date]['screen_page_views'] += entry.get('screen_page_views', 0)
+        data_by_date[base_url][date]['conversions'] += entry.get('conversions', 0)
+        data_by_date[base_url][date]['active_users'] += entry.get('active_users', 0)
+        data_by_date[base_url][date]['sessions'] += entry.get('sessions', 0)
+        data_by_date[base_url][date]['engaged_sessions'] += entry.get('engaged_sessions', 0)
+        data_by_date[base_url][date]['total_users'] += entry.get('total_users', 0)
+
+        # カテゴリ項目のカウント
+        city = entry.get('city')
+        if city:
+            data_by_date[base_url][date]['city'][city] += 1
+        
+        device_category = entry.get('device_category')
+        if device_category:
+            data_by_date[base_url][date]['device_category'][device_category] += 1
+
+    # Conversion Rateの計算
+    for base_url, dates in data_by_date.items():
+        for date, data in dates.items():
+            if data['total_users'] > 0:
+                data['conversion_rate'] = data['conversions'] / data['total_users']
+            else:
+                data['conversion_rate'] = 0.0
+
+    # Search Console Dataの処理
+    for entry in search_console_data:
+        page = entry.get('page')
+        if not page:
+            continue
+        
+        date = entry.get('date').replace("-", "")
+        if not date:
+            continue
+
+        # URLからパスを取得
+        parsed_url = urlparse(page)
+        base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+
+        if date not in data_by_date[base_url]:
+            # 日付ごとに初期データを設定
+            data_by_date[base_url][date] = {
+                "screen_page_views": 0,
+                "conversions": 0,
+                "conversion_rate": 0.0,
+                "active_users": 0,
+                "sessions": 0,
+                "engaged_sessions": 0,
+                "total_users": 0,
+                "city": defaultdict(int),       # Analytics Dataから取得
+                "device_category": defaultdict(int),
+                "query": defaultdict(int),
+                "click": 0,                    
+                "impression": 0,
+                "ctr": 0,
+                "position": 0,
+                "country": defaultdict(int),
+            }
+        
+        # クエリの集計
+        data_by_date[base_url][date]['click'] += entry.get('click', 0)
+        data_by_date[base_url][date]['impression'] += entry.get('impression', 0)
+        data_by_date[base_url][date]['ctr'] += entry.get('ctr', 0)
+        data_by_date[base_url][date]['position'] += entry.get('position', 0)
+
+        # カテゴリ項目のカウント
+        query = entry.get('query')
+        if query:
+            data_by_date[base_url][date]['query'][query] += 1
+        
+        country = entry.get('country')
+        if country:
+            data_by_date[base_url][date]['country'][country] += 1
+
+    # CTRの平均値を計算
+    for base_url, dates in data_by_date.items():
+        for date, data in dates.items():
+            if data['impression'] > 0:
+                data['ctr'] = (data['click'] / data['impression']) * 100
+            else:
+                data['ctr'] = 0.0
+    
+    # city, country, queryは上位30件のみ渡す
+    for base_url, dates in data_by_date.items():
+        for date, data in dates.items():
+            if 'city' in data:
+                data_by_date[base_url][date]['city'] = get_top_n(data['city'])
+            if 'country' in data:
+                data_by_date[base_url][date]['country'] = get_top_n(data['country'])
+            if 'query' in data:
+                data_by_date[base_url][date]['query'] = get_top_n(data['query'])
+    
+    return data_by_date
+
 def aggregate_data(analytics_data, search_console_data):
     """
         Analytics DataとSearch Console Dataを集計する関数
@@ -75,7 +215,7 @@ def aggregate_data(analytics_data, search_console_data):
     for base_url, paths in aggregated.items():
         for page_path, data in paths.items():
             if data['total_users'] > 0:
-                data['conversion_rate'] = data['conversions'] / data['total_users']
+                data['conversion_rate'] = data['conversions'] / data['total_users'] * 100
             else:
                 data['conversion_rate'] = 0.0
 
@@ -127,13 +267,13 @@ def aggregate_data(analytics_data, search_console_data):
         if country:
             aggregated[base_url][decoded_path]['country'][country] += 1
 
-    # Conversion Rateの計算
-    for base_url, paths in aggregated.items():
-        for page_path, data in paths.items():
-            if data['total_users'] > 0:
-                data['conversion_rate'] = data['conversions'] / data['total_users'] * 100
-            else:
-                data['conversion_rate'] = 0.0
+    # # Conversion Rateの計算
+    # for base_url, paths in aggregated.items():
+    #     for page_path, data in paths.items():
+    #         if data['total_users'] > 0:
+    #             data['conversion_rate'] = data['conversions'] / data['total_users'] * 100
+    #         else:
+    #             data['conversion_rate'] = 0.0
 
     # CTRの平均値を計算
     for base_url, paths in aggregated.items():

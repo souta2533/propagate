@@ -5,7 +5,7 @@ import os
 
 from db.supabase_client import supabase
 from db.db_operations import AnalyticsData, SearchConsoleDataTable
-from utils.data_process import aggregate_data, aggregate_by_url
+from utils.data_process import data_by_date, aggregate_data, aggregate_by_url
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -14,6 +14,41 @@ log = logging.getLogger("uvicorn")
 router = APIRouter()
 
 security = HTTPBearer()     # JWT認証用のセキュリティ設定 
+
+
+@router.get('/fetch-data-by-day')
+async def get_data_by_day(
+    propertyId: str,
+    startDate: str,
+    endDate: str,
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+):
+    """
+        Analytics DataとSearch Console Dataを日付ごとに取得するエンドポイント
+    """
+    logging.info("呼び出されました")
+    # JWTトークンの検証
+    jwt_token = credentials.credentials
+    if not jwt_token:
+        raise HTTPException(status_code=403, detail='Unauthorized')
+    
+    try:
+        # DBからデータを取得
+        analytics_table = AnalyticsData(supabase)
+        analytics_data = await analytics_table.fetch_data(propertyId, startDate, endDate, jwt_token)
+
+        search_console_table = SearchConsoleDataTable(supabase)
+        search_console_data = await search_console_table.fetch_data(propertyId, startDate, endDate, jwt_token)
+
+        data_by_day = data_by_date(analytics_data, search_console_data)
+        logging.info(f"Data by date: {data_by_day['https://www.propagateinc.com']}")
+
+        return {"status": "success", "data": data_by_day}
+
+    except Exception as e:
+        log.error(f"Error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get data by day")
+
 
 
 @router.get('/fetch-aggregated-data-from-dashboard')
@@ -31,10 +66,10 @@ async def get_aggregated_data_from_dashboard(
     try:
         # DBからデータを取得
         analytics_table = AnalyticsData(supabase)
-        analytics_data = await analytics_table.fetch_aggregated_data(propertyId, startDate, endDate, token)
+        analytics_data = await analytics_table.fetch_data(propertyId, startDate, endDate, token)
 
         search_console_table = SearchConsoleDataTable(supabase)
-        search_console_data = await search_console_table.fetch_aggregated_data(propertyId, startDate, endDate, token)
+        search_console_data = await search_console_table.fetch_data(propertyId, startDate, endDate, token)
         
         # logging.info(f"Analytics data: {analytics_data}")
         # logging.info(f"Search Console data: {search_console_data}")
@@ -65,10 +100,10 @@ async def get_aggregated_data_from_detail(
     try:
         # DBからデータを取得
         analytics_table = AnalyticsData(supabase)
-        analytics_data = await analytics_table.fetch_aggregated_data(propertyId, startDate, endDate, token)
+        analytics_data = await analytics_table.fetch_data(propertyId, startDate, endDate, token)
 
         search_console_table = SearchConsoleDataTable(supabase)
-        search_console_data = await search_console_table.fetch_aggregated_data(propertyId, startDate, endDate, token)
+        search_console_data = await search_console_table.fetch_data(propertyId, startDate, endDate, token)
         
         # logging.info(f"Analytics data: {analytics_data}")
         # logging.info(f"Search Console data: {search_console_data}")

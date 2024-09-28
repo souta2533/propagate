@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchAggregatedDataFromDashboard } from '../lib/getData';
 
 
+// dashboardで使用されるデータを集計
 const fetchAggregatedData = async (session, propertyIds, startDate, endDate) => {
     if (
         !session ||

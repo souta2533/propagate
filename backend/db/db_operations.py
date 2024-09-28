@@ -206,36 +206,54 @@ class AnalyticsData:
     def __init__(self, supabase_client: Client) -> None:
         self.supabase = supabase_client
 
-    async def fetch_aggregated_data(self, property_id, start_date, end_date, jwt_token):
+    async def fetch_data(self, property_id, start_date, end_date, jwt_token):
         try:
             # JWTトークンをSupabaseクライアントに設定
             # self.supabase.auth.set_auth(jwt_token)
 
-            response = self.supabase \
-                .table("AnalyticsData") \
-                .select("""
-                date,
-                page_location,
-                page_path, 
-                device_category, 
-                city, 
-                screen_page_views, 
-                conversions, 
-                active_users, 
-                sessions, 
-                engaged_sessions, 
-                total_users
-                """) \
-                .eq("property_id", property_id) \
-                .gte('date', start_date) \
-                .lte('date', end_date) \
-                .execute()
-            
-            if response.data == []:
-                logging.warning(f"No data found for property ID: {property_id}")
-                return None
-            
-            return response.data
+            limit = 1000
+            offset = 0
+            all_data = []
+
+            while True:
+
+                response = self.supabase \
+                    .table("AnalyticsData") \
+                    .select("""
+                    date,
+                    page_location,
+                    page_path, 
+                    device_category, 
+                    city, 
+                    screen_page_views, 
+                    conversions, 
+                    active_users, 
+                    sessions, 
+                    engaged_sessions, 
+                    total_users
+                    """) \
+                    .eq("property_id", property_id) \
+                    .gte('date', start_date) \
+                    .lte('date', end_date) \
+                    .range(offset, offset + limit - 1) \
+                    .execute()
+                
+                # データがない場合，ループを終了
+                if not response.data or response.data == []:
+                    logging.warning(f"No data found for property ID: {property_id}")
+                    break
+                    
+                # データをリストに追加
+                all_data.extend(response.data)
+
+                # データが1000件未満の場合，ループを終了
+                if len(response.data) < limit:
+                    break
+
+                # オフセットを更新
+                offset += limit
+
+            return all_data if all_data else None
         
         except Exception as e:
             log.error(f"Error: {e}")
@@ -259,34 +277,51 @@ class SearchConsoleDataTable:
     def __init__(self, supabase_client: Client) -> None:
         self.supabase = supabase_client
 
-    async def fetch_aggregated_data(self, property_id, start_date, end_date, jwt_token):
+    async def fetch_data(self, property_id, start_date, end_date, jwt_token):
         try:
             # self.supabase.auth.set_auth(jwt_token)
 
-            response = self.supabase \
-                .table("SearchConsoleDataTable") \
-                .select("""
-                date,
-                query,
-                page,
-                country,
-                device,
-                click,
-                impression,
-                ctr,
-                position,
-                total_users
-                """) \
-                .eq("property_id", property_id) \
-                .gte('date', start_date) \
-                .lte('date', end_date) \
-                .execute()
+            limit = 1000
+            offset = 0
+            all_data = []
+
+            while True:
+                response = self.supabase \
+                    .table("SearchConsoleDataTable") \
+                    .select("""
+                    date,
+                    query,
+                    page,
+                    country,
+                    device,
+                    click,
+                    impression,
+                    ctr,
+                    position,
+                    total_users
+                    """) \
+                    .eq("property_id", property_id) \
+                    .gte('date', start_date) \
+                    .lte('date', end_date) \
+                    .range(offset, offset + limit - 1) \
+                    .execute()
+                
+                # データがない場合，ループを終了
+                if not response.data or response.data == []:
+                    logging.warning(f"No data found for property ID: {property_id}")
+                    break
+
+                # データをリストに追加
+                all_data.extend(response.data)
+
+                # データが1000件未満の場合，ループを終了
+                if len(response.data) < limit:
+                    break
+
+                # オフセットを更新
+                offset += limit
             
-            if response.data == []:
-                logging.warning(f"No data found for property ID: {property_id}")
-                return None
-            
-            return response.data
+            return all_data if all_data else None
         
         except Exception as e:
             logging.error(f"Error: {e}")

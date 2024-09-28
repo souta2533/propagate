@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { FaSearch } from "react-icons/fa";
 import { supabase } from "../lib/supabaseClient";
 import { useSessionData } from "../hooks/useSessionData";
+import { useDataByDay } from "../hooks/useGetDataByDay";
 import { useAnalyticsData } from "../hooks/useAnalyticsData";
 import { useSearchConsoleData } from "../hooks/useSearchConsoleData";
 import { useAggregatedData } from "../hooks/useAggregatedData";
@@ -312,6 +313,7 @@ const Dashboard = () => {
   const [analyticsData, setAnalyticsData] = useState([]);
   const [propertyIds, setPropertyIds] = useState([]);
   const [searchConsoleData, setSearchConsoleData] = useState([]);
+  const [dataByDay, setDataByDay] = useState([]);
 
   // Anlyticsデータの取得
   const {
@@ -359,6 +361,33 @@ const Dashboard = () => {
     searchConsoleLoading,
     refetchSearchConsoleData,
   ]);
+
+  // AnalyticsとSearch Consoleのデータを取得
+  const {
+    data: fetchedDataByDay,
+    error: dataByDayError,
+    isLoading: dataByDayLoading,
+    refetch: refetchDataByDay,
+  } = useDataByDay(session, propertyIds, startDate, endDate);
+
+  console.log("Data By Day: ", fetchedDataByDay);
+
+  useEffect(() => {
+    if (
+      !session ||
+      !propertyIds ||
+      !startDate ||
+      !endDate
+    ) {console.log("Null something");return;}
+
+    if (dataByDayError) {
+      console.error("Error fetching data by day:", dataByDayError);
+      refetchDataByDay(session, propertyIds, startDate, endDate);
+    } else if (fetchedDataByDay) {
+      console.log("Fetched Data By Day: ", fetchedDataByDay);
+      setDataByDay(fetchedDataByDay);
+    }
+  }, [session, propertyIds, startDate, endDate, dataByDayError, dataByDayLoading, refetchDataByDay]);
 
   // 集計データを取得
   const {
@@ -461,8 +490,8 @@ useCallback:
   // }, [session, propertyIds, startDate, endDate]);
 
   // // データのデバッグ
-  console.log("Analytics Data: ", analyticsData);
-  console.log("Search Console Data: ", searchConsoleData);
+  // console.log("Analytics Data: ", analyticsData);
+  // console.log("Search Console Data: ", searchConsoleData);
 
   // フォーム送信時の処理
   const handleSubmit = (e) => {
