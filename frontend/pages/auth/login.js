@@ -90,7 +90,7 @@ export default function Login() {
               onClick={() => router.push("/auth/register")}
               className="forget-password"
             >
-              パスワードを忘れた方はこちら
+              パスワードを忘れた方はこちらから
             </button>
             <button type="submit" className="login-button">
               ログイン
