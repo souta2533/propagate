@@ -274,7 +274,8 @@ class SearchConsoleDataTable:
                 click,
                 impression,
                 ctr,
-                position
+                position,
+                total_users
                 """) \
                 .eq("property_id", property_id) \
                 .gte('date', start_date) \
