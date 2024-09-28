@@ -249,6 +249,8 @@ const Dashboard = () => {
   const [showCalendar, setShowCalendar] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [url, setUrl] = useState(""); // URL用のstate
+  const [sanitizedUrl, setSanitizedUrl] = useState("");
+
   const [metrics, setMetrics] = useState(sampleMetrics); // メトリクスのstate
   const [selectedMetric, setSelectedMetric] = useState("PV (ページ閲覧数)"); // 選択中のメトリクス
   const [inputValue, setInputValue] = useState(""); // ここで useState を使って定義
@@ -372,7 +374,14 @@ const Dashboard = () => {
     refetch: refetchDataByDay,
   } = useDataByDay(session, propertyIds, startDate, endDate);
 
-  console.log("Data By Day: ", fetchedDataByDay);
+  console.log("Data By Day: ", fetchedDataByDay); //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.
+  if (dataByDay && dataByDay[propertyId] && url) {
+    console.log("DDBP:", dataByDay[propertyId]);
+    console.log("SNURL:", sanitizedUrl);
+    console.log("DD:", dataByDay[propertyId][sanitizedUrl]);
+  } else {
+    //console.warn("dataByDay または url が存在しないか無効です");
+  }
 
   useEffect(() => {
     if (!session || !propertyIds || !startDate || !endDate) {
@@ -381,12 +390,13 @@ const Dashboard = () => {
     }
 
     if (dataByDayError) {
-      console.error("Error fetching data by day:", dataByDayError);
+      console.error("Error fetching data by day:", dataByDayError); //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
       refetchDataByDay(session, propertyIds, startDate, endDate);
     } else if (fetchedDataByDay) {
       console.log("Fetched Data By Day: ", fetchedDataByDay);
       setDataByDay(fetchedDataByDay);
     }
+    console.log("ErrorDBD:", dataByDay);
   }, [
     session,
     propertyIds,
@@ -527,8 +537,11 @@ useCallback:
       }
     }
     console.log("Found Property ID:", propertyId); // デバッグ用ログ
-    setPropertyId[propertyId];
-    setUrl[url];
+    setPropertyId(propertyId);
+    setUrl(url);
+    const saniUrl = url.replace(/\/+$/, "");
+    setSanitizedUrl(saniUrl);
+    console.log("SANIUrl:", saniUrl);
     return propertyId;
   };
 
@@ -579,10 +592,10 @@ useCallback:
       return [
         {
           date: "",
-          PV: 0,
-          CV: 0,
-          CVR: 0,
-          UU: 0,
+          screen_page_views: 0,
+          conversions: 0,
+          conversion_rate: 0,
+          acrive_users: 0,
         },
       ];
     }
@@ -689,10 +702,10 @@ useCallback:
       result.push(
         dataMap.get(formattedDate) || {
           date: formattedDate,
-          PV: 0,
-          CV: 0,
-          CVR: 0,
-          UU: 0,
+          screen_page_views: 0,
+          conversions: 0,
+          conversion_rate: 0,
+          sessions: 0,
         }
       );
     }
@@ -704,10 +717,10 @@ useCallback:
     return [
       {
         date: new Date().toISOString().split("T")[0], // デフォルトで現在の日付,
-        PV: 0,
-        CV: 0,
-        CVR: 0,
-        UU: 0,
+        screen_page_views: 0,
+        conversions: 0,
+        conversion_rate: 0,
+        sessions: 0,
       },
     ];
   };
@@ -731,10 +744,11 @@ useCallback:
 
   //AnalyticsData, DateRange, filteredDataに呼応してフィルタリング//////////////////////////////////////////////////////////////////////////////////////////////////////Dataの変更場所
   useEffect(() => {
-    if (formattedAnalytics.length > 0) {
+    if (dataByDay.length > 0) {
       console.log("DateRange:", dateRange);
-      const filtered = filterDataByDateRange(formattedAnalytics, dateRange); //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>516
+      const filtered = filterDataByDateRange(dataByDay, dateRange); //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>516
       setFilteredData(filtered);
+      console.log("FILTERED:", filtered);
     }
   }, [dateRange, analyticsData]);
 
@@ -893,13 +907,13 @@ useCallback:
       console.log("PROID:", propertyId);
       //const data = getAnalyticsData(propertyId);
       //console.log("data:", data);
-      const data = dataByDay[propertyId];
+      const data = dataByDay[propertyId][sanitizedUrl];
       console.log("DateByDAY for PRO:", data);
       const filtered = filterDataByDateRange(data, dateRange); //>>>>>>>>>>>>>>>>>>>>>>>>>>>>-300
       console.log("dateRange", dateRange);
       console.log("Fetched Data for Property:", data); // デバッグ用ログ
       console.log("filtered data:", filtered);
-      setFilteredData(data); //..........................................................................修正！
+      setFilteredData(filtered); //>>>>>>>>>-300
     }
   }, [propertyId, dateRange]);
 
@@ -927,7 +941,7 @@ useCallback:
     }
 
     if (selectedMetric === "PV (ページ閲覧数)") {
-      return <LineChart data={filteredData} dataKey="PV" />;
+      return <LineChart data={filteredData} dataKey="screen_page_vies" />;
     }
     if (selectedMetric === "CV (お問い合わせ数)") {
       return <LineChart data={filteredData} dataKey="CV" />;
@@ -943,7 +957,7 @@ useCallback:
 
   function getQuery(searchData, searchId) {
     // 最後の / を削除
-    const sanitizedUrl = url.replace(/\/+$/, "");
+
     console.log(sanitizedUrl); // "https://www.propagateinc.com"
 
     const queryData = searchData[searchId]?.[sanitizedUrl]?.query;

@@ -11,7 +11,6 @@ const sortDataByDate = (data) => {
     return [];
   }
   return data.sort((a, b) => new Date(a.date) - new Date(b.date));
-  return data.sort((a, b) => new Date(a.date) - new Date(b.date));
 };
 
 const LineChart = ({ data = [], dataKey }) => {
