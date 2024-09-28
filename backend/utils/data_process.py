@@ -1,4 +1,5 @@
 from collections import defaultdict
+from datetime import datetime
 from urllib.parse import urlparse, unquote
 
 
@@ -8,6 +9,38 @@ def get_top_n(data_dict, n=NUM):
         ソートして上位n件を返す関数
         """
         return dict(sorted(data_dict.items(), key=lambda x: x[1], reverse=True)[:n])
+
+def transform_data_by_date(data_by_date):
+    """
+        data_by_data[base_url][date] -> data_by_date[base_url]
+    """
+    transformed_data = defaultdict(list)
+
+    for base_url, date_entries in data_by_date.items():
+        for date, data in date_entries.items():
+            d = {
+                "date": date,
+                "screen_page_views": data.get("screen_page_views", 0),
+                "conversions": data.get("conversions", 0),
+                "conversion_rate": data.get("conversion_rate", 0.0),
+                "active_users": data.get("active_users", 0),
+                "sessions": data.get("sessions", 0),
+                "engaged_sessions": data.get("engaged_sessions", 0),
+                "total_users": data.get("total_users", 0),
+                "city": data.get("city", {}),
+                "device_category": data.get("device_category", {}),
+                "query": data.get("query", {}),
+                "click": data.get("click", 0),
+                "impression": data.get("impression", 0),
+                "ctr": data.get("ctr", 0),
+                "position": data.get("position", 0),
+                "country": data.get("country", {}),
+            }
+
+            transformed_data[base_url].append(d)
+
+    return transformed_data
+
 
 def data_by_date(analytics_data, search_console_data):
     """
@@ -28,7 +61,7 @@ def data_by_date(analytics_data, search_console_data):
         if not page_location:
             continue
 
-        date = entry.get("date")
+        date = datetime.strptime(entry.get("date"), "%Y%m%d").strftime("%Y-%m-%d")
         if not date:
             continue
 
@@ -86,7 +119,7 @@ def data_by_date(analytics_data, search_console_data):
         if not page:
             continue
         
-        date = entry.get('date').replace("-", "")
+        date = entry.get('date')
         if not date:
             continue
 
@@ -147,7 +180,10 @@ def data_by_date(analytics_data, search_console_data):
             if 'query' in data:
                 data_by_date[base_url][date]['query'] = get_top_n(data['query'])
     
-    return data_by_date
+    # 日付をキーに持つ構造から、base_url 内に date フィールドを含む形式に変換
+    transformed_data = transform_data_by_date(data_by_date)
+
+    return transformed_data
 
 def aggregate_data(analytics_data, search_console_data):
     """

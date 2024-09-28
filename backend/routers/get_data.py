@@ -26,7 +26,6 @@ async def get_data_by_day(
     """
         Analytics DataとSearch Console Dataを日付ごとに取得するエンドポイント
     """
-    logging.info("呼び出されました")
     # JWTトークンの検証
     jwt_token = credentials.credentials
     if not jwt_token:
@@ -41,7 +40,6 @@ async def get_data_by_day(
         search_console_data = await search_console_table.fetch_data(propertyId, startDate, endDate, jwt_token)
 
         data_by_day = data_by_date(analytics_data, search_console_data)
-        logging.info(f"Data by date: {data_by_day['https://www.propagateinc.com']}")
 
         return {"status": "success", "data": data_by_day}
 
