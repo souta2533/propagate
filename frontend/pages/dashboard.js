@@ -375,12 +375,10 @@ const Dashboard = () => {
   console.log("Data By Day: ", fetchedDataByDay);
 
   useEffect(() => {
-    if (
-      !session ||
-      !propertyIds ||
-      !startDate ||
-      !endDate
-    ) {console.log("Null something");return;}
+    if (!session || !propertyIds || !startDate || !endDate) {
+      console.log("Null something");
+      return;
+    }
 
     if (dataByDayError) {
       console.error("Error fetching data by day:", dataByDayError);
@@ -389,7 +387,15 @@ const Dashboard = () => {
       console.log("Fetched Data By Day: ", fetchedDataByDay);
       setDataByDay(fetchedDataByDay);
     }
-  }, [session, propertyIds, startDate, endDate, dataByDayError, dataByDayLoading, refetchDataByDay]);
+  }, [
+    session,
+    propertyIds,
+    startDate,
+    endDate,
+    dataByDayError,
+    dataByDayLoading,
+    refetchDataByDay,
+  ]);
 
   // 集計データを取得
   const {
@@ -885,8 +891,10 @@ useCallback:
   useEffect(() => {
     if (propertyId) {
       console.log("PROID:", propertyId);
-      const data = getAnalyticsData(propertyId);
-      console.log("data:", data);
+      //const data = getAnalyticsData(propertyId);
+      //console.log("data:", data);
+      const data = dataByDay[propertyId];
+      console.log("DateByDAY for PRO:", data);
       const filtered = filterDataByDateRange(data, dateRange); //>>>>>>>>>>>>>>>>>>>>>>>>>>>>-300
       console.log("dateRange", dateRange);
       console.log("Fetched Data for Property:", data); // デバッグ用ログ

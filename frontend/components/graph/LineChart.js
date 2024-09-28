@@ -6,6 +6,11 @@ Chart.register(...registerables);
 
 // データを日付で昇順にソートする関数
 const sortDataByDate = (data) => {
+  if (!Array.isArray(data)) {
+    console.error("Data is not an array", data);
+    return [];
+  }
+  return data.sort((a, b) => new Date(a.date) - new Date(b.date));
   return data.sort((a, b) => new Date(a.date) - new Date(b.date));
 };
 
