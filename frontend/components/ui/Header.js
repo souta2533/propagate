@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Settings, UserRoundPen, Mail, LogOut, MailCheck } from "lucide-react";
 import { FaBars, FaTimes } from "react-icons/fa";
-import { Button } from "../ui/Button";
+import Button from "@mui/material/Button";
 //import { Select } from "../components/ui/Select";
 import { useRouter } from "next/router";
 import "../../styles/components/headers.css";
@@ -78,13 +78,12 @@ const Header = ({ isOpen, toggleMenu, handleSubmit, url, setUrl }) => {
       </div>
       <div className="header-right">
         <Button
-          size="icon"
           variant="ghost"
+          startIcon={<Settings className="Icon" />}
           className="header-button"
           ref={buttonRef}
           onClick={toggleDropdown}
         >
-          <Settings className="icon" />
           <span className="sr-only"></span>
         </Button>
         {isDropdownOpen && (

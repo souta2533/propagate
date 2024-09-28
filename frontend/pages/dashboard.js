@@ -289,14 +289,6 @@ const Dashboard = () => {
     filterDataByDateRange(value);
   };
 
-  /*console.log("Filter Date Range Start:", startDate, "End:", endDate); // デバッグ用ログ
-    const filteredData = data.filter((item) => {
-      const itemDate = new Date(item.date);
-      return itemDate >= startDate && itemDate <= endDate;
-    });
-    return filteredData;
-  };*/
-
   // Sessionの取得
   const { fetchedSession, loading: sessionLoading } = useSessionData();
   useEffect(() => {
@@ -446,73 +438,6 @@ const Dashboard = () => {
     aggregatedLoading,
     refetchAggregatedData,
   ]);
-
-  //AggregatedDataが空白にならないようにするにはMemo化が必要かも　yamasaki
-  /*メモ化（Memoization）とは
-メモ化は計算の最適化技術の一つで、高コストな関数の戻り値をキャッシュし、同じ入力に対してはキャッシュから結果を返すことで、不要な計算を避ける手法です。これにより、アプリケーションのパフォーマンスが向上します。
-
-Reactにおけるメモ化
-Reactでは主に以下の二つのフックを利用してメモ化を行います。
-
-useMemo:
-
-計算された値をメモ化するために使用されます。
-関数の戻り値を記憶しておき、依存する値が変わった場合にのみ再計算を行います。
-useCallback:
-
-関数自体をメモ化するために使用されます。
-コンポーネントが再レンダリングされても、依存する値が変わらない限り同じ関数の参照を保持します。*/
-
-  /** 以下日付変更が起こった際に集計データを取得する関数 */
-  // useEffect(() => {
-  //   const fetchAggregatedData = async () => {
-  //     if (
-  //       !session ||
-  //       !propertyIds ||
-  //       propertyIds.length === 0 ||
-  //       !startDate ||
-  //       !endDate
-  //     ) {
-  //       console.warn("Property ID, Start Date, or End Date is missing.");
-  //       return;
-  //     }
-
-  //     const jwtToken = session.access_token;
-  //     if (!jwtToken) {
-  //       console.error("JWT Token is missing.");
-  //       return;
-  //     }
-
-  //     const aggregatedDataByPropertyId = {};
-
-  //     for (const property of propertyIds) {
-  //       const propertyId = property.properties_id;
-  //       try {
-  //         const aggregatedData = await fetchAggregatedDataFromDashboard(
-  //           ////////////////////////////////////////////////要確認
-  //           jwtToken,
-  //           propertyId,
-  //           startDate,
-  //           endDate
-  //         );
-
-  //         if (aggregatedData) {
-  //           aggregatedDataByPropertyId[propertyId] = aggregatedData;
-  //         }
-  //       } catch (error) {
-  //         console.error("Error fetching aggregated data:", error);
-  //       }
-  //     }
-  //     //console.log("Aggregated Data:", aggregatedDataByPropertyId); // デバッグ用ログ
-  //     //setAggregatedData(aggregatedDataByPropertyId);///////////////////////////////////////////////////////////////要確認
-  //   };
-
-  //   fetchAggregatedData();
-  // }, [session, propertyIds, startDate, endDate]);
-
-  // // データのデバッグ
-  // console.log("Analytics Data: ", analyticsData);
-  // console.log("Search Console Data: ", searchConsoleData);
 
   // フォーム送信時の処理
   const handleSubmit = (e) => {
@@ -854,9 +779,9 @@ useCallback:
     });
 
     previousData.forEach((data) => {
-      prePV += data.screen_page_views || 0;
-      preCV += data.conversions || 0;
-      preUU += data.sessions || 0;
+      prePV += data.PV || 0;
+      preCV += data.CV || 0;
+      preUU += data.SS || 0;
     });
 
     const currentData = {
@@ -920,9 +845,6 @@ useCallback:
     }
   }, [propertyId, dateRange]);
 
-  //setChartData(dataForDateRange);
-  //}, [propertyId, dateRange]);
-
   const handleMetricChange = (metricTitle) => {
     setSelectedMetric(metricTitle);
   };
@@ -944,7 +866,7 @@ useCallback:
     }
 
     if (selectedMetric === "PV (ページ閲覧数)") {
-      return <LineChart data={filteredData} dataKey="screen_page_vies" />;
+      return <LineChart data={filteredData} dataKey="PV" />;
     }
     if (selectedMetric === "CV (お問い合わせ数)") {
       return <LineChart data={filteredData} dataKey="CV" />;

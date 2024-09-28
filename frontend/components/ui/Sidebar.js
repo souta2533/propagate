@@ -1,7 +1,7 @@
 // Sidebar.js
 import React from "react";
-import { Button } from "../ui/Button";
-import { Home, BarChart2, FileText, Link } from "lucide-react";
+import Button from "@mui/material/Button";
+import { Home, BarChart2, FileText, Link, HomeIcon } from "lucide-react";
 import { useRouter } from "next/router";
 import "../../styles/components/sidebar.css";
 
@@ -19,29 +19,32 @@ const Sidebar = ({ isOpen }) => {
         <Button
           variant="ghost"
           onClick={() => router.push("/dashboard")}
+          startIcon={<Home className="icon" />}
           className="menu-button"
         >
-          <Home className="icon" />
           <div className="icon-text">ホーム</div>
         </Button>
         <Button
           variant="ghost"
           onClick={() => handelButtonClick(propertyId)}
+          startIcon={<BarChart2 className="icon" />}
           className="menu-button"
         >
-          <BarChart2 className="icon" />
           <div className="icon-text">ページ別状況</div>
         </Button>
-        <Button variant="ghost" className="menu-button">
-          <FileText className="icon" />
+        <Button
+          variant="ghost"
+          className="menu-button"
+          startIcon={<FileText className="icon" />}
+        >
           <div className="icon-text">アナリティクスレポート</div>
         </Button>
         <Button
           variant="ghost"
           onClick={() => router.push("../setting/urlSetting")}
+          startIcon={<Link className="icon" />}
           className="menu-button"
         >
-          <Link className="icon" />
           <div className="icon-text">URL追加</div>
         </Button>
       </div>

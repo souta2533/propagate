@@ -191,6 +191,7 @@ export default function Details() {
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedMetric, setSelectedMetric] = useState("PV");
   const [urlList, seturlList] = useState("");
+  const [sanitizedUrl, setSanitizedUrl] = useState("");
   const [timeGranularity, setTimeGranularity] = useState("日別");
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
@@ -507,7 +508,7 @@ export default function Details() {
 
   useEffect(() => {
     if (propertyId && dateRange) {
-      const data = getAnalyticsData(propertyId);
+      const data = dataByDay[propertyId][sanitizedUrl];
       console.log("data:", data);
       const filtered = filterDataByDateRange(data, dateRange);
       console.log("dateRange", dateRange);
