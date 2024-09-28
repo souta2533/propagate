@@ -3,10 +3,10 @@ import { useRouter } from "next/router";
 import { FaSearch } from "react-icons/fa";
 import { supabase } from "../lib/supabaseClient";
 import { useSessionData } from "../hooks/useSessionData";
+import { useDataByDay } from "../hooks/useGetDataByDay";
 import { useAnalyticsData } from "../hooks/useAnalyticsData";
 import { useSearchConsoleData } from "../hooks/useSearchConsoleData";
 import { useAggregatedData } from "../hooks/useAggregatedData";
-import { fetchAggregatedData } from "../lib/getData";
 import { Card, CardContent } from "../components/ui/Card";
 import Select from "react-select";
 import Sidebar from "../components/ui/Sidebar";
@@ -315,6 +315,7 @@ const Dashboard = () => {
   const [analyticsData, setAnalyticsData] = useState([]);
   const [propertyIds, setPropertyIds] = useState([]);
   const [searchConsoleData, setSearchConsoleData] = useState([]);
+  const [dataByDay, setDataByDay] = useState([]);
 
   // Anlyticsデータの取得
   const {
@@ -362,6 +363,33 @@ const Dashboard = () => {
     searchConsoleLoading,
     refetchSearchConsoleData,
   ]);
+
+  // AnalyticsとSearch Consoleのデータを取得
+  const {
+    data: fetchedDataByDay,
+    error: dataByDayError,
+    isLoading: dataByDayLoading,
+    refetch: refetchDataByDay,
+  } = useDataByDay(session, propertyIds, startDate, endDate);
+
+  console.log("Data By Day: ", fetchedDataByDay);
+
+  useEffect(() => {
+    if (
+      !session ||
+      !propertyIds ||
+      !startDate ||
+      !endDate
+    ) {console.log("Null something");return;}
+
+    if (dataByDayError) {
+      console.error("Error fetching data by day:", dataByDayError);
+      refetchDataByDay(session, propertyIds, startDate, endDate);
+    } else if (fetchedDataByDay) {
+      console.log("Fetched Data By Day: ", fetchedDataByDay);
+      setDataByDay(fetchedDataByDay);
+    }
+  }, [session, propertyIds, startDate, endDate, dataByDayError, dataByDayLoading, refetchDataByDay]);
 
   // 集計データを取得
   const {
@@ -417,55 +445,55 @@ useCallback:
 コンポーネントが再レンダリングされても、依存する値が変わらない限り同じ関数の参照を保持します。*/
 
   /** 以下日付変更が起こった際に集計データを取得する関数 */
-  useEffect(() => {
-    const fetchAggregatedData = async () => {
-      if (
-        !session ||
-        !propertyIds ||
-        propertyIds.length === 0 ||
-        !startDate ||
-        !endDate
-      ) {
-        console.warn("Property ID, Start Date, or End Date is missing.");
-        return;
-      }
+  // useEffect(() => {
+  //   const fetchAggregatedData = async () => {
+  //     if (
+  //       !session ||
+  //       !propertyIds ||
+  //       propertyIds.length === 0 ||
+  //       !startDate ||
+  //       !endDate
+  //     ) {
+  //       console.warn("Property ID, Start Date, or End Date is missing.");
+  //       return;
+  //     }
 
-      const jwtToken = session.access_token;
-      if (!jwtToken) {
-        console.error("JWT Token is missing.");
-        return;
-      }
+  //     const jwtToken = session.access_token;
+  //     if (!jwtToken) {
+  //       console.error("JWT Token is missing.");
+  //       return;
+  //     }
 
-      const aggregatedDataByPropertyId = {};
+  //     const aggregatedDataByPropertyId = {};
 
-      for (const property of propertyIds) {
-        const propertyId = property.properties_id;
-        try {
-          const aggregatedData = await fetchAggregatedDataFromDashboard(
-            ////////////////////////////////////////////////要確認
-            jwtToken,
-            propertyId,
-            startDate,
-            endDate
-          );
+  //     for (const property of propertyIds) {
+  //       const propertyId = property.properties_id;
+  //       try {
+  //         const aggregatedData = await fetchAggregatedDataFromDashboard(
+  //           ////////////////////////////////////////////////要確認
+  //           jwtToken,
+  //           propertyId,
+  //           startDate,
+  //           endDate
+  //         );
 
-          if (aggregatedData) {
-            aggregatedDataByPropertyId[propertyId] = aggregatedData;
-          }
-        } catch (error) {
-          console.error("Error fetching aggregated data:", error);
-        }
-      }
-      //console.log("Aggregated Data:", aggregatedDataByPropertyId); // デバッグ用ログ
-      //setAggregatedData(aggregatedDataByPropertyId);///////////////////////////////////////////////////////////////要確認
-    };
+  //         if (aggregatedData) {
+  //           aggregatedDataByPropertyId[propertyId] = aggregatedData;
+  //         }
+  //       } catch (error) {
+  //         console.error("Error fetching aggregated data:", error);
+  //       }
+  //     }
+  //     //console.log("Aggregated Data:", aggregatedDataByPropertyId); // デバッグ用ログ
+  //     //setAggregatedData(aggregatedDataByPropertyId);///////////////////////////////////////////////////////////////要確認
+  //   };
 
-    fetchAggregatedData();
-  }, [session, propertyIds, startDate, endDate]);
+  //   fetchAggregatedData();
+  // }, [session, propertyIds, startDate, endDate]);
 
   // // データのデバッグ
-  console.log("Analytics Data: ", analyticsData);
-  console.log("Search Console Data: ", searchConsoleData);
+  // console.log("Analytics Data: ", analyticsData);
+  // console.log("Search Console Data: ", searchConsoleData);
 
   // フォーム送信時の処理
   const handleSubmit = (e) => {

@@ -1,3 +1,32 @@
+export const fetchDataByDay = async (jwtToken, propertyId, startDate, endDate) => {
+    try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+        const queryParams = new URLSearchParams({
+            propertyId: propertyId,
+            startDate: startDate,
+            endDate: endDate,
+        }).toString();
+
+        const response = await fetch(`${apiUrl}/fetch-data-by-day?${queryParams}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${jwtToken}`,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error("Data fetch failed");
+        }
+
+        const dataByDay = await response.json();
+        return dataByDay.data;
+    } catch (error) {
+        console.error("Error fetching data by day: ", error);
+        return null;
+    }
+}
+
 export const fetchAggregatedDataFromDashboard = async (jwtToken, propertyId, startDate, endDate) => {
     try {
         const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;

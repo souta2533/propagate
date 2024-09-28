@@ -1,4 +1,4 @@
-NUM_BATCHES = 200
+# NUM_BATCHES = 1000
 
 def batch_process(data, batch_size, process_func, *args, **kwargs):
     """
