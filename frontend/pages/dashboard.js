@@ -370,22 +370,22 @@ const Dashboard = () => {
     refetch: refetchDataByDay,
   } = useDataByDay(session, propertyIds, startDate, endDate);
 
-  console.log("Data By Day: ", fetchedDataByDay);
-
   useEffect(() => {
     if (
       !session ||
       !propertyIds ||
       !startDate ||
       !endDate
-    ) {console.log("Null something");return;}
+    ) return;
 
     if (dataByDayError) {
       console.error("Error fetching data by day:", dataByDayError);
       refetchDataByDay(session, propertyIds, startDate, endDate);
-    } else if (fetchedDataByDay) {
-      console.log("Fetched Data By Day: ", fetchedDataByDay);
+    } else if (fetchedDataByDay && Object.values(fetchedDataByDay).some(data => Object.values(data).length > 0)) {
+      console.log("Data By Day: ", fetchedDataByDay);
       setDataByDay(fetchedDataByDay);
+    } else {
+      console.log("Data By Day is empty");
     }
   }, [session, propertyIds, startDate, endDate, dataByDayError, dataByDayLoading, refetchDataByDay]);
 

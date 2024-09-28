@@ -5,7 +5,7 @@ import os
 
 from db.supabase_client import supabase
 from db.db_operations import AnalyticsData, SearchConsoleDataTable
-from utils.data_process import data_by_date, aggregate_data, aggregate_by_url
+from utils.data_process import data_by_date, data_by_page_path, aggregate_data, aggregate_by_url
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -47,7 +47,38 @@ async def get_data_by_day(
         log.error(f"Error: {e}")
         raise HTTPException(status_code=500, detail="Failed to get data by day")
 
+@router.get('/fetch-data-by-day-from-details')
+async def get_data_by_day_from_details(
+    propertyId: str,
+    startDate: str,
+    endDate: str,
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+):
+    """
+        Detailsのページ用
+        Analytics DataとSearch Console Dataを日付ごとに取得するエンドポイント
+    """
+    logging.info("Fetching data by day from details")
+    # JWTトークンの検証
+    jwt_token = credentials.credentials
+    if not jwt_token:
+        raise HTTPException(status_code=403, detail='Unauthorized')
+    
+    try:
+        # DBからデータを取得
+        analytics_table = AnalyticsData(supabase)
+        analytics_data = await analytics_table.fetch_data(propertyId, startDate, endDate, jwt_token)
 
+        search_console_table = SearchConsoleDataTable(supabase)
+        search_console_data = await search_console_table.fetch_data(propertyId, startDate, endDate, jwt_token)
+
+        data_by_page_path = data_by_page_path(analytics_data, search_console_data)
+
+        return {"status": "success", "data": data_by_page_path}
+    
+    except Exception as e:
+        log.error(f"Error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to get data by day details")
 
 @router.get('/fetch-aggregated-data-from-dashboard')
 async def get_aggregated_data_from_dashboard(
