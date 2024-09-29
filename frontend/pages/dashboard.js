@@ -274,6 +274,9 @@ const Dashboard = () => {
   //localStorageからURLリストを取得
   useEffect(() => {
     const storedUrls = JSON.parse(localStorage.getItem("urlOptions")) || [];
+    const newUrl = { label: url, value: url };
+    storedUrls.push(newUrl);
+    localStorage.setItem("urlOptions", JSON.stringify(storedUrls));
     setUrlOptions(storedUrls);
   }, []);
 
@@ -281,6 +284,7 @@ const Dashboard = () => {
   const handleUrlChange = (selectedOption) => {
     setSelectedUrl(selectedOption);
     setUrl(selectedOption.value);
+    console.log("SelectedURL:", selectedOption.value);
   };
 
   /////////////////////////////////////////////////////できるならコンテキストで保管したい

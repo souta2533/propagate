@@ -16,7 +16,7 @@ export default function UrlSetting() {
       alert(`URL: ${url} が登録されました！`);
 
       //登録されたURLをlocalStorageに保存
-      const storedUrls = JSON.parse(localStrage.getItem("urlOptions")) || [];
+      const storedUrls = JSON.parse(localStorage.getItem("urlOptions")) || [];
       const newUrl = { lavel: url, value: url };
       storedUrls.push(newUrl);
       localStorage.setItem("urlOptions", JSON.stringify(storedUrls));
