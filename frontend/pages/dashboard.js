@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/router";
 import { FaSearch } from "react-icons/fa";
+import { Settings, UserRoundPen, Mail, LogOut } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import { useSessionData } from "../hooks/useSessionData";
 import { useDataByDay } from "../hooks/useGetDataByDay";
 import { useAnalyticsData } from "../hooks/useAnalyticsData";
 import { useSearchConsoleData } from "../hooks/useSearchConsoleData";
 import { useAggregatedData } from "../hooks/useAggregatedData";
+import Button from "@mui/material/Button";
 import { Card, CardContent } from "../components/ui/Card";
 import Select from "react-select";
 import Sidebar from "../components/ui/Sidebar";
-import Header from "../components/ui/Header";
 import MetricCard from "../components/ui/MetricCard";
-import Overlay from "../components/ui/Overlay";
 import LineChart from "../components/graph/LineChart";
 import "../styles/dashboard.css";
 import "../styles/react-select.css";
@@ -246,11 +246,11 @@ const Dashboard = () => {
   const [chartData, setChartData] = useState([]);
   const [dateRange, setDateRange] = useState("過去7日間");
   const [selectedOption, setSelectedOption] = useState(null);
-  const [showCalendar, setShowCalendar] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [url, setUrl] = useState(""); // URL用のstate
+  const [urlOptions, setUrlOptions] = useState([]);
+  const [selectedUrl, setSelectedUrl] = useState("");
   const [sanitizedUrl, setSanitizedUrl] = useState("");
-
   const [metrics, setMetrics] = useState(sampleMetrics); // メトリクスのstate
   const [selectedMetric, setSelectedMetric] = useState("PV (ページ閲覧数)"); // 選択中のメトリクス
   const [inputValue, setInputValue] = useState(""); // ここで useState を使って定義
@@ -260,9 +260,27 @@ const Dashboard = () => {
   const [filteredData, setFilteredData] = useState([]);
   const router = useRouter();
 
+  //Loadingの設定
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   //detailsのリンクにpropertyIdを紐づける
   const handelButtonClick = (propertyId) => {
     router.push(`/${propertyId}/details`);
+  };
+
+  //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.URL処理
+  //localStorageからURLリストを取得
+  useEffect(() => {
+    const storedUrls = JSON.parse(localStorage.getItem("urlOptions")) || [];
+    setUrlOptions(storedUrls);
+  }, []);
+
+  //URL選択時の処理
+  const handleUrlChange = (selectedOption) => {
+    setSelectedUrl(selectedOption);
+    setUrl(selectedOption.value);
   };
 
   /////////////////////////////////////////////////////できるならコンテキストで保管したい
@@ -278,16 +296,6 @@ const Dashboard = () => {
       setInputValue(decodedUrl);
     }
   }, [router.query.url]);
-
-  const handleDateRangeChange = (value) => {
-    // Toggle showCalendar if custom date is selected
-    if (value === "カスタム") {
-      setShowCalendar(true);
-    } else {
-      setShowCalendar(false);
-    }
-    filterDataByDateRange(value);
-  };
 
   // Sessionの取得
   const { fetchedSession, loading: sessionLoading } = useSessionData();
@@ -411,7 +419,6 @@ const Dashboard = () => {
       aggregatedLoading
     )
       return; // session, propertyIds, startDate
-
     if (aggregatedError) {
       console.error("Error fetching aggregated data:", aggregatedError);
       refetchAggregatedData(session, propertyIds, startDate, endDate); // エラー時にリフェッチ
@@ -530,7 +537,7 @@ const Dashboard = () => {
       UU: entry.sessions || 0,
     }));
 
-    console.log("ANADATA:", analyticsData);
+    console.log("ANADATA:", analyticsData); //sani
     return analyticsData;
   };
 
@@ -538,8 +545,6 @@ const Dashboard = () => {
 
   const filterDataByDateRange = (data, range) => {
     const now = new Date();
-    console.log("nowDate:", now);
-    //setEndDate(now);
     let startDate;
 
     switch (range) {
@@ -622,10 +627,10 @@ const Dashboard = () => {
       result.push(
         dataMap.get(formattedDate) || {
           date: formattedDate,
-          screen_page_views: 0,
-          conversions: 0,
-          conversion_rate: 0,
-          sessions: 0,
+          PV: 0,
+          CV: 0,
+          CVR: 0,
+          SS: 0,
         }
       );
     }
@@ -637,23 +642,13 @@ const Dashboard = () => {
     return [
       {
         date: new Date().toISOString().split("T")[0], // デフォルトで現在の日付,
-        screen_page_views: 0,
-        conversions: 0,
-        conversion_rate: 0,
-        sessions: 0,
+        PV: 0,
+        CV: 0,
+        CVR: 0,
+        SS: 0,
       },
     ];
   };
-
-  /*{showCalendar && (
-                  <DateRangePicker
-                    startDate={startDate}
-                    endDate={endDate}
-                    onChange={(range) => {
-                      setStartDate(range.startDate);
-                      setEndDate(range.endDate);
-                      filterDataByDateRange("カスタム"); // カスタム範囲でデータをフィルタリング
-                    }*/
 
   // オプションが選択された時に実行される関数
   const handleSelectChange = (selectedOption) => {
@@ -662,28 +657,8 @@ const Dashboard = () => {
     console.log("selectedOption:", selectedOption.value);
   };
 
-  //AnalyticsData, DateRange, filteredDataに呼応してフィルタリング//////////////////////////////////////////////////////////////////////////////////////////////////////Dataの変更場所
-  useEffect(() => {
-    if (dataByDay.length > 0) {
-      console.log("DateRange:", dateRange);
-      const filtered = filterDataByDateRange(dataByDay, dateRange); //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>516
-      setFilteredData(filtered);
-      console.log("FILTERED:", filtered);
-    }
-  }, [dateRange, analyticsData]);
-
-  useEffect(() => {
-    if (filteredData.length > 0) {
-      console.log("FilteredData:", filteredData);
-      const previousData = getPreviousData(formattedAnalytics, dateRange); //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>603
-      console.log("PreData:", previousData);
-      calculateCurrentAndPreviousData(filteredData, previousData); //>>>>>>>>>>>>>>>646
-    }
-  }, [filteredData]);
-
-  const getPreviousData = (data, dateRange) => {
+  const preFilterDataByDateRange = (data, dateRange) => {
     const now = new Date();
-    console.log("NOW:", now);
     let previousStartDate, previousEndDate;
 
     switch (dateRange) {
@@ -740,16 +715,17 @@ const Dashboard = () => {
       //break;
 
       default:
-        return [];
+        console.log("PreDATA:", data);
+        return data;
     }
     if (Array.isArray(data)) {
-      const previousData = fillMissingDates(
+      const preFilteredData = fillMissingDates(
         data,
         previousStartDate,
         previousEndDate
       );
-      console.log("PreviousData :", previousData);
-      return previousData;
+      console.log("PreviousData :", preFilteredData);
+      return preFilteredData;
     } else {
       console.error("データが配列ではありません: ", data);
       return generateZeroData();
@@ -827,13 +803,16 @@ const Dashboard = () => {
       console.log("PROID:", propertyId);
       //const data = getAnalyticsData(propertyId);
       //console.log("data:", data);
-      const data = dataByDay[propertyId][sanitizedUrl];
+      const data = dataByDay[propertyId]?.[sanitizedUrl] || [];
       console.log("DateByDAY for PRO:", data);
       const filtered = filterDataByDateRange(data, dateRange); //>>>>>>>>>>>>>>>>>>>>>>>>>>>>-300
+      const prefiltered = preFilterDataByDateRange(data, dateRange); //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>603
+      console.log("PreData:", prefiltered);
       console.log("dateRange", dateRange);
       console.log("Fetched Data for Property:", data); // デバッグ用ログ
       console.log("filtered data:", filtered);
       setFilteredData(filtered); //>>>>>>>>>-300
+      calculateCurrentAndPreviousData(filtered, prefiltered); //>>>>>>>>>>>>>>>646
     }
   }, [propertyId, dateRange]);
 
@@ -930,17 +909,97 @@ const Dashboard = () => {
     );
   };
 
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const buttonRef = useRef(null);
+
+  const toggleDropdown = () => {
+    setIsDropdownOpen((prevState) => !prevState);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target) &&
+        !buttonRef.current.contains(event.target)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleKeyDown = (e) => {
+    e.preventDefault();
+    if (url) {
+      console.log("Submitted URL:", url);
+      // dashboardにURLをクエリパラメータとして渡してリダイレクト
+      router.push(`/dashboard?url=${encodeURIComponent(url)}`);
+    } else {
+      alert("URLを追加してください。");
+    }
+  };
+
   return (
     <div className="dashboard-container">
-      <Header
-        isOpen={isOpen}
-        toggleMenu={toggleMenu}
-        handleSubmit={handleSubmit}
-        url={url}
-        setUrl={setUrl}
-      />
-      {/* オーバーレイの追加 */}
-      {/*<Overlay isOpen={isOpen} toggleMenu={toggleMenu} />*/}
+      <header className="header">
+        <div className="header-left">
+          <h1 className="header-title">Propagate Analytics</h1>
+          <form onSubmit={handleSubmit}>
+            <Select
+              className="url-select"
+              value={selectedUrl}
+              onChange={handleUrlChange}
+              options={urlOptions}
+              placeholder="URLを選択してください"
+            />
+          </form>
+        </div>
+        <div className="header-right">
+          <Button
+            variant="ghost"
+            startIcon={<Settings className="Icon" />}
+            className="header-button"
+            ref={buttonRef}
+            onClick={toggleDropdown}
+          >
+            <span className="sr-only"></span>
+          </Button>
+          {isDropdownOpen && (
+            <div className="dropdown-menu">
+              <Button
+                variant="ghost"
+                onClick={() => router.push("/dashboard")}
+                className="menu-button"
+              >
+                <UserRoundPen className="icon" />
+                <div className="icon-text">プロフィール</div>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => router.push("/setting/addAccount")}
+                className="menu-button"
+              >
+                <Mail className="icon" />
+                <div className="icon-text">アカウント追加</div>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => router.push("/setting/logout")}
+                className="menu-button"
+              >
+                <LogOut className="icon" />
+                <div className="icon-text">ログアウト</div>
+              </Button>
+            </div>
+          )}
+        </div>
+      </header>
       <main className="dashboard-main">
         {/* サイドバーの表示制御 */}
         <Sidebar isOpen={isOpen} className="sidebar" />
@@ -953,7 +1012,7 @@ const Dashboard = () => {
               onChange={handleSelectChange}
               options={options}
               placeholder="データの範囲を選択"
-            ></Select>
+            />
           </div>
           <div className="dashboard-main-right">
             <div className="center-content">

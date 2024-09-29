@@ -6,15 +6,9 @@ import { useDataByDayFromDetails } from "../../hooks/useGetDataByDay";
 import { useAnalyticsData } from "../../hooks/useAnalyticsData";
 import { useSearchConsoleData } from "../../hooks/useSearchConsoleData";
 import { useAggregatedData } from "../../hooks/useAggregatedData";
-import { Button } from "../../components/ui/Button";
+import Button from "@mui/material/Button";
 import Select from "react-select";
-/*import { Tabs, TabsList, TabsTrigger } from "../components/Tabs";*/
-import { Calendar } from "../../components/ui/Calendar";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "../../components/ui/Popover";
+import Popover from "../../components/ui/Popover";
 import { X, Calendar as CalendarIcon } from "lucide-react";
 import LineChart from "../../components/graph/LineChart";
 import BarChart from "../../components/graph/BarChart";
@@ -177,17 +171,6 @@ export default function Details() {
     { value: "全期間", label: "全期間" },
   ];
 
-  const pagePathOptions = [
-    {
-      value: "ホーム",
-      label: "/",
-    },
-    {
-      value: "ログイン",
-      label: "/login",
-    },
-  ];
-
   const [dateRange, setDateRange] = useState("過去 28 日間");
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedMetric, setSelectedMetric] = useState("PV");
@@ -204,7 +187,7 @@ export default function Details() {
   );
   const [formattedAnalytics, setFormattedAnalytics] = useState([]);
   const [filteredData, setFilteredData] = useState(null);
-  const [pagePath, setpagePath] = useState("");
+  const [pagePath, setpagePath] = useState(null);
   const [selectedPagePath, setSelectedPagePath] = useState("/");
   const [selectedDateRange, setSelectedDateRange] = useState("過去7日間");
   const router = useRouter();
@@ -234,6 +217,7 @@ export default function Details() {
   const [propertyIds, setPropertyIds] = useState([]);
   const [searchConsoleData, setSearchConsoleData] = useState([]);
   const [aggregatedData, setAggregatedData] = useState([]);
+  const [pathList, setPathList] = useState([]);
 
   useEffect(() => {
     if (router.query.propertyId) {
@@ -264,7 +248,7 @@ export default function Details() {
   }, [fetchedSession, analyticsError, router]);
 
   // useSearchConsoleDataでデータを取得する
-  console.log("PropertyIds:", propertyIds);
+  //console.log("PropertyIds:", propertyIds);
   const {
     data: fetchedSearchConsoleData,
     error: searchConsoleError,
@@ -310,6 +294,26 @@ export default function Details() {
       setDataByDayFromDetails(fetchedDataByDayFromDetails);
     }
   }, [fetchedDataByDayFromDetails]);
+
+  //PagePathを取得する関数
+  useEffect(() => {
+    if (dataByDayFromDetails && dataByDayFromDetails[propertyId]) {
+      const urlForPro = Object.keys(dataByDayFromDetails[propertyId]);
+      console.log("URLforPRO:", urlForPro);
+      const firstUrl = urlForPro[0]; //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>修正箇所
+      const saniUrl = firstUrl.replace(/\/+$/, "");
+      setSanitizedUrl(saniUrl);
+      console.log("SANIUrl:", saniUrl);
+      const list = Object.keys(dataByDayFromDetails[propertyId][saniUrl]);
+      console.log("PathList", list);
+      setPathList(list);
+    }
+  }, [dataByDayFromDetails]);
+
+  const pagePathOptions = pathList.map((path) => ({
+    value: path,
+    label: path,
+  }));
 
   // useAggregatedDataでデータを取得する
   const {
@@ -397,28 +401,28 @@ export default function Details() {
     // 最後の / を削除
     //const sanitizedUrl = url.replace(/\/+$/, "");
     //console.log(sanitizedUrl);
-    console.log("serchId:", searchId);
-    console.log("SearchData;", searchData);
+    //console.log("serchId:", searchId);
+    //console.log("SearchData;", searchData);
     // searchData[searchId] から URL 部分（キー）を取得
     const dataObject = searchData[searchId];
     if (!dataObject) {
-      console.warn("No data found for the given searchId:", searchId);
+      //console.warn("No data found for the given searchId:", searchId);
       return [];
     }
 
     // dataObjectの中の最初のキー（URLとして仮定）を取得
-    const urlKey = Object.keys(dataObject)[0];
-    console.log("URL Key:", urlKey);
+    const urlKey = Object.keys(dataObject);
+    //console.log("URL Key:", urlKey);
 
     // URL部分の下にある指定されたオブジェクトキー（object）を取得
     const queryData = dataObject[urlKey]?.[object];
-    console.log("QueryData: ", queryData);
+    //console.log("QueryData: ", queryData);
     if (!queryData) {
       return [];
     }
     const sortedEntries = Object.entries(queryData).sort((a, b) => b[1] - a[1]);
     const top7Queries = sortedEntries.slice(0, 7);
-    console.log("top7Queries: ", top7Queries);
+    //console.log("top7Queries: ", top7Queries);
     return top7Queries;
   }
 
@@ -432,7 +436,7 @@ export default function Details() {
   const topCountries = getQuery(aggregatedData, propertyId, "country");
   //console.log("topCountries", topCountries);
   const topCities = getQuery(aggregatedData, propertyId, "city");
-  console.log("topCountries", topCountries);
+  //console.log("topCountries", topCountries);
 
   const selectChart = () => {
     if (!filteredData || filteredData.length === 0) {
@@ -463,7 +467,6 @@ export default function Details() {
       } else if (selectedMetric === "SK") {
         return (
           <div>
-            {/*<BarChart data={topQueries} />;*/}
             <PercentageTable
               data={topQueries}
               subtitle="上位7項目"
@@ -526,7 +529,6 @@ export default function Details() {
     } else if (selectedMetric === "SK") {
       return (
         <div>
-          {/*<BarChart data={topQueries} />;*/}
           <PercentageTable
             data={topQueries}
             title="検索キーワード"
@@ -546,59 +548,25 @@ export default function Details() {
   const parseDate = (dateStr) => new Date(dateStr);
 
   useEffect(() => {
-    if (propertyId && dateRange) {
-      const data = dataByDay[propertyId][sanitizedUrl];
-      console.log("data:", data);
-      const filtered = filterDataByDateRange(data, dateRange);
-      console.log("dateRange", dateRange);
-      console.log("Fetched Data for Property:", data); // デバッグ用ログ
-      console.log("filtered data:", filtered);
-      setFilteredData(filtered);
+    if (
+      propertyId &&
+      dateRange &&
+      dataByDayFromDetails &&
+      dataByDayFromDetails[propertyId]
+    ) {
+      if (propertyId && dateRange) {
+        const data = dataByDayFromDetails[propertyId][sanitizedUrl][pagePath]; //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>データ設定
+        console.log("data:", data);
+        const filtered = filterDataByDateRange(data, dateRange);
+        console.log("dateRange", dateRange);
+        console.log("Fetched Data for Property:", data); // デバッグ用ログ
+        console.log("filtered data:", filtered);
+        setFilteredData(filtered);
+      }
+    } else {
+      console.log("NOSANIID");
     }
   }, [propertyId, dateRange]);
-
-  const getAnalyticsData = (propertyId) => {
-    if (!formattedAnalytics || formattedAnalytics.length === 0) {
-      console.warn("formattedAnalytics is empty or undefined.");
-      return [];
-    }
-    const filteredAnalytics = formattedAnalytics.filter(
-      (entry) => entry.properties_id === propertyId
-    );
-
-    console.log("FileterdAnalyticD: ", filteredAnalytics);
-
-    if (filteredAnalytics.length === 0) {
-      console.warn("No analytics data found for Property ID:", propertyId);
-      return [
-        {
-          date: "",
-          PV: 0,
-          CV: 0,
-          TU: 0,
-          CVR: 0,
-          UU: 0,
-          TC: 0,
-        },
-      ];
-    }
-    // analyticsDataの定義
-    const analyticsData = filteredAnalytics.map((entry) => ({
-      date: entry.date,
-      PV: entry.screen_page_views || 0,
-      CV: entry.conversions || 0,
-      TU: entry.total_users || 0,
-      CVR: entry.sessions
-        ? ((entry.conversions / entry.sessions) * 100).toFixed(2)
-        : 0, // CVRをパーセント表示
-      UU: entry.sessions || 0,
-      TC: entry.click || 0,
-    }));
-
-    console.log("FileterdAnalyticD: ", filteredAnalytics);
-
-    return analyticsData;
-  };
 
   const filterDataByDateRange = (data, range) => {
     const now = new Date();
@@ -718,12 +686,12 @@ export default function Details() {
       <div className="header">
         <div className="metric-select"></div>
         <div className="action-icons">
-          <button
+          <Button
             onClick={() => router.push("/dashboard")}
             className="icon-button"
           >
             <X className="icon" />
-          </button>
+          </Button>
         </div>
       </div>
       <div className="graph-control">
@@ -760,66 +728,66 @@ export default function Details() {
         </div>
         <div className="tabs">
           <div className="tabs-list">
-            <button
+            <Button
               onClick={() => handleMetricChange("PV")}
               className={`tab ${selectedMetric === "PV" ? "active" : ""}`}
             >
               ページ閲覧数
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleMetricChange("CV")}
               className={`tab ${selectedMetric === "CV" ? "active" : ""}`}
             >
               お問い合わせ数
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleMetricChange("TU")}
               className={`tab ${selectedMetric === "TU" ? "active" : ""}`}
             >
               ページ訪問者数
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleMetricChange("UU")}
               className={`tab ${selectedMetric === "UU" ? "active" : ""}`}
             >
               セッション数
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleMetricChange("CVR")}
               className={`tab ${selectedMetric === "CVR" ? "active" : ""}`}
             >
               お問い合わせ率
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleMetricChange("SD")}
               className={`tab ${selectedMetric === "SD" ? "active" : ""}`}
             >
               流入元デバイス
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleMetricChange("VR")}
               className={`tab ${selectedMetric === "" ? "active" : ""}`}
             >
               流入者属性
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleMetricChange("RU")}
               className={`tab ${selectedMetric === "RU" ? "active" : ""}`}
             >
               流入元URL
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleMetricChange("SK")}
               className={`tab ${selectedMetric === "SK" ? "active" : ""}`}
             >
               検索キーワード
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleMetricChange("TC")}
               className={`tab ${selectedMetric === "TC" ? "active" : ""}`}
             >
               クリック数
-            </button>
+            </Button>
           </div>
         </div>
         <div className="chart-controls">
@@ -831,7 +799,7 @@ export default function Details() {
           />
         </div>
       </div>
-      <div className="chart">{selectChart()}</div>
+      {<div className="chart">{selectChart()}</div>}
     </div>
   );
 }

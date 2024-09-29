@@ -1,6 +1,7 @@
 import React from "react";
 import { useState } from "react";
 import { useRouter } from "next/router";
+import Button from "@mui/material/Button";
 import styles from "../../styles/setting/logout.css";
 
 export default function UrlSetting() {
@@ -39,20 +40,20 @@ export default function UrlSetting() {
                 required
               />
             </div>
-            <button
+            <Button
               className="logout-button"
               type="submit"
               onClick={() => handleUrl}
             >
               ログアウト
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => router.push("/dashboard")}
               type="button"
               className="dashboard-button"
             >
               ホームへ戻る
-            </button>
+            </Button>
           </div>
         </form>
       </div>

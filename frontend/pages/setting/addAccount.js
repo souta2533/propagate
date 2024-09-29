@@ -1,6 +1,7 @@
 import React from "react";
 import { useState } from "react";
 import { useRouter } from "next/router";
+import Button from "@mui/material/Button";
 
 import styles from "../../styles/setting/addAccount.css";
 
@@ -43,17 +44,17 @@ const addAccount = () => {
               required
             />
           </div>
-          <button type="submit" className="register-button">
+          <Button type="submit" className="register-button">
             新規アカウント登録
-          </button>
+          </Button>
         </form>
-        <button
+        <Button
           onClick={() => router.push("/dashboard")}
           type="button"
           className="dashboard-button"
         >
           ホームへ戻る
-        </button>
+        </Button>
       </div>
     </div>
   );

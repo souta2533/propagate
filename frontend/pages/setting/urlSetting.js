@@ -1,6 +1,7 @@
 import React from "react";
 import { useState } from "react";
 import { useRouter } from "next/router";
+import Button from "@mui/material/Button";
 import styles from "../../styles/setting/urlSetting.css";
 
 export default function UrlSetting() {
@@ -11,9 +12,15 @@ export default function UrlSetting() {
   const handleUrl = (e) => {
     e.preventDefault(); // フォーム送信時のページリロードを防止
     if (url) {
-      // URLの登録ロジックをここに追加
       console.log("登録されたURL: ", url);
       alert(`URL: ${url} が登録されました！`);
+
+      //登録されたURLをlocalStorageに保存
+      const storedUrls = JSON.parse(localStrage.getItem("urlOptions")) || [];
+      const newUrl = { lavel: url, value: url };
+      storedUrls.push(newUrl);
+      localStorage.setItem("urlOptions", JSON.stringify(storedUrls));
+
       // 登録後にdashboardへリダイレクト
       router.push({
         pathname: "/dashboard",
@@ -39,20 +46,20 @@ export default function UrlSetting() {
               placeholder="登録するURLを入力してください"
               required
             ></input>
-            <button
+            <Button
               className="register-button"
               type="submit"
               onClick={() => handleUrl}
             >
               登録
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => router.push("/dashboard")}
               type="button"
               className="dashboard-button"
             >
               ホームへ戻る
-            </button>
+            </Button>
           </div>
         </form>
       </div>
