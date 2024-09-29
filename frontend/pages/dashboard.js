@@ -392,15 +392,7 @@ const Dashboard = () => {
     } else {
       console.log("Data By Day is empty");
     }
-  }, [
-    session,
-    propertyIds,
-    startDate,
-    endDate,
-    dataByDayError,
-    dataByDayLoading,
-    refetchDataByDay,
-  ]);
+  }, [fetchedDataByDay]);
 
   // 集計データを取得
   const {
