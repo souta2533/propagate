@@ -43,6 +43,32 @@ const CustomOption = (props) => {
     </div>
   );
 };
+const customStyles = {
+  control: (provided) => ({
+    ...provided,
+    border: "none",
+    boxShadow: "none",
+    padding: "5px 10px",
+    cursor: "pointer",
+  }),
+  "&:hover": {},
+  menu: (provided) => ({
+    ...provided,
+    backgroundColor: "#fff", // メニュー背景色
+    zIndex: 9999, // メニューが他の要素の上に表示されるように
+  }),
+  "&:hover": {},
+  option: (provided, state) => ({
+    ...provided,
+    backgroundColor: state.isFocused ? "#f0f0f0" : "#fff", // フォーカスされたときのオプションの背景色
+    color: state.isFocused ? "#333" : "#000", // フォーカスされたときのオプションの文字色
+    padding: 10,
+  }),
+  singleValue: (provided) => ({
+    ...provided,
+    color: "#333", // 選択されたオプションのテキスト色
+  }),
+};
 
 const Dashboard = () => {
   const sampledata1 = [
@@ -273,7 +299,6 @@ const Dashboard = () => {
   const [chartData, setChartData] = useState([]);
   const [dateRange, setDateRange] = useState("過去7日間");
   const [selectedOption, setSelectedOption] = useState(null);
-  const [isOpen, setIsOpen] = useState(false);
   const [url, setUrl] = useState(""); // URL用のstate
   const [urlOptions, setUrlOptions] = useState([]);
   const [selectedUrl, setSelectedUrl] = useState("");
@@ -540,11 +565,6 @@ const Dashboard = () => {
   }, [analyticsData]); // analyticsDataが変更された時に実行
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-  /*サイドバーの開閉状態を保持する */
-  const toggleMenu = () => {
-    setIsOpen(!isOpen);
-  };
 
   const parseDate = (dateStr) => new Date(dateStr);
 
@@ -958,6 +978,7 @@ const Dashboard = () => {
           <form onSubmit={handleSubmit}>
             <Select
               className="url-select"
+              styles={customStyles}
               value={selectedUrl}
               onChange={handleUrlChange}
               options={urlOptions}
@@ -981,7 +1002,7 @@ const Dashboard = () => {
             <span className="sr-only"></span>
           </Button>
           {isDropdownOpen && (
-            <div className="dropdown-menu">
+            <div className="header-dropdown-menu">
               <Button
                 variant="ghost"
                 onClick={() => router.push("/dashboard")}
@@ -1011,17 +1032,17 @@ const Dashboard = () => {
         </div>
       </header>
       <main className="dashboard-main">
-        {/* サイドバーの表示制御 */}
-        <Sidebar isOpen={isOpen} className="sidebar" />
+        <Sidebar className="sidebar" />
         <div className="dashboard-main-left">
           <div className="dashboard-header">
             <h2 className="dashboard-title">アナリティクスデータ</h2>
             <Select
               className="custom-select"
+              styles={customStyles}
               value={selectedOption}
               onChange={handleSelectChange}
               options={options}
-              placeholder="データの範囲を選択"
+              placeholder="データ範囲選択"
             />
           </div>
           <div className="dashboard-main-right">

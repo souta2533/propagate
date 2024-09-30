@@ -32,8 +32,8 @@ const LineChart = ({ data = [], dataKey }) => {
       {
         label: dataKey,
         data: sortedData.map((item) => item[dataKey]),
-        borderColor: "#3399cc",
-        backgroundColor: "rgba(64, 224,208,0.2 )",
+        borderColor: "#000000",
+        backgroundColor: "rgba(51, 51,51 ,0.3 )",
         fill: true,
         tension: 0.1,
         borderWidth: 1,

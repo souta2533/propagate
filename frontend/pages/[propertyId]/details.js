@@ -14,9 +14,38 @@ import LineChart from "../../components/graph/LineChart";
 import BarChart from "../../components/graph/BarChart";
 import PieChart from "../../components/graph/PieChart";
 import Table from "../../components/graph/Table";
+import ParrialDataChart from "../../components/graph/ParrialDataChart";
+import { Grid, Paper, Typography, Box } from "@mui/material";
 
 import "../../styles/details.css";
 import PercentageTable from "../../components/ui/PercentageTable";
+
+const customStyles = {
+  control: (provided) => ({
+    ...provided,
+    border: "none",
+    boxShadow: "none",
+    padding: "5px 10px",
+    cursor: "pointer",
+  }),
+  "&:hover": {},
+  menu: (provided) => ({
+    ...provided,
+    backgroundColor: "#fff", // メニュー背景色
+    zIndex: 9999, // メニューが他の要素の上に表示されるように
+  }),
+  "&:hover": {},
+  option: (provided, state) => ({
+    ...provided,
+    backgroundColor: state.isFocused ? "#f0f0f0" : "#fff", // フォーカスされたときのオプションの背景色
+    color: state.isFocused ? "#333" : "#000", // フォーカスされたときのオプションの文字色
+    padding: 10,
+  }),
+  singleValue: (provided) => ({
+    ...provided,
+    color: "#333", // 選択されたオプションのテキスト色
+  }),
+};
 
 export default function Details() {
   const sampledata = [
@@ -508,7 +537,6 @@ export default function Details() {
               subtitle="上位7項目"
               className="Percentage-graph"
             />
-            ;
           </div>
         );
       } else if (selectedMetric === "TC") {
@@ -556,30 +584,15 @@ export default function Details() {
     } else if (selectedMetric === "SD") {
       return (
         <div>
-          <PercentageTable
-            data={device}
-            title="流入元デバイス"
-            subtitle="上位7項目"
-            className="Percentage-graph"
-          />
-          ;
+          <LineChart data={filteredData} dataKey="CVR" />;
+          <Table data={filteredData} dataKey="CVR" />
         </div>
       );
     } else if (selectedMetric === "VR") {
       return (
         <div className="details-graph">
-          <PercentageTable
-            data={city}
-            title="流入者属性（国内）"
-            subtitle="上位7項目"
-            className="Percentage-graph"
-          />
-          <PercentageTable
-            data={country}
-            title="流入者属性（国外）"
-            subtitle="上位7項目"
-            className="Percentage-graph"
-          />
+          <LineChart data={filteredData} dataKey="CVR" />;
+          <Table data={filteredData} dataKey="VR" />
         </div>
       ); // 流入者属性
     } else if (selectedMetric === "RU") {
@@ -587,13 +600,8 @@ export default function Details() {
     } else if (selectedMetric === "SK") {
       return (
         <div>
-          <PercentageTable
-            data={query}
-            title="検索キーワード"
-            subtitle="上位7項目"
-            className="Percentage-graph"
-          />
-          ;
+          <LineChart data={filteredData} dataKey="CVR" />;
+          <Table data={filteredData} dataKey="CVR" />
         </div>
       );
     } else if (selectedMetric === "TC") {
@@ -743,6 +751,57 @@ export default function Details() {
     ];
   };
 
+  /*
+  const aggregateData = (data) => {
+    const countryAggregation = {};
+    const deviceAggregation = {};
+    const queryAggregation = {};
+    const cityAggregation = {};
+
+    data.forEach((item) => {
+      // Countryの集計
+      const countries = item.country || {};
+      Object.keys(countries).forEach((country) => {
+        if (!countryAggregation[country]) {
+          countryAggregation[country] = 0;
+        }
+        countryAggregation[country] += countries[country];
+      });
+
+      // Device Categoryの集計
+      const devices = item.device_category || {};
+      Object.keys(devices).forEach((device) => {
+        if (!deviceAggregation[device]) {
+          deviceAggregation[device] = 0;
+        }
+        deviceAggregation[device] += devices[device];
+      });
+
+      // Queryの集計
+      const queries = item.query || {};
+      Object.keys(queries).forEach((query) => {
+        if (!queryAggregation[query]) {
+          queryAggregation[query] = 0;
+        }
+        queryAggregation[query] += queries[query];
+      });
+
+      // Cityの集計
+      const city = item.city || "(not set)";
+      if (!cityAggregation[city]) {
+        cityAggregation[city] = 0;
+      }
+      cityAggregation[city] += 1; // 同じcityがあったらカウントを増やす
+    });
+
+    return {
+      countryAggregation,
+      deviceAggregation,
+      queryAggregation,
+      cityAggregation,
+    };
+  };*/
+
   return (
     <div className="container">
       <div className="header">
@@ -750,6 +809,7 @@ export default function Details() {
         <div className="action-icons">
           <Button
             onClick={() => router.push("/dashboard")}
+            variant="ghost"
             className="icon-button"
           >
             <X className="icon" />
@@ -760,6 +820,7 @@ export default function Details() {
         <div className="filter-section">
           <div className="date-range">
             <Select
+              styles={customStyles}
               className="custom-select"
               value={selectedUrl}
               onChange={handleSelectUrlChange}
@@ -767,6 +828,7 @@ export default function Details() {
               placeholder="URLを選択"
             />
             <Select
+              styles={customStyles}
               className="custom-select"
               value={selectedPagePath}
               onChange={handleSelectPathChange}
@@ -776,32 +838,14 @@ export default function Details() {
           </div>
           <div className="chart-controls">
             <Select
+              styles={customStyles}
+              className="custom-select"
               value={selectedDateRange}
               onChange={handleSelectDateChange}
               options={dateRangeOptions}
               placeholder="データの範囲を選択"
             />
           </div>
-          {showCalendar && (
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="calendar-button">
-                  <CalendarIcon className="icon-small" />
-                  {startDate && endDate
-                    ? `${formatDate(startDate)} 〜 ${formatDate(endDate)}`
-                    : "日付を選択"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="calendar-popover">
-                <Calendar
-                  selected={{ from: startDate, to: endDate }}
-                  onSelect={handleDateSelect}
-                  numberOfMonths={2}
-                  mode="range"
-                />
-              </PopoverContent>
-            </Popover>
-          )}
         </div>
         <div className="tabs">
           <div className="tabs-list">

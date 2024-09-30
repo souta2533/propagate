@@ -22,30 +22,24 @@
 }
 
 .filter-section {
-  margin-top: 20px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  padding: 0 20px; /* パディングで余白を追加 */
+  border-bottom: 1px solid #ddd; /* 下線を追加 */
+}
+
+.filter-section select {
   align-items: center;
 }
 
 .date-range {
   display: flex;
-  justify-content: space-between;
   align-items: center;
 }
 
 .date-range-text {
   margin-left: 10px;
-}
-
-/*日付選択のスタイル*/
-.filter-section {
-  display: flex;
-  justify-content: space-between; /* 左右の要素を端に配置 */
-  align-items: center; /* 垂直方向に中央揃え */
-  padding: 0 20px; /* パディングで余白を追加 */
-  border-top: 1px solid #ddd;
-  border-bottom: 1px solid #ddd; /* 下線を追加 */
 }
 
 /*Button(Select)のスタイルを指定*/
@@ -73,7 +67,6 @@ button {
 /*タブの見え方*/
 .tabs {
   background-color: white;
-  padding: 0 16px;
   border-bottom: 1px solid #ddd;
   cursor: pointer;
   font-size: 14px;
@@ -83,6 +76,7 @@ button {
 
 .tabs-list {
   display: flex;
+  flex: 1;
   gap: 0; /* タブ間のスペースを設定 */
   border: none;
   width: auto;
@@ -91,7 +85,7 @@ button {
 .tab {
   display: flex;
   background-color: white;
-  padding: 8px 16px;
+  padding: 8px 25px;
   border: none;
   cursor: pointer;
   font-size: 14px;
@@ -110,8 +104,14 @@ button {
 }
 
 .custom-select {
-  min-width: 150px;
+  display: flex;
+  align-items: center;
 }
+
+.select__control {
+  border: none;
+}
+
 .chart-controls {
   display: flex;
   justify-content: space-between;
@@ -186,6 +186,20 @@ option {
 @media (max-width: 768px) {
   .header {
     width: 100%;
+    justify-content: end;
+  }
+  .filter-section {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+  }
+  .date-range {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0;
+  }
+  .custom-select {
+    min-width: 0;
   }
   .dashboard-header {
     width: 100vw;
