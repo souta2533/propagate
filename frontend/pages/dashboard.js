@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/router";
-import { FaSearch } from "react-icons/fa";
+import { FaSearch, FaTrash } from "react-icons/fa";
 import { Settings, UserRoundPen, Mail, LogOut } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import { useSessionData } from "../hooks/useSessionData";
@@ -10,12 +10,39 @@ import { useSearchConsoleData } from "../hooks/useSearchConsoleData";
 import { useAggregatedData } from "../hooks/useAggregatedData";
 import Button from "@mui/material/Button";
 import { Card, CardContent } from "../components/ui/Card";
-import Select from "react-select";
+import Select, { components } from "react-select";
 import Sidebar from "../components/ui/Sidebar";
 import MetricCard from "../components/ui/MetricCard";
 import LineChart from "../components/graph/LineChart";
 import "../styles/dashboard.css";
 import "../styles/react-select.css";
+
+//Selectのカスタム
+const CustomOption = (props) => {
+  const { data, innerRef, innerProps } = props;
+
+  return (
+    <div
+      ref={innerRef}
+      {...innerProps}
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: "10px",
+      }}
+    >
+      <span>{data.label}</span>
+      <FaTrash
+        onClick={(e) => {
+          e.stopPropagation(); // オプションの選択を防ぐ
+          props.onDelete(data); // 削除機能を呼び出す
+        }}
+        style={{ cursor: "pointer", color: "black" }}
+      />
+    </div>
+  );
+};
 
 const Dashboard = () => {
   const sampledata1 = [
@@ -274,11 +301,21 @@ const Dashboard = () => {
   //localStorageからURLリストを取得
   useEffect(() => {
     const storedUrls = JSON.parse(localStorage.getItem("urlOptions")) || [];
-    const newUrl = { label: url, value: url };
-    storedUrls.push(newUrl);
-    localStorage.setItem("urlOptions", JSON.stringify(storedUrls));
     setUrlOptions(storedUrls);
   }, []);
+
+  //URL削除処理
+  const handleDelete = (urlToDelete) => {
+    const updatedUrls = urlOptions.filter(
+      (option) => option.value !== urlToDelete.value
+    );
+    setUrlOptions(updatedUrls);
+    localStorage.setItem("urlOptions", JSON.stringify(updatedUrls));
+
+    if (selectedUrl && selectedUrl.value === urlToDelete.value) {
+      setSelectedUrl(null);
+    }
+  };
 
   //URL選択時の処理
   const handleUrlChange = (selectedOption) => {
@@ -479,7 +516,7 @@ const Dashboard = () => {
   //Dachboardに表示するための加工したデータをformattedAnalyticsに格納
   useEffect(() => {
     if (!analyticsData || analyticsData.length === 0) {
-      console.warn("analyticsDataが空です");
+      //console.warn("analyticsDataが空です");
       return;
     }
 
@@ -507,42 +544,6 @@ const Dashboard = () => {
   /*サイドバーの開閉状態を保持する */
   const toggleMenu = () => {
     setIsOpen(!isOpen);
-  };
-
-  const getAnalyticsData = (propertyId) => {
-    if (!formattedAnalytics || formattedAnalytics.length === 0) {
-      console.warn("formattedAnalytics is empty or undefined.");
-      return [];
-    }
-    const filteredAnalytics = formattedAnalytics.filter(
-      (entry) => entry.properties_id === propertyId
-    );
-
-    if (filteredAnalytics.length === 0) {
-      console.warn("No analytics data found for Property ID:", propertyId);
-      return [
-        {
-          date: "",
-          screen_page_views: 0,
-          conversions: 0,
-          conversion_rate: 0,
-          acrive_users: 0,
-        },
-      ];
-    }
-
-    const analyticsData = filteredAnalytics.map((entry) => ({
-      date: entry.date,
-      PV: entry.screen_page_views || 0,
-      CV: entry.conversions || 0,
-      CVR: entry.sessions
-        ? ((entry.conversions / entry.sessions) * 100).toFixed(2)
-        : 0, // CVRをパーセント表示
-      UU: entry.sessions || 0,
-    }));
-
-    console.log("ANADATA:", analyticsData); //sani
-    return analyticsData;
   };
 
   const parseDate = (dateStr) => new Date(dateStr);
@@ -818,7 +819,7 @@ const Dashboard = () => {
       setFilteredData(filtered); //>>>>>>>>>-300
       calculateCurrentAndPreviousData(filtered, prefiltered); //>>>>>>>>>>>>>>>646
     }
-  }, [propertyId, dateRange]);
+  }, [propertyId, dateRange, url]);
 
   const handleMetricChange = (metricTitle) => {
     setSelectedMetric(metricTitle);
@@ -961,6 +962,11 @@ const Dashboard = () => {
               onChange={handleUrlChange}
               options={urlOptions}
               placeholder="URLを選択してください"
+              components={{
+                Option: (props) => (
+                  <CustomOption {...props} onDelete={handleDelete} />
+                ),
+              }}
             />
           </form>
         </div>

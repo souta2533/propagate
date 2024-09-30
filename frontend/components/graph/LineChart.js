@@ -16,7 +16,11 @@ const sortDataByDate = (data) => {
 const LineChart = ({ data = [], dataKey }) => {
   if (!data || data.length === 0) {
     console.warn("Data is empty or null");
-    return <div>No data available</div>;
+    return (
+      <dev>
+        <h1>Please set your URL & PagePath!</h1>
+      </dev>
+    );
   }
 
   // 日付順にソート

@@ -2,6 +2,15 @@ import React from "react";
 import { Pie } from "react-chartjs-2";
 
 const PieChart = ({ data }) => {
+  if (!data || data.length === 0) {
+    console.warn("Data is empty or null");
+    return (
+      <dev>
+        <h1>Please set your URL & PagePath!</h1>
+      </dev>
+    );
+  }
+
   const chartData = {
     labels: Object.keys(data), // ラベル（セクション名）
     datasets: [

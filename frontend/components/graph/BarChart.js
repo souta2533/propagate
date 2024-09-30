@@ -2,6 +2,15 @@ import React from "react";
 import { Bar } from "react-chartjs-2";
 
 const BarChart = ({ data }) => {
+  if (!data || data.length === 0) {
+    console.warn("Data is empty or null");
+    return (
+      <dev>
+        <h1>Please set your URL & PagePath!</h1>
+      </dev>
+    );
+  }
+
   // dataをchart.jsが必要とする形式に変換
   const chartData = {
     labels: Object.keys(data), // X軸のラベル

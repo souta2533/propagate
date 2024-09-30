@@ -4,7 +4,7 @@ import "../../styles/components/percentageTable.css"; // スタイルを別のCS
 const PercentageTable = ({ data, title, subtitle }) => {
   // データが存在しない、または不正な場合は何も表示しない
   if (!Array.isArray(data) || data.length === 0) {
-    return <p>No data available</p>;
+    return <h1>Please set your URL & PagePath!</h1>;
   }
 
   // 総数を計算

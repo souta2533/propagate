@@ -191,7 +191,11 @@
 .react-select__placeholder: プレースホルダー部分。*/
 
 .custom-select {
-  min-width: 150px;
+  min-width: 200px;
+}
+
+.react-select__option {
+  padding: 10px;
 }
 
 .react-select__control {
@@ -358,6 +362,10 @@
     padding: 10px;
     border-radius: 10px;
     border: 2px solid #7272722f;
+  }
+
+  .custom-select {
+    min-width: 300px;
   }
 
   .header-button {

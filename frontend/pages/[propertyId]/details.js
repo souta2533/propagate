@@ -174,7 +174,9 @@ export default function Details() {
   const [dateRange, setDateRange] = useState("過去 28 日間");
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedMetric, setSelectedMetric] = useState("PV");
-  const [urlList, seturlList] = useState("");
+  const [selectedUrl, setSelectedUrl] = useState("");
+  const [url, setUrl] = useState("");
+  const [urlList, setUrlList] = useState([]);
   const [sanitizedUrl, setSanitizedUrl] = useState("");
   const [timeGranularity, setTimeGranularity] = useState("日別");
   const [startDate, setStartDate] = useState(() => {
@@ -190,6 +192,10 @@ export default function Details() {
   const [pagePath, setpagePath] = useState(null);
   const [selectedPagePath, setSelectedPagePath] = useState("/");
   const [selectedDateRange, setSelectedDateRange] = useState("過去7日間");
+  const [query, setQuery] = useState([]);
+  const [device, setDevice] = useState([]);
+  const [country, setCountry] = useState([]);
+  const [city, setCity] = useState([]);
   const router = useRouter();
 
   const formatDate = (date) => {
@@ -295,20 +301,32 @@ export default function Details() {
     }
   }, [fetchedDataByDayFromDetails]);
 
-  //PagePathを取得する関数
+  //URLのリストを作成する
   useEffect(() => {
     if (dataByDayFromDetails && dataByDayFromDetails[propertyId]) {
-      const urlForPro = Object.keys(dataByDayFromDetails[propertyId]);
-      console.log("URLforPRO:", urlForPro);
-      const firstUrl = urlForPro[0]; //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>修正箇所
-      const saniUrl = firstUrl.replace(/\/+$/, "");
-      setSanitizedUrl(saniUrl);
-      console.log("SANIUrl:", saniUrl);
-      const list = Object.keys(dataByDayFromDetails[propertyId][saniUrl]);
+      const urls = Object.keys(dataByDayFromDetails[propertyId]);
+      console.log("URLs:", urls);
+      setUrlList(urls);
+    }
+  }, [dataByDayFromDetails, propertyId]);
+
+  const urlOptions = urlList.map((url) => ({
+    value: url,
+    label: url,
+  }));
+
+  //PagePathを取得する関数
+  useEffect(() => {
+    if (
+      dataByDayFromDetails &&
+      dataByDayFromDetails[propertyId] &&
+      sanitizedUrl
+    ) {
+      const list = Object.keys(dataByDayFromDetails[propertyId][sanitizedUrl]);
       console.log("PathList", list);
       setPathList(list);
     }
-  }, [dataByDayFromDetails]);
+  }, [sanitizedUrl]);
 
   const pagePathOptions = pathList.map((path) => ({
     value: path,
@@ -372,12 +390,22 @@ export default function Details() {
     console.log("Formatted Analytics:", formattedAnalyticsData);
   }, [analyticsData]); // analyticsDataが変更された時に実行
 
-  // 選択されたURLを管理するstate
-  const [selectedURL, setSelectedURL] = useState("");
-
   // URLが選択されたときの処理
-  const handleURLChange = (url) => {
-    setSelectedURL(url);
+  const handleSelectUrlChange = (selectedOption) => {
+    setSelectedUrl(selectedOption);
+    console.log("selectedUrl:", selectedOption.value);
+    if (selectedOption && typeof selectedOption.value === "string") {
+      //onsole.log("Url.value:", selectedOption.value);
+      const url = selectedOption.value;
+      setUrl(url);
+
+      // URLの最後に余分なスラッシュがあれば削除
+      const saniUrl = url.replace(/\/+$/, "");
+      setSanitizedUrl(saniUrl);
+      console.log("SANIUrl:", saniUrl);
+    } else {
+      console.log("選択されたOptionは無効です:", selectedOption);
+    }
   };
 
   const handleSelectDateChange = (selectedOption) => {
@@ -396,26 +424,21 @@ export default function Details() {
     setSelectedMetric(value);
   };
 
-  /////////////////////////////////////////////////////////////////////////////////////////////////////
-  function getQuery(searchData, searchId, object = "") {
+  /////////////////////////////////////////////////////////////////////////////////////////////////////ここが何回も繰り返されている
+  function getQuery(searchData, searchId, url, object = "") {
     // 最後の / を削除
     //const sanitizedUrl = url.replace(/\/+$/, "");
     //console.log(sanitizedUrl);
     //console.log("serchId:", searchId);
     //console.log("SearchData;", searchData);
     // searchData[searchId] から URL 部分（キー）を取得
-    const dataObject = searchData[searchId];
+    const dataObject = searchData[searchId][url];
     if (!dataObject) {
       //console.warn("No data found for the given searchId:", searchId);
       return [];
     }
-
-    // dataObjectの中の最初のキー（URLとして仮定）を取得
-    const urlKey = Object.keys(dataObject);
-    //console.log("URL Key:", urlKey);
-
     // URL部分の下にある指定されたオブジェクトキー（object）を取得
-    const queryData = dataObject[urlKey]?.[object];
+    const queryData = dataObject?.[object];
     //console.log("QueryData: ", queryData);
     if (!queryData) {
       return [];
@@ -426,49 +449,62 @@ export default function Details() {
     return top7Queries;
   }
 
-  // console.log("AGGREGATED:", aggregatedData);
-  const topQueries = getQuery(aggregatedData, propertyId, "query");
-
-  //console.log("propertyID:", propertyId);
-  //console.log("topQueries", topQueries);
-  const topDevices = getQuery(aggregatedData, propertyId, "device_category");
-  //console.log("topDevices", topDevices);
-  const topCountries = getQuery(aggregatedData, propertyId, "country");
-  //console.log("topCountries", topCountries);
-  const topCities = getQuery(aggregatedData, propertyId, "city");
-  //console.log("topCountries", topCountries);
+  useEffect(() => {
+    if (url) {
+      //console.log("AGGREGATED:", aggregatedData);
+      const topQueries = getQuery(aggregatedData, propertyId, url, "query");
+      setQuery(topQueries);
+      //console.log("topQueries", topQueries);
+      const topDevices = getQuery(
+        aggregatedData,
+        propertyId,
+        url,
+        "device_category"
+      );
+      setDevice(topDevices);
+      //console.log("topDevices", topDevices);
+      const topCountries = getQuery(aggregatedData, propertyId, url, "country");
+      setCountry(topCountries);
+      //console.log("topCountries", topCountries);
+      const topCities = getQuery(aggregatedData, propertyId, url, "city");
+      setCity(topCities);
+      //console.log("topCountries", topCountries);}
+    } else {
+      console.log("No Url Yet");
+    }
+  }, [pagePath]);
 
   const selectChart = () => {
     if (!filteredData || filteredData.length === 0) {
       if (selectedMetric === "PV") {
-        return <LineChart data={sampledata} dataKey="PV" />;
+        return <LineChart data={[]} dataKey="PV" />;
       } else if (selectedMetric === "CV") {
-        return <LineChart data={sampledata} dataKey="CV" />;
+        return <LineChart data={[]} dataKey="CV" />;
       } else if (selectedMetric === "TU") {
         return (
           <div>
-            <LineChart data={sampledata} dataKey="TU" />;
+            <LineChart data={[]} dataKey="total_users" />;
           </div>
         );
       } else if (selectedMetric === "UU") {
-        return <LineChart data={sampledata} dataKey="UU" />;
+        return <LineChart data={[]} dataKey="UU" />;
       } else if (selectedMetric === "CVR") {
-        return <LineChart data={sampledata} dataKey="CVR" />;
+        return <LineChart data={[]} dataKey="CVR" />;
       } else if (selectedMetric === "SD") {
         return (
           <div>
-            <BarChart data={topDevices} />;
+            <BarChart data={[]} />;
           </div>
         );
       } else if (selectedMetric === "VR") {
-        return <BarChart data={topCountries} />; // 流入者属性
+        return <BarChart data={[]} />; // 流入者属性
       } else if (selectedMetric === "RU") {
-        return <PieChart data={topQueries} />; // 流入元URL
+        return <PieChart data={[]} />; // 流入元URL
       } else if (selectedMetric === "SK") {
         return (
           <div>
             <PercentageTable
-              data={topQueries}
+              data={[]}
               subtitle="上位7項目"
               className="Percentage-graph"
             />
@@ -476,30 +512,52 @@ export default function Details() {
           </div>
         );
       } else if (selectedMetric === "TC") {
-        return <LineChart data={sampledata} />; // 総クリック数
+        return <LineChart data={[]} dataKey="click" />; // 総クリック数
       } else {
-        return <LineChart data={sampledata} dataKey="PV" />;
+        return <LineChart data={[]} dataKey="PV" />;
       }
     }
+    //データが存在したらこっち
     if (selectedMetric === "PV") {
-      return <LineChart data={filteredData} dataKey="PV" />;
+      return (
+        <div>
+          <LineChart data={filteredData} dataKey="PV" />;
+          <Table data={filteredData} dataKey="PV" />
+        </div>
+      );
     } else if (selectedMetric === "CV") {
-      return <LineChart data={filteredData} dataKey="CV" />;
+      return (
+        <div>
+          <LineChart data={filteredData} dataKey="CV" />;
+          <Table data={filteredData} dataKey="CV" />
+        </div>
+      );
     } else if (selectedMetric === "TU") {
       return (
         <div>
           <LineChart data={filteredData} dataKey="TU" />;
+          <Table data={filteredData} dataKey="TU" />
         </div>
       );
     } else if (selectedMetric === "UU") {
-      return <LineChart data={filteredData} dataKey="UU" />;
+      return (
+        <div>
+          <LineChart data={filteredData} dataKey="UU" />;
+          <Table data={filteredData} dataKey="UU" />
+        </div>
+      );
     } else if (selectedMetric === "CVR") {
-      return <LineChart data={filteredData} dataKey="CVR" />;
+      return (
+        <div>
+          <LineChart data={filteredData} dataKey="CVR" />;
+          <Table data={filteredData} dataKey="CVR" />
+        </div>
+      );
     } else if (selectedMetric === "SD") {
       return (
         <div>
           <PercentageTable
-            data={topDevices}
+            data={device}
             title="流入元デバイス"
             subtitle="上位7項目"
             className="Percentage-graph"
@@ -511,13 +569,13 @@ export default function Details() {
       return (
         <div className="details-graph">
           <PercentageTable
-            data={topCities}
+            data={city}
             title="流入者属性（国内）"
             subtitle="上位7項目"
             className="Percentage-graph"
           />
           <PercentageTable
-            data={topCountries}
+            data={country}
             title="流入者属性（国外）"
             subtitle="上位7項目"
             className="Percentage-graph"
@@ -525,12 +583,12 @@ export default function Details() {
         </div>
       ); // 流入者属性
     } else if (selectedMetric === "RU") {
-      return <PieChart data={topQueries} />; // 流入元URL
+      return <PieChart data={query} />; // 流入元URL
     } else if (selectedMetric === "SK") {
       return (
         <div>
           <PercentageTable
-            data={topQueries}
+            data={query}
             title="検索キーワード"
             subtitle="上位7項目"
             className="Percentage-graph"
@@ -539,9 +597,15 @@ export default function Details() {
         </div>
       );
     } else if (selectedMetric === "TC") {
-      return <LineChart data={filteredData} />; // 総クリック数
+      return (
+        <div>
+          <LineChart data={filteredData} dataKey="click" />;
+          <Table data={filteredData} dataKey="click" />
+        </div>
+      );
     } else {
       return <LineChart data={sampledata} dataKey="PV" />;
+      <Table data={filteredData} dataKey="PV" />;
     }
   };
 
@@ -549,24 +613,22 @@ export default function Details() {
 
   useEffect(() => {
     if (
-      propertyId &&
-      dateRange &&
       dataByDayFromDetails &&
-      dataByDayFromDetails[propertyId]
+      dataByDayFromDetails[propertyId] &&
+      dataByDayFromDetails[propertyId][sanitizedUrl] &&
+      dataByDayFromDetails[propertyId][sanitizedUrl][pagePath]
     ) {
-      if (propertyId && dateRange) {
-        const data = dataByDayFromDetails[propertyId][sanitizedUrl][pagePath]; //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>データ設定
-        console.log("data:", data);
-        const filtered = filterDataByDateRange(data, dateRange);
-        console.log("dateRange", dateRange);
-        console.log("Fetched Data for Property:", data); // デバッグ用ログ
-        console.log("filtered data:", filtered);
-        setFilteredData(filtered);
-      }
+      const data = dataByDayFromDetails[propertyId][sanitizedUrl][pagePath]; //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>データ設定
+      console.log("data:", data);
+      const filtered = filterDataByDateRange(data, dateRange);
+      console.log("dateRange", dateRange);
+      console.log("Fetched Data for Property:", data); // デバッグ用ログ
+      console.log("filtered data:", filtered);
+      setFilteredData(filtered);
     } else {
-      console.log("NOSANIID");
+      console.log("NOSANIANDDATA");
     }
-  }, [propertyId, dateRange]);
+  }, [sanitizedUrl, pagePath, dateRange]);
 
   const filterDataByDateRange = (data, range) => {
     const now = new Date();
@@ -656,10 +718,10 @@ export default function Details() {
           date: formattedDate,
           PV: 0,
           CV: 0,
-          TU: 0,
+          total_users: 0,
           CVR: 0,
           UU: 0,
-          TC: 0,
+          click: 0,
         }
       );
     }
@@ -673,10 +735,10 @@ export default function Details() {
         date: new Date().toISOString().split("T")[0], // デフォルトで現在の日付,
         PV: 0,
         CV: 0,
-        TU: 0,
+        total_users: 0,
         CVR: 0,
         UU: 0,
-        TC: 0,
+        click: 0,
       },
     ];
   };
@@ -699,32 +761,47 @@ export default function Details() {
           <div className="date-range">
             <Select
               className="custom-select"
+              value={selectedUrl}
+              onChange={handleSelectUrlChange}
+              options={urlOptions}
+              placeholder="URLを選択"
+            />
+            <Select
+              className="custom-select"
               value={selectedPagePath}
               onChange={handleSelectPathChange}
               options={pagePathOptions}
               placeholder="ページパスを選択"
-            ></Select>
-            {showCalendar && (
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="calendar-button">
-                    <CalendarIcon className="icon-small" />
-                    {startDate && endDate
-                      ? `${formatDate(startDate)} 〜 ${formatDate(endDate)}`
-                      : "日付を選択"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="calendar-popover">
-                  <Calendar
-                    selected={{ from: startDate, to: endDate }}
-                    onSelect={handleDateSelect}
-                    numberOfMonths={2}
-                    mode="range"
-                  />
-                </PopoverContent>
-              </Popover>
-            )}
+            />
           </div>
+          <div className="chart-controls">
+            <Select
+              value={selectedDateRange}
+              onChange={handleSelectDateChange}
+              options={dateRangeOptions}
+              placeholder="データの範囲を選択"
+            />
+          </div>
+          {showCalendar && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="calendar-button">
+                  <CalendarIcon className="icon-small" />
+                  {startDate && endDate
+                    ? `${formatDate(startDate)} 〜 ${formatDate(endDate)}`
+                    : "日付を選択"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="calendar-popover">
+                <Calendar
+                  selected={{ from: startDate, to: endDate }}
+                  onSelect={handleDateSelect}
+                  numberOfMonths={2}
+                  mode="range"
+                />
+              </PopoverContent>
+            </Popover>
+          )}
         </div>
         <div className="tabs">
           <div className="tabs-list">
@@ -789,14 +866,6 @@ export default function Details() {
               クリック数
             </Button>
           </div>
-        </div>
-        <div className="chart-controls">
-          <Select
-            value={selectedDateRange}
-            onChange={handleSelectDateChange}
-            options={dateRangeOptions}
-            placeholder="データの範囲を選択"
-          />
         </div>
       </div>
       {<div className="chart">{selectChart()}</div>}

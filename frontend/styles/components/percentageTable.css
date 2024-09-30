@@ -1,6 +1,5 @@
 .percentage-table {
-  width: 100%;
-  max-width: 400px;
+  width: 100vw;
   background-color: #fff;
   padding: 20px;
   border-radius: 8px;
@@ -8,7 +7,7 @@
 }
 
 .table-title {
-  font-size: 16px;
+  font-size: 20px;
   font-weight: bold;
   margin-bottom: 5px;
 }
