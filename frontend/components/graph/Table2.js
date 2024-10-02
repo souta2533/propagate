@@ -1,29 +1,5 @@
 import React from "react";
 import MUIDataTable from "mui-datatables";
-import { Download } from "lucide-react";
-
-const getMuiTheme = () =>
-  createTheme({
-    overrides: {
-      MUIDataTable: {
-        root: {
-          backgroundColor: "#fafafa", // テーブル全体の背景色を設定
-        },
-      },
-      MUIDataTableBodyCell: {
-        root: {
-          padding: "10px", // セルのパディングを変更
-          fontSize: "14px", // フォントサイズを変更
-        },
-      },
-      MUIDataTableHeadCell: {
-        root: {
-          backgroundColor: "#3f51b5", // ヘッダーセルの背景色
-          color: "#fff", // ヘッダーセルの文字色
-        },
-      },
-    },
-  });
 
 const Table = ({ data, dataKey }) => {
   if (!Array.isArray(data) || data.length === 0) {
@@ -33,15 +9,19 @@ const Table = ({ data, dataKey }) => {
 
   // `date`列と`dataKey`で指定された列を表示
   const columns = [
-    { name: "date", label: "Date" },
-    { name: dataKey || "defaultKey", label: dataKey || "Default Key" }, // 2列目がundefinedの場合はデフォルト値を設定
+    { name: "query", label: dataKey }, // 1列目は常に`date`
+    { name: "count", label: "Count" }, // 2列目は`dataKey`で指定された列
   ];
 
   // データをテーブル用に整形
-  const tableData = data.map((item) => ({
-    date: item.date, // 1列目は常に`date`
-    [dataKey]: item[dataKey] ?? "", // 2列目は`dataKey`の値。無い場合は空白
-  }));
+  const tableData = data.map((item) => {
+    const row = {
+      query: item[0],
+      count: item[1],
+    };
+    console.log(row);
+    return row;
+  });
 
   // options 設定（必要に応じてカスタマイズ可能）
   const options = {
@@ -67,7 +47,7 @@ const Table = ({ data, dataKey }) => {
 
   return (
     <MUIDataTable
-      title={`${dataKey || "All Columns"}`}
+      title={dataKey}
       data={tableData} // 2行目以降のデータを提供
       columns={columns}
       options={options} // オプション設定

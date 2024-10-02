@@ -14,6 +14,7 @@ import LineChart from "../../components/graph/LineChart";
 import BarChart from "../../components/graph/BarChart";
 import PieChart from "../../components/graph/PieChart";
 import Table from "../../components/graph/Table";
+import Table2 from "../../components/graph/Table2";
 import ParrialDataChart from "../../components/graph/ParrialDataChart";
 import { Grid, Paper, Typography, Box } from "@mui/material";
 
@@ -491,7 +492,7 @@ export default function Details() {
         "device_category"
       );
       setDevice(topDevices);
-      //console.log("topDevices", topDevices);
+      console.log("topDevices", topDevices);
       const topCountries = getQuery(aggregatedData, propertyId, url, "country");
       setCountry(topCountries);
       //console.log("topCountries", topCountries);
@@ -512,7 +513,7 @@ export default function Details() {
       } else if (selectedMetric === "TU") {
         return (
           <div>
-            <LineChart data={[]} dataKey="total_users" />;
+            <LineChart data={[]} dataKey="total_users" />
           </div>
         );
       } else if (selectedMetric === "UU") {
@@ -549,71 +550,93 @@ export default function Details() {
     if (selectedMetric === "PV") {
       return (
         <div>
-          <LineChart data={filteredData} dataKey="PV" />;
+          <LineChart data={filteredData} dataKey="PV" />
           <Table data={filteredData} dataKey="PV" />
         </div>
       );
     } else if (selectedMetric === "CV") {
       return (
         <div>
-          <LineChart data={filteredData} dataKey="CV" />;
+          <LineChart data={filteredData} dataKey="CV" />
           <Table data={filteredData} dataKey="CV" />
         </div>
       );
     } else if (selectedMetric === "TU") {
       return (
         <div>
-          <LineChart data={filteredData} dataKey="TU" />;
-          <Table data={filteredData} dataKey="TU" />
+          <LineChart data={filteredData} dataKey="TU" />
+          <Table data={filteredData} dataKey="total_users" />
         </div>
       );
     } else if (selectedMetric === "UU") {
       return (
         <div>
-          <LineChart data={filteredData} dataKey="UU" />;
+          <LineChart data={filteredData} dataKey="UU" />
           <Table data={filteredData} dataKey="UU" />
         </div>
       );
     } else if (selectedMetric === "CVR") {
       return (
         <div>
-          <LineChart data={filteredData} dataKey="CVR" />;
+          <LineChart data={filteredData} dataKey="CVR" />
           <Table data={filteredData} dataKey="CVR" />
         </div>
       );
     } else if (selectedMetric === "SD") {
       return (
         <div>
-          <LineChart data={filteredData} dataKey="CVR" />;
-          <Table data={filteredData} dataKey="CVR" />
+          <PercentageTable
+            data={device}
+            title="流入元デバイス"
+            subtitle="上位7項目"
+            className="Percentage-graph"
+          />
+          <Table2 data={device} dataKey="流入元デバイス" />
+          <PieChart data={device} />
         </div>
-      );
+      ); //流入元デバイス
     } else if (selectedMetric === "VR") {
       return (
         <div className="details-graph">
-          <LineChart data={filteredData} dataKey="CVR" />;
-          <Table data={filteredData} dataKey="VR" />
+          <PercentageTable
+            data={city}
+            title="流入者属性（国内）"
+            subtitle="上位7項目"
+            className="Percentage-graph"
+          />
+          <PercentageTable
+            data={country}
+            title="流入者属性（国別）"
+            subtitle="上位7項目"
+            className="Percentage-graph"
+          />
+          <Table2 data={city} dataKey="流入者属性" />
+          <Table2 data={country} dataKey="流入者属性" />
         </div>
       ); // 流入者属性
     } else if (selectedMetric === "RU") {
-      return <PieChart data={query} />; // 流入元URL
+      return <LineChart data={query} />; // 流入元URL
     } else if (selectedMetric === "SK") {
       return (
         <div>
-          <LineChart data={filteredData} dataKey="CVR" />;
-          <Table data={filteredData} dataKey="CVR" />
+          <PercentageTable
+            data={query}
+            title="検索キーワード"
+            subtitle="上位7項目"
+            className="Percentage-graph"
+          />
+          <Table2 data={query} dataKey="検索キーワード" />
         </div>
       );
     } else if (selectedMetric === "TC") {
       return (
         <div>
-          <LineChart data={filteredData} dataKey="click" />;
+          <LineChart data={filteredData} dataKey="click" />
           <Table data={filteredData} dataKey="click" />
         </div>
       );
     } else {
       return <LineChart data={sampledata} dataKey="PV" />;
-      <Table data={filteredData} dataKey="PV" />;
     }
   };
 
@@ -727,8 +750,12 @@ export default function Details() {
           PV: 0,
           CV: 0,
           total_users: 0,
-          CVR: 0,
           UU: 0,
+          CVR: 0,
+          device_category: [],
+          city: [],
+          country: [],
+          query: [],
           click: 0,
         }
       );
@@ -744,8 +771,12 @@ export default function Details() {
         PV: 0,
         CV: 0,
         total_users: 0,
-        CVR: 0,
         UU: 0,
+        CVR: 0,
+        device_category: [],
+        city: [],
+        country: [],
+        query: [],
         click: 0,
       },
     ];

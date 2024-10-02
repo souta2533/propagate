@@ -889,6 +889,7 @@ const Dashboard = () => {
 
     const sortedEntries = Object.entries(queryData).sort((a, b) => b[1] - a[1]);
     const topQueries = sortedEntries.slice(0, 7);
+    console.log("TopQuery:", topQueries);
     return topQueries;
   }
 
