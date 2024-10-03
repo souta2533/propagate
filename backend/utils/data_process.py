@@ -142,11 +142,6 @@ def aggregate_data(analytics_data, search_console_data):
                 data['ctr'] = (data['click'] / data['impression']) * 100
             else:
                 data['ctr'] = 0.0
-
-    # Sortして上位30件を取得する関数
-    # def get_top_n(data_dict):
-    #     sorted_items = sorted(data_dict.items(), key=lambda x: x[1], reverse=True)
-    #     return dict(sorted_items[:NUM])
     
     # city, country, queryは上位30件のみ渡す
     for base_url, paths in aggregated.items():
