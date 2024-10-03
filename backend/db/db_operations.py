@@ -216,7 +216,6 @@ class AnalyticsData:
             all_data = []
 
             while True:
-
                 response = self.supabase \
                     .table("AnalyticsData") \
                     .select("""

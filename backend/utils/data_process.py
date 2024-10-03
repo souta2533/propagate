@@ -1,5 +1,6 @@
 from collections import defaultdict
 from datetime import datetime
+import pandas as pd
 from urllib.parse import urlparse, unquote
 
 
@@ -576,3 +577,41 @@ def aggregate_by_url(aggregated_data):
             url_summary[base_url]['query'] = get_top_n(url_summary[base_url]['query'])
 
     return url_summary
+
+def transform_for_statistic_analysis(data_by_data):
+    """
+        統計解析用のデータ構造に変換する関数
+        Parameters:
+        - data_by_data: 辞書型のデータ構造（base_url ごとの日付データ）
+
+        Returns:
+        - transformed_data: 統計解析に使用するためのリスト形式のデータ
+    """
+    transformed_data = []
+
+    for base_url, entries in data_by_data.items():
+        for entry in entries:
+            # device_category, queryを統計分析可能な形に変換
+            top_device_category = max(entry['device_category'], key=entry['device_category'].get) if entry['device_category'] else None
+            top_query = max(entry['query'], key=entry['query'].get) if entry['query'] else None
+
+            transformed_data.append({
+                'base_url': base_url,
+                'date': entry['date'],
+                'PV': int(entry['PV']),
+                'CV': int(entry['CV']),
+                'CVR': float(entry['CVR']),
+                'active_users': int(entry['active_users']),
+                'UU': int(entry['UU']),
+                'engaged_sessions': int(entry['engaged_sessions']),
+                'total_users': int(entry['total_users']),
+                'city': entry['city'],
+                'device_category': top_device_category,
+                'query': top_query,
+                'click': int(entry['click']),
+                'impression': int(entry['impression']),
+                'ctr': float(entry['ctr']),
+                'position': float(entry['position']),
+            })
+
+    return transformed_data
