@@ -1,27 +1,49 @@
 import React from "react";
 import MUIDataTable from "mui-datatables";
-import { Download } from "lucide-react";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 
 const getMuiTheme = () =>
   createTheme({
-    overrides: {
+      components:{
       MUIDataTable: {
-        root: {
-          backgroundColor: "#fafafa", // テーブル全体の背景色を設定
+        styleOverrides: {
+          paper:{
+            boxShadow:"none",
+          },
+        
+    },
+      },
+      MUIDataTableToolbar: {
+        styleOverrides: {
+          root: {
+            display: "none",
+          },
         },
       },
       MUIDataTableBodyCell: {
+        styleOverrides: {
         root: {
-          padding: "10px", // セルのパディングを変更
-          fontSize: "14px", // フォントサイズを変更
+          padding: "8px", // セルのパディングを変更
+          fontSize: "15px", // フォントサイズを変更
+          borderRight: '1px solid #e0e0e0', // 右側のボーダーを追加
+          '&:last-child': {
+            borderRight: 'none', // 最後のセルの右ボーダーを削除
+          },
         },
       },
+    },
       MUIDataTableHeadCell: {
+        styleOverrides: {
         root: {
-          backgroundColor: "#3f51b5", // ヘッダーセルの背景色
-          color: "#fff", // ヘッダーセルの文字色
+          fontWeight: "bold",
+          borderRight: '1px solid #ffffff',
+            '&:last-child': {
+              borderRight: 'none',
+            },
         },
       },
+    },
+    
     },
   });
 
@@ -66,12 +88,13 @@ const Table = ({ data, dataKey }) => {
   };
 
   return (
-    <MUIDataTable
-      title={`${dataKey || "All Columns"}`}
-      data={tableData} // 2行目以降のデータを提供
-      columns={columns}
-      options={options} // オプション設定
-    />
+    <ThemeProvider theme={getMuiTheme()}> <MUIDataTable
+    
+    data={tableData} // 2行目以降のデータを提供
+    columns={columns}
+    options={options} // オプション設定
+  /></ThemeProvider>
+   
   );
 };
 

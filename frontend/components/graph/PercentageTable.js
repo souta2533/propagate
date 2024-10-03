@@ -41,7 +41,7 @@ const PercentageTable = ({ data, title, subtitle }) => {
                 ></div>
               </div>
               <div className="percentage">
-                {percentage}%({item[1]})
+                {item[1]}({percentage}%)
               </div>
             </div>
           );

@@ -1,6 +1,51 @@
 import React from "react";
 import MUIDataTable from "mui-datatables";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 
+const getMuiTheme = () =>
+  createTheme({
+    components: {
+      MUIDataTable: {
+        styleOverrides: {
+          paper: {
+            boxShadow: 'none',
+          },
+        },
+      },
+      MUIDataTableToolbar: {
+        styleOverrides: {
+          root: {
+            display: 'none',
+          },
+        },
+      },
+      MUIDataTableBodyCell: {
+        styleOverrides: {
+          root: {
+            padding: "8px",
+            fontSize: "15px",
+            borderRight: '1px solid #e0e0e0',
+            '&:last-child': {
+              borderRight: 'none',
+            },
+          },
+        },
+      },
+      MUIDataTableHeadCell: {
+        styleOverrides: {
+          root: {
+            
+       
+            fontWeight: "bold",
+            borderRight: '1px solid #ffffff',
+            '&:last-child': {
+              borderRight: 'none',
+            },
+          },
+        },
+      },
+    },
+  });
 const Table = ({ data, dataKey }) => {
   if (!Array.isArray(data) || data.length === 0) {
     console.error("Invalid or empty data format");
@@ -46,12 +91,13 @@ const Table = ({ data, dataKey }) => {
   };
 
   return (
-    <MUIDataTable
-      title={dataKey}
-      data={tableData} // 2行目以降のデータを提供
-      columns={columns}
-      options={options} // オプション設定
-    />
+    <ThemeProvider theme={getMuiTheme()}>
+      <MUIDataTable
+        data={tableData}
+        columns={columns}
+        options={options}
+      />
+    </ThemeProvider>
   );
 };
 

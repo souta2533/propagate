@@ -254,7 +254,7 @@ const Dashboard = () => {
       previousValue: "-",
     },
     {
-      title: "CV (お問い合わせ数)",
+      title: "UU (セッション数)",
       value: "-",
       previousValue: "-",
     },
@@ -264,10 +264,12 @@ const Dashboard = () => {
       previousValue: "-",
     },
     {
-      title: "UU (セッション数)",
+      title: "CV (お問い合わせ数)",
       value: "-",
       previousValue: "-",
     },
+
+    
   ];
 
   const options = [
@@ -800,9 +802,9 @@ const Dashboard = () => {
         previousValue: preData.PV,
       },
       {
-        title: "CV (お問い合わせ数)",
-        value: currentData.CV || 0,
-        previousValue: preData.CV,
+        title: "UU (セッション数)",
+        value: currentData.UU || 0,
+        previousValue: preData.UU,
       },
       {
         title: "CVR (お問い合わせ率)",
@@ -816,10 +818,12 @@ const Dashboard = () => {
             : "0%", // 前月の UU が 0 の場合も "0%" を表示
       },
       {
-        title: "UU (セッション数)",
-        value: currentData.UU || 0,
-        previousValue: preData.UU,
+        title: "CV (お問い合わせ数)",
+        value: currentData.CV || 0,
+        previousValue: preData.CV,
       },
+      
+      
     ]);
   };
 
@@ -850,29 +854,33 @@ const Dashboard = () => {
       if (selectedMetric === "PV (ページ閲覧数)") {
         return <LineChart data={sampledata2} dataKey="PV" />;
       }
-      if (selectedMetric === "CV (お問い合わせ数)") {
-        return <LineChart data={sampledata2} dataKey="CV" />;
+      if (selectedMetric === "UU (セッション数)") {
+        return <LineChart data={sampledata2} dataKey="UU" />;
       }
       if (selectedMetric === "CVR (お問い合わせ率)") {
         return <LineChart data={sampledata2} dataKey="CVR" />;
       }
-      if (selectedMetric === "UU (セッション数)") {
-        return <LineChart data={sampledata2} dataKey="UU" />;
+      if (selectedMetric === "CV (お問い合わせ数)") {
+        return <LineChart data={sampledata2} dataKey="CV" />;
       }
+      
+      
     }
 
     if (selectedMetric === "PV (ページ閲覧数)") {
       return <LineChart data={filteredData} dataKey="PV" />;
     }
-    if (selectedMetric === "CV (お問い合わせ数)") {
-      return <LineChart data={filteredData} dataKey="CV" />;
+    if (selectedMetric === "UU (セッション数)") {
+      return <LineChart data={filteredData} dataKey="UU" />;
     }
     if (selectedMetric === "CVR (お問い合わせ率)") {
       return <LineChart data={filteredData} dataKey="CVR" />;
     }
-    if (selectedMetric === "UU (セッション数)") {
-      return <LineChart data={filteredData} dataKey="UU" />;
+    if (selectedMetric === "CV (お問い合わせ数)") {
+      return <LineChart data={filteredData} dataKey="CV" />;
     }
+    
+    
     return <div>URLを入力してください</div>;
   };
 
@@ -887,8 +895,7 @@ const Dashboard = () => {
       return [];
     }
 
-    const sortedEntries = Object.entries(queryData).sort((a, b) => b[1] - a[1]);
-    const topQueries = sortedEntries.slice(0, 7);
+    const topQueries = Object.entries(queryData).sort((a, b) => b[1] - a[1]);
     console.log("TopQuery:", topQueries);
     return topQueries;
   }
