@@ -4,19 +4,41 @@ import { Chart, registerables } from "chart.js";
 
 Chart.register(...registerables);
 
-const LineChart = ({ data, dataKey }) => {
+// データを日付で昇順にソートする関数
+const sortDataByDate = (data) => {
+  if (!Array.isArray(data)) {
+    console.error("Data is not an array", data);
+    return [];
+  }
+  return data.sort((a, b) => new Date(a.date) - new Date(b.date));
+};
+
+const LineChart = ({ data = [], dataKey }) => {
+  if (!data || data.length === 0) {
+    console.warn("Data is empty or null");
+    return (
+      <dev>
+        <h1>Please set your URL & PagePath!</h1>
+      </dev>
+    );
+  }
+
+  // 日付順にソート
+  const sortedData = sortDataByDate(data);
+
   const graphData = {
     labels: data.map((item) => item.date),
     datasets: [
       {
         label: dataKey,
-        data: data.map((item) => item[dataKey]),
-        borderColor: "#3399cc",
-        backgroundColor: "rgba(64, 224,208,0.2 )",
+        data: sortedData.map((item) => item[dataKey]),
+        borderColor: "#000000",
+        backgroundColor: "rgba(51, 51,51 ,0.3 )",
         fill: true,
         tension: 0.1,
         borderWidth: 1,
         pointRadius: 0,
+        pointHitRadius: 20,
       },
     ],
   };
@@ -28,7 +50,7 @@ const LineChart = ({ data, dataKey }) => {
       x: {
         ticks: {
           autoSkip: true,
-          maxTicksLimit: 5, //X軸のラベル表示
+          maxTicksLimit: 20, //X軸のラベル表示
         },
         grid: {
           display: false,
@@ -40,7 +62,14 @@ const LineChart = ({ data, dataKey }) => {
     },
     plugins: {
       tooltip: {
-        enabled: true,
+        enabled: true, //ツールチップを有効にする
+        callbacks: {
+          function(context) {
+            const label = context.dataset.label || "";
+            const value = context.raw;
+            return `${label}: ${value}`;
+          },
+        },
       },
       legend: {
         display: false, //凡例

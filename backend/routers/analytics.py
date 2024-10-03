@@ -26,5 +26,5 @@ async def get_analytics(data: AnalyticsRequest):
     else:
         pass
         # Google AnalyticsのデータをDBに保存
-        # await save_analytics_data(property_id, result) 
+        await save_analytics_data(property_id, result) 
     return result
