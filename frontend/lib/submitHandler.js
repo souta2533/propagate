@@ -28,7 +28,7 @@
 //     } 
 // }
 
-export const handlerUrlSubmit = async (customerEmail, propertyId, url, setUrl) => {
+export const handlerUrlSubmit = async (customerEmail, url, setUrl) => {
     try {
         const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;    //await fetch(`${apiUrl}/get-properties`
         const response = await fetch(`${apiUrl}/submit-url`, {

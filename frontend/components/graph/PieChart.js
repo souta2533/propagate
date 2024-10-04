@@ -2,11 +2,24 @@ import React from "react";
 import { Pie } from "react-chartjs-2";
 
 const PieChart = ({ data }) => {
+  console.log("PieData:", data);
+  if (!data || data.length === 0) {
+    console.warn("Data is empty or null");
+    return (
+      <dev>
+        <h1>Please set your URL & PagePath!</h1>
+      </dev>
+    );
+  }
+
+  const labels = data.map((item) => item[0]);
+  const values = data.map((item) => item[1]);
+
   const chartData = {
-    labels: Object.keys(data), // ラベル（セクション名）
+    labels: labels, // ラベル（セクション名）
     datasets: [
       {
-        data: Object.values(data), // 各セクションの値
+        data: values, // 各セクションの値
         backgroundColor: ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"], // セクションの色
         borderColor: ["#ffffff"], // 境界線の色
         borderWidth: 1, // 境界線の幅

@@ -6,6 +6,7 @@
   width: 20%;
   border-right: 1px solid #cccccc;
   transition: transform 0.3s ease-in-out;
+  padding:5px;
 }
 /*sidebarのmenubutton*/
 .menu-list {
@@ -23,6 +24,7 @@
   padding: 10px 10px 10px 15px;
   display: inline-flex;
   align-items: center; /* 垂直方向に中央揃え */
+  justify-content: flex-start;
   font-family: "Noto sans jp", sans-serif;
 }
 
@@ -32,7 +34,8 @@
 
 .icon-text {
   text-align: left;
-  font-weight: 600px;
+  font-size: 16px;
+  font-weight: 700px;
   display: flex;
   align-items: center;
   padding: 10px;
@@ -40,9 +43,7 @@
 
 .icon {
   vertical-align: middle;
-  min-height: 20px;
-  min-width: 20px;
-  margin-right: 10px;
+  margin: 0;
 }
 
 .overlay {

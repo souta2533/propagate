@@ -7,6 +7,72 @@
   background-color: #ffffff; /* bg-gray-100 */
   font-family: "Noto Sans JP", sans-serif;
   font-size: 100%;
+  height: 100vh;
+}
+
+/* ヘッダー */
+.header {
+  background-color: #ffffff;
+  padding: 10px;
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1500;
+  font-family: "Noto Sans JP", sans-serif;
+  font-size: 100%;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-title {
+  font-size: 40px;
+  font-weight: 800;
+  padding-left: 5px;
+  margin: 0;
+}
+
+.header-button {
+  /* スタイルはButtonコンポーネントで管理 */
+  border: none;
+  background-color: #ffffff;
+  border-radius: 30px;
+  justify-content: center;
+}
+
+.header-dropdown-menu {
+  position: absolute;
+  top: 60px; /* ヘッダーの下にメニューを表示するための位置調整 */
+  right: 0px; /* 右側にドロップダウンメニューを配置 */
+  background-color: white;
+  border: 1px solid #ddd;
+  border-top: none;
+  /*box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);*/
+  z-index: 1000; /* 他の要素の上に表示 */
+  width: 20%;
+  height: 100vh;
+}
+
+.dropdown-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dropdown-menu li {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.dropdown-menu li:hover {
+  background-color: #f0f0f0;
+  transition: 0.5s;
 }
 
 /* メインコンテンツ */
@@ -83,18 +149,22 @@
 }
 
 .metric-card-header {
-  font-size: 10px;
+  font-size: 16px;
   color: #666666;
+  padding:5px;
 }
 
 .metric-value {
-  font-size: 25px;
+  font-size: 30px;
   font-weight: 700;
+  padding-bottom :2px;
+
 }
 
 .metric-comparison {
-  font-size: 15px; /* text-xs */
+  font-size: 20px; /* text-xs */
   color: #f9fafb; /* text-muted-foreground */
+
 }
 
 /*メインのヘッダ*/
@@ -106,7 +176,7 @@
 }
 
 .dashboard-title {
-  font-size: 1.3rem; /* text-2xl */
+  font-size: 1.5rem; /* text-2xl */
   font-weight: 600; /* font-semibold */
   margin: 16px;
 }
@@ -120,7 +190,11 @@
 .react-select__placeholder: プレースホルダー部分。*/
 
 .custom-select {
-  min-width: 150px;
+  min-width: 18%;
+}
+
+.react-select__option {
+  padding: 10px;
 }
 
 .react-select__control {
@@ -165,7 +239,7 @@
   background-color: #f0f0f0;
   border: none;
   border-radius: 20px;
-  padding: 5px 10px;
+  padding: 5px 20px;
   font-family: "Noto Sans JP", sans-serif;
 }
 
@@ -176,18 +250,20 @@
 /* 検索欄 */
 .dashboard-sidebar {
   background-color: #ffffff;
-  margin-left: 20px;
+  margin: 0 20px;
   width: 20%;
+  height:550px;
   border: 1px solid #cccccc;
   border-radius: 15px;
   padding: 10px;
-  overflow: auto;
+  overflow-y: auto;
 }
 
 .sidebar-title {
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 600;
-  text-align: center;
+  text-align: left;
+  margin-bottom: 5px;
 }
 
 .search-keywords {
@@ -207,11 +283,13 @@
 }
 
 .search-icon {
+  font-size: 25px;
   height: 15px;
   width: 15px;
   color: #6b7280;
   background-color: #ebecec;
   padding: 10px;
+  margin-right: 8px;
   border-radius: 10px;
 }
 
@@ -221,13 +299,13 @@
 }
 
 .search-keyword-text {
-  font-size: 14px;
+  font-size: 20px;
   font-weight: 500; /* font-medium */
   margin: 0;
 }
 
 .search-count-text {
-  font-size: 12px; /* text-xs */
+  font-size: 16px; /* text-xs */
   color: #6b7280; /* text-gray-500 */
   margin: 0;
 }
@@ -236,8 +314,7 @@
 .suggest-space {
   padding: 20px;
   background-color: #ffffff;
-  margin-top: 20px;
-  margin-left: 20px;
+  margin: 20px;
   border: 1px solid #cccccc;
   border-radius: 10px;
   height: 150px;
@@ -271,11 +348,26 @@
     min-height: 100%;
     width: 100vw;
   }
-
   .header {
     width: 100vw;
-    min-width: 768px;
+    justify-content: flex-start;
+    padding: 5px;
   }
+
+  .header-left {
+    display: flex;
+    align-items: left;
+    justify-content: flex-start;
+  }
+
+  .header-button {
+    padding: 0;
+  }
+
+  .custom-select {
+    min-width: 100px;
+  }
+
   .dashboard-main {
     flex-direction: column;
     width: 100%;
@@ -285,22 +377,50 @@
   .dashboard-header {
     width: 100%;
     height: 100%;
+    padding: 5px;
+  }
+
+  .dashboard-title {
+    margin: 20px 0;
+  }
+
+  .header-dropdown-menu {
+    display: flex;
+    flex-direction: column;
+    width: 30%;
   }
 
   .sidebar {
-    width: 50%;
     position: fixed;
-    height: 100%;
+    bottom: 0;
+    width: 100%;
+    height: 10%;
     z-index: 9999;
     background-color: #ffffff;
-    border-right: 3px solid #7272722f;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease-in-out;
+    border-top: 2px solid #7272722f;
   }
 
-  /* サイドバーが開いたときに表示 */
-  .sidebar.open {
-    transform: translateX(0);
+  .menu-list {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    padding: 0;
+  }
+
+  .menu-button {
+    width: auto;
+    flex-direction: column;
+    flex: 1;
+    padding: 0;
+  }
+
+  .icon {
+    justify-content: center;
+  }
+
+  .icon-text {
+    font-size: 10px;
+    padding: 5px;
   }
 
   .dashboard-main-left {
@@ -312,13 +432,17 @@
 
   .dashboard-main-right {
     width: 100vw;
+    padding: 5px;
     display: flex;
     flex-direction: column;
     margin: 0;
   }
 
   .center-content {
+    margin: 0;
+    padding: 10px 0;
     width: 100%;
+    border-top: none;
   }
 
   .metrics-grid {
@@ -342,46 +466,13 @@
 
   .chart-content {
     width: 100%;
+    padding: 10px 0;
   }
 
   .dashboard-sidebar {
-    width: 100vw;
+    width: 100%;
     margin-top: 24px;
     margin: 10px 0;
-    padding: 0;
-  }
-
-  /*ハンバーガーメニュー*/
-  .hamburger-icon {
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-  }
-
-  .hamburger-icon.bar {
-    width: 25px;
-    height: 3px;
-    background-color: #333;
-    margin: 4px 0;
-    transition: 0.4s;
-  }
-
-  /* オーバーレイの設定 */
-  .overlay {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    width: 100%;
-    height: 100%; /* 画面全体をカバー */
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 998;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out; /* オーバーレイのトランジション */
-  }
-
-  .overlay.visible {
-    opacity: 1; /* 不透明に */
-    visibility: visible; /* 表示 */
+    padding: 5px;
   }
 }

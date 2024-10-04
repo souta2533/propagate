@@ -2,27 +2,52 @@ import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useSessionData } from "../../hooks/useSessionData";
-import { useDataByDayFromDetails } from "../../hooks/useGetDataByDay"
+import { useDataByDayFromDetails } from "../../hooks/useGetDataByDay";
 import { useAnalyticsData } from "../../hooks/useAnalyticsData";
 import { useSearchConsoleData } from "../../hooks/useSearchConsoleData";
 import { useAggregatedData } from "../../hooks/useAggregatedData";
-import { Button } from "../../components/ui/Button";
+import Button from "@mui/material/Button";
 import Select from "react-select";
-/*import { Tabs, TabsList, TabsTrigger } from "../components/Tabs";*/
-import { Calendar } from "../../components/ui/Calendar";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "../../components/ui/Popover";
+import Popover from "../../components/ui/Popover";
 import { X, Calendar as CalendarIcon } from "lucide-react";
 import LineChart from "../../components/graph/LineChart";
+import MultiLineChart from "../../components/graph/MultiLineChart";
 import BarChart from "../../components/graph/BarChart";
 import PieChart from "../../components/graph/PieChart";
 import Table from "../../components/graph/Table";
+import Table2 from "../../components/graph/Table2";
+import PercentageTable from "../../components/graph/PercentageTable";
+import ParrialDataChart from "../../components/graph/ParrialDataChart";
+import { Grid, Paper, Typography, Box } from "@mui/material";
 
 import "../../styles/details.css";
-import PercentageTable from "../../components/ui/PercentageTable";
+
+const customStyles = {
+  control: (provided) => ({
+    ...provided,
+    border: "none",
+    boxShadow: "none",
+    padding: "5px 10px",
+    cursor: "pointer",
+  }),
+  "&:hover": {},
+  menu: (provided) => ({
+    ...provided,
+    backgroundColor: "#fff", // メニュー背景色
+    zIndex: 9999, // メニューが他の要素の上に表示されるように
+  }),
+  "&:hover": {},
+  option: (provided, state) => ({
+    ...provided,
+    backgroundColor: state.isFocused ? "#f0f0f0" : "#fff", // フォーカスされたときのオプションの背景色
+    color: state.isFocused ? "#333" : "#000", // フォーカスされたときのオプションの文字色
+    padding: 10,
+  }),
+  singleValue: (provided) => ({
+    ...provided,
+    color: "#333", // 選択されたオプションのテキスト色
+  }),
+};
 
 export default function Details() {
   const sampledata = [
@@ -177,21 +202,13 @@ export default function Details() {
     { value: "全期間", label: "全期間" },
   ];
 
-  const pagePathOptions = [
-    {
-      value: "ホーム",
-      label: "/",
-    },
-    {
-      value: "ログイン",
-      label: "/login",
-    },
-  ];
-
   const [dateRange, setDateRange] = useState("過去 28 日間");
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedMetric, setSelectedMetric] = useState("PV");
-  const [urlList, seturlList] = useState("");
+  const [selectedUrl, setSelectedUrl] = useState("");
+  const [url, setUrl] = useState("");
+  const [urlList, setUrlList] = useState([]);
+  const [sanitizedUrl, setSanitizedUrl] = useState("");
   const [timeGranularity, setTimeGranularity] = useState("日別");
   const [startDate, setStartDate] = useState(() => {
     const date = new Date();
@@ -203,9 +220,13 @@ export default function Details() {
   );
   const [formattedAnalytics, setFormattedAnalytics] = useState([]);
   const [filteredData, setFilteredData] = useState(null);
-  const [pagePath, setpagePath] = useState("");
+  const [pagePath, setpagePath] = useState(null);
   const [selectedPagePath, setSelectedPagePath] = useState("/");
   const [selectedDateRange, setSelectedDateRange] = useState("過去7日間");
+  const [query, setQuery] = useState([]);
+  const [device, setDevice] = useState([]);
+  const [country, setCountry] = useState([]);
+  const [city, setCity] = useState([]);
   const router = useRouter();
 
   const formatDate = (date) => {
@@ -233,6 +254,7 @@ export default function Details() {
   const [propertyIds, setPropertyIds] = useState([]);
   const [searchConsoleData, setSearchConsoleData] = useState([]);
   const [aggregatedData, setAggregatedData] = useState([]);
+  const [pathList, setPathList] = useState([]);
 
   useEffect(() => {
     if (router.query.propertyId) {
@@ -263,7 +285,7 @@ export default function Details() {
   }, [fetchedSession, analyticsError, router]);
 
   // useSearchConsoleDataでデータを取得する
-  console.log("PropertyIds:", propertyIds);
+  //console.log("PropertyIds:", propertyIds);
   const {
     data: fetchedSearchConsoleData,
     error: searchConsoleError,
@@ -299,11 +321,48 @@ export default function Details() {
       refetchDataByDayFromDetails();
     }
 
-    if (fetchedDataByDayFromDetails && Object.values(fetchedDataByDayFromDetails).some(data => Object.values(data).length > 0)) {
+    if (
+      fetchedDataByDayFromDetails &&
+      Object.values(fetchedDataByDayFromDetails).some(
+        (data) => Object.values(data).length > 0
+      )
+    ) {
       console.log("fetchedDataByDayFromDetails:", fetchedDataByDayFromDetails);
       setDataByDayFromDetails(fetchedDataByDayFromDetails);
     }
   }, [fetchedDataByDayFromDetails]);
+
+  //URLのリストを作成する
+  useEffect(() => {
+    if (dataByDayFromDetails && dataByDayFromDetails[propertyId]) {
+      const urls = Object.keys(dataByDayFromDetails[propertyId]);
+      console.log("URLs:", urls);
+      setUrlList(urls);
+    }
+  }, [dataByDayFromDetails, propertyId]);
+
+  const urlOptions = urlList.map((url) => ({
+    value: url,
+    label: url,
+  }));
+
+  //PagePathを取得する関数
+  useEffect(() => {
+    if (
+      dataByDayFromDetails &&
+      dataByDayFromDetails[propertyId] &&
+      sanitizedUrl
+    ) {
+      const list = Object.keys(dataByDayFromDetails[propertyId][sanitizedUrl]);
+      console.log("PathList", list);
+      setPathList(list);
+    }
+  }, [sanitizedUrl]);
+
+  const pagePathOptions = pathList.map((path) => ({
+    value: path,
+    label: path,
+  }));
 
   // useAggregatedDataでデータを取得する
   const {
@@ -362,12 +421,22 @@ export default function Details() {
     console.log("Formatted Analytics:", formattedAnalyticsData);
   }, [analyticsData]); // analyticsDataが変更された時に実行
 
-  // 選択されたURLを管理するstate
-  const [selectedURL, setSelectedURL] = useState("");
-
   // URLが選択されたときの処理
-  const handleURLChange = (url) => {
-    setSelectedURL(url);
+  const handleSelectUrlChange = (selectedOption) => {
+    setSelectedUrl(selectedOption);
+    console.log("selectedUrl:", selectedOption.value);
+    if (selectedOption && typeof selectedOption.value === "string") {
+      //onsole.log("Url.value:", selectedOption.value);
+      const url = selectedOption.value;
+      setUrl(url);
+
+      // URLの最後に余分なスラッシュがあれば削除
+      const saniUrl = url.replace(/\/+$/, "");
+      setSanitizedUrl(saniUrl);
+      console.log("SANIUrl:", saniUrl);
+    } else {
+      console.log("選択されたOptionは無効です:", selectedOption);
+    }
   };
 
   const handleSelectDateChange = (selectedOption) => {
@@ -378,128 +447,192 @@ export default function Details() {
 
   const handleSelectPathChange = (selectedOption) => {
     setSelectedPagePath(selectedOption);
+    setpagePath(selectedOption.value);
+    console.log("PagePath:", pagePath);
   };
 
   const handleMetricChange = (value) => {
     setSelectedMetric(value);
   };
 
-  /////////////////////////////////////////////////////////////////////////////////////////////////////
-  function getQuery(searchData, searchId, object = "") {
-    // 最後の / を削除
-    //const sanitizedUrl = url.replace(/\/+$/, "");
-    //console.log(sanitizedUrl);
-    console.log("serchId:", searchId);
-    console.log("SearchData;", searchData);
-    // searchData[searchId] から URL 部分（キー）を取得
-    const dataObject = searchData[searchId];
+  /////////////////////////////////////////////////////////////////////////////////////////////////////ここが何回も繰り返されている
+  function getQuery(searchData, searchId, url, object = "") {
+    const dataObject = searchData[searchId][url];
     if (!dataObject) {
-      console.warn("No data found for the given searchId:", searchId);
+      //console.warn("No data found for the given searchId:", searchId);
       return [];
     }
-
-    // dataObjectの中の最初のキー（URLとして仮定）を取得
-    const urlKey = Object.keys(dataObject)[0];
-    console.log("URL Key:", urlKey);
-
     // URL部分の下にある指定されたオブジェクトキー（object）を取得
-    const queryData = dataObject[urlKey]?.[object];
-    console.log("QueryData: ", queryData);
+    const queryData = dataObject?.[object];
+    //console.log("QueryData: ", queryData);
     if (!queryData) {
       return [];
     }
     const sortedEntries = Object.entries(queryData).sort((a, b) => b[1] - a[1]);
     const top7Queries = sortedEntries.slice(0, 7);
-    console.log("top7Queries: ", top7Queries);
+    //console.log("top7Queries: ", top7Queries);
     return top7Queries;
   }
 
-  // console.log("AGGREGATED:", aggregatedData);
-  const topQueries = getQuery(aggregatedData, propertyId, "query");
-  // console.log("AG:", aggregatedData);
-  // console.log("propertyID:", propertyId);
-  // console.log("topQueries", topQueries);
-  const topDevices = getQuery(aggregatedData, propertyId, "device_category");
-  // console.log("topDevices", topDevices);
-  const topCountries = getQuery(
-    aggregatedData,
-    propertyId,
-    aggregatedData[propertyId] ? "city" : "country"
-  );
-  console.log("topCountries", topCountries);
+  useEffect(() => {
+    if (url) {
+      //console.log("AGGREGATED:", aggregatedData);
+      const topQueries = getQuery(aggregatedData, propertyId, url, "query");
+      setQuery(topQueries);
+      //console.log("topQueries", topQueries);
+      const topDevices = getQuery(
+        aggregatedData,
+        propertyId,
+        url,
+        "device_category"
+      );
+      setDevice(topDevices);
+      console.log("topDevices", topDevices);
+      const topCountries = getQuery(aggregatedData, propertyId, url, "country");
+      setCountry(topCountries);
+      //console.log("topCountries", topCountries);
+      const topCities = getQuery(aggregatedData, propertyId, url, "city");
+      setCity(topCities);
+      //console.log("topCountries", topCountries);}
+    } else {
+      console.log("No Url Yet");
+    }
+  }, [pagePath]);
 
   const selectChart = () => {
     if (!filteredData || filteredData.length === 0) {
       if (selectedMetric === "PV") {
-        return <LineChart data={sampledata} dataKey="PV" />;
+        return <LineChart data={[]} dataKey="PV" />;
       } else if (selectedMetric === "CV") {
-        return <LineChart data={sampledata} dataKey="CV" />;
+        return <LineChart data={[]} dataKey="CV" />;
       } else if (selectedMetric === "TU") {
         return (
           <div>
-            <LineChart data={sampledata} dataKey="TU" />;
+            <LineChart data={[]} dataKey="total_users" />
           </div>
         );
       } else if (selectedMetric === "UU") {
-        return <LineChart data={sampledata} dataKey="UU" />;
+        return <LineChart data={[]} dataKey="UU" />;
       } else if (selectedMetric === "CVR") {
-        return <LineChart data={sampledata} dataKey="CVR" />;
+        return <LineChart data={[]} dataKey="CVR" />;
       } else if (selectedMetric === "SD") {
         return (
           <div>
-            <BarChart data={topDevices} />;
+            <BarChart data={[]} />;
           </div>
         );
       } else if (selectedMetric === "VR") {
-        return <BarChart data={topCountries} />; // 流入者属性
+        return <BarChart data={[]} />; // 流入者属性
       } else if (selectedMetric === "RU") {
-        return <PieChart data={topQueries} />; // 流入元URL
+        return <PieChart data={[]} />; // 流入元URL
       } else if (selectedMetric === "SK") {
         return (
           <div>
-            {/*<BarChart data={topQueries} />;*/}
-            <PercentageTable data={topQueries} />;
+            <PercentageTable
+              data={[]}
+              subtitle="上位7項目"
+              className="Percentage-graph"
+            />
           </div>
         );
       } else if (selectedMetric === "TC") {
-        return <LineChart data={sampledata} />; // 総クリック数
+        return <LineChart data={[]} dataKey="click" />; // 総クリック数
       } else {
-        return <LineChart data={sampledata} dataKey="PV" />;
+        return <LineChart data={[]} dataKey="PV" />;
       }
     }
+    //データが存在したらこっち
     if (selectedMetric === "PV") {
-      return <LineChart data={filteredData} dataKey="PV" />;
+      return (
+        <div>
+          <LineChart data={filteredData} dataKey="PV" />
+          <Table data={filteredData} dataKey="PV" />
+        </div>
+      );
     } else if (selectedMetric === "CV") {
-      return <LineChart data={filteredData} dataKey="CV" />;
+      return (
+        <div>
+          <LineChart data={filteredData} dataKey="CV" />
+          <Table data={filteredData} dataKey="CV" />
+        </div>
+      );
     } else if (selectedMetric === "TU") {
       return (
         <div>
-          <LineChart data={filteredData} dataKey="TU" />;
+          <LineChart data={filteredData} dataKey="TU" />
+          <Table data={filteredData} dataKey="total_users" />
         </div>
       );
     } else if (selectedMetric === "UU") {
-      return <LineChart data={filteredData} dataKey="UU" />;
-    } else if (selectedMetric === "CVR") {
-      return <LineChart data={filteredData} dataKey="CVR" />;
-    } else if (selectedMetric === "SD") {
       return (
         <div>
-          <PercentageTable data={topDevices} title="流入元デバイス" />;
+          <LineChart data={filteredData} dataKey="UU" />
+          <Table data={filteredData} dataKey="UU" />
         </div>
       );
+    } else if (selectedMetric === "CVR") {
+      return (
+        <div>
+          <LineChart data={filteredData} dataKey="CVR" />
+          <Table data={filteredData} dataKey="CVR" />
+        </div>
+      );
+    } else if (selectedMetric === "SD") {
+      return (
+      <div>
+        <MultiLineChart data={filteredData} dataKey="device_category" />
+          <PercentageTable
+            data={device}
+            title="流入元デバイス"
+            subtitle="上位7項目"
+            className="Percentage-graph"
+          />
+          <Table2 data={device} dataKey="流入元デバイス" />
+
+        </div>
+      ); //流入元デバイス
     } else if (selectedMetric === "VR") {
-      return <PercentageTable data={topCountries} title="流入者属性" />; // 流入者属性
+      return (
+        <div className="details-graph">
+          <PercentageTable
+            data={city}
+            title="流入者属性（国内）"
+            subtitle="上位7項目"
+            className="Percentage-graph"
+          />
+          
+          <Table2 data={city} dataKey="流入者属性" />
+          {/*<PercentageTable
+            data={country}
+            title="流入者属性（国別）"
+            subtitle="上位7項目"
+            className="Percentage-graph"
+          />
+          <Table2 data={country} dataKey="流入者属性" />*/}
+        </div>
+      ); // 流入者属性
     } else if (selectedMetric === "RU") {
-      return <PieChart data={topQueries} />; // 流入元URL
+      return <LineChart data={query} />; // 流入元URL
     } else if (selectedMetric === "SK") {
       return (
         <div>
-          {/*<BarChart data={topQueries} />;*/}
-          <PercentageTable data={topQueries} title="検索キーワード" />;
+          <MultiLineChart data={filteredData} dataKey="query" />
+          <PercentageTable
+            data={query}
+            title="検索キーワード"
+            subtitle="上位7項目"
+            className="Percentage-graph"
+          />
+          <Table2 data={query} dataKey="検索キーワード" />
         </div>
       );
     } else if (selectedMetric === "TC") {
-      return <LineChart data={filteredData} />; // 総クリック数
+      return (
+        <div>
+          <LineChart data={filteredData} dataKey="click" />
+          <Table data={filteredData} dataKey="click" />
+        </div>
+      );
     } else {
       return <LineChart data={sampledata} dataKey="PV" />;
     }
@@ -508,59 +641,23 @@ export default function Details() {
   const parseDate = (dateStr) => new Date(dateStr);
 
   useEffect(() => {
-    if (propertyId && dateRange) {
-      const data = getAnalyticsData(propertyId);
+    if (
+      dataByDayFromDetails &&
+      dataByDayFromDetails[propertyId] &&
+      dataByDayFromDetails[propertyId][sanitizedUrl] &&
+      dataByDayFromDetails[propertyId][sanitizedUrl][pagePath]
+    ) {
+      const data = dataByDayFromDetails[propertyId][sanitizedUrl][pagePath]; //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>データ設定
       console.log("data:", data);
       const filtered = filterDataByDateRange(data, dateRange);
       console.log("dateRange", dateRange);
       console.log("Fetched Data for Property:", data); // デバッグ用ログ
       console.log("filtered data:", filtered);
       setFilteredData(filtered);
+    } else {
+      console.log("NOSANIANDDATA");
     }
-  }, [propertyId, dateRange]);
-
-  const getAnalyticsData = (propertyId) => {
-    if (!formattedAnalytics || formattedAnalytics.length === 0) {
-      console.warn("formattedAnalytics is empty or undefined.");
-      return [];
-    }
-    const filteredAnalytics = formattedAnalytics.filter(
-      (entry) => entry.properties_id === propertyId
-    );
-
-    console.log("FileterdAnalyticD: ", filteredAnalytics);
-
-    if (filteredAnalytics.length === 0) {
-      console.warn("No analytics data found for Property ID:", propertyId);
-      return [
-        {
-          date: "",
-          PV: 0,
-          CV: 0,
-          TU: 0,
-          CVR: 0,
-          UU: 0,
-          TC: 0,
-        },
-      ];
-    }
-    // analyticsDataの定義
-    const analyticsData = filteredAnalytics.map((entry) => ({
-      date: entry.date,
-      PV: entry.screen_page_views || 0,
-      CV: entry.conversions || 0,
-      TU: entry.total_users || 0,
-      CVR: entry.sessions
-        ? ((entry.conversions / entry.sessions) * 100).toFixed(2)
-        : 0, // CVRをパーセント表示
-      UU: entry.sessions || 0,
-      TC: entry.click || 0,
-    }));
-
-    console.log("FileterdAnalyticD: ", filteredAnalytics);
-
-    return analyticsData;
-  };
+  }, [sanitizedUrl, pagePath, dateRange]);
 
   const filterDataByDateRange = (data, range) => {
     const now = new Date();
@@ -650,10 +747,14 @@ export default function Details() {
           date: formattedDate,
           PV: 0,
           CV: 0,
-          TU: 0,
-          CVR: 0,
+          total_users: 0,
           UU: 0,
-          TC: 0,
+          CVR: 0,
+          device_category: {desktop:0, mobile:0, tablet:0},
+          city: {},
+          country: {jpn:0},
+          query: {},
+          click: 0,
         }
       );
     }
@@ -667,133 +768,218 @@ export default function Details() {
         date: new Date().toISOString().split("T")[0], // デフォルトで現在の日付,
         PV: 0,
         CV: 0,
-        TU: 0,
-        CVR: 0,
+        total_users: 0,
         UU: 0,
-        TC: 0,
+        CVR: 0,
+        device_category: {desktop:0, mobile:0, tablet:0},
+        city: {shibuya:0},
+        country: {jpn:0},
+        query: {ホームページ:0},
+        click: 0,
       },
     ];
   };
+
+  /*function aggregateDevicesByDate(data) {
+    const aggregated = {};
+
+    if (!data || !Array.isArray(data)) {
+      return [];
+    }
+  
+    data.forEach(item => {
+      const date = item.date;
+      const deviceCategory = item.device_category ? Object.keys(item.device_category)[0] : 'unknown';
+  
+      if (!aggregated[date]) {
+        aggregated[date] = {};
+      }
+  
+      if (!aggregated[date][deviceCategory]) {
+        aggregated[date][deviceCategory] = 0;
+      }
+  
+      aggregated[date][deviceCategory]++;
+    });
+  
+    // 結果を日付でソートし、見やすい形式に変換
+    const result = Object.entries(aggregated).sort(([a], [b]) => a.localeCompare(b)).map(([date, devices]) => ({
+      date,
+      devices
+    }));
+  
+    return result;
+  }
+
+const aggregatedResult = aggregateDevicesByDate(filteredData);
+console.log(JSON.stringify(aggregatedResult, null, 2));
+*/
+
+  /*
+  const aggregateData = (data) => {
+    const countryAggregation = {};
+    const deviceAggregation = {};
+    const queryAggregation = {};
+    const cityAggregation = {};
+
+    data.forEach((item) => {
+      // Countryの集計
+      const countries = item.country || {};
+      Object.keys(countries).forEach((country) => {
+        if (!countryAggregation[country]) {
+          countryAggregation[country] = 0;
+        }
+        countryAggregation[country] += countries[country];
+      });
+
+      // Device Categoryの集計
+      const devices = item.device_category || {};
+      Object.keys(devices).forEach((device) => {
+        if (!deviceAggregation[device]) {
+          deviceAggregation[device] = 0;
+        }
+        deviceAggregation[device] += devices[device];
+      });
+
+      // Queryの集計
+      const queries = item.query || {};
+      Object.keys(queries).forEach((query) => {
+        if (!queryAggregation[query]) {
+          queryAggregation[query] = 0;
+        }
+        queryAggregation[query] += queries[query];
+      });
+
+      // Cityの集計
+      const city = item.city || "(not set)";
+      if (!cityAggregation[city]) {
+        cityAggregation[city] = 0;
+      }
+      cityAggregation[city] += 1; // 同じcityがあったらカウントを増やす
+    });
+
+    return {
+      countryAggregation,
+      deviceAggregation,
+      queryAggregation,
+      cityAggregation,
+    };
+  };*/
 
   return (
     <div className="container">
       <div className="header">
         <div className="metric-select"></div>
         <div className="action-icons">
-          <button
+          <Button
             onClick={() => router.push("/dashboard")}
+            variant="ghost"
             className="icon-button"
           >
             <X className="icon" />
-          </button>
+          </Button>
         </div>
       </div>
-      <div className="graph-control">
+      
+        <div className="graph-control">
         <div className="filter-section">
           <div className="date-range">
             <Select
+              styles={customStyles}
+              className="custom-select"
+              value={selectedUrl}
+              onChange={handleSelectUrlChange}
+              options={urlOptions}
+              placeholder="URLを選択"
+            />
+            <Select
+              styles={customStyles}
               className="custom-select"
               value={selectedPagePath}
               onChange={handleSelectPathChange}
               options={pagePathOptions}
               placeholder="ページパスを選択"
-            ></Select>
-            {showCalendar && (
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="calendar-button">
-                    <CalendarIcon className="icon-small" />
-                    {startDate && endDate
-                      ? `${formatDate(startDate)} 〜 ${formatDate(endDate)}`
-                      : "日付を選択"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="calendar-popover">
-                  <Calendar
-                    selected={{ from: startDate, to: endDate }}
-                    onSelect={handleDateSelect}
-                    numberOfMonths={2}
-                    mode="range"
-                  />
-                </PopoverContent>
-              </Popover>
-            )}
+            />
+          </div>
+          <div className="chart-controls">
+            <Select
+              styles={customStyles}
+              className="custom-select"
+              value={selectedDateRange}
+              onChange={handleSelectDateChange}
+              options={dateRangeOptions}
+              placeholder="データの範囲を選択"
+            />
           </div>
         </div>
         <div className="tabs">
           <div className="tabs-list">
-            <button
+            <Button
               onClick={() => handleMetricChange("PV")}
               className={`tab ${selectedMetric === "PV" ? "active" : ""}`}
             >
               ページ閲覧数
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleMetricChange("CV")}
               className={`tab ${selectedMetric === "CV" ? "active" : ""}`}
             >
               お問い合わせ数
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleMetricChange("TU")}
               className={`tab ${selectedMetric === "TU" ? "active" : ""}`}
             >
               ページ訪問者数
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleMetricChange("UU")}
               className={`tab ${selectedMetric === "UU" ? "active" : ""}`}
             >
               セッション数
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleMetricChange("CVR")}
               className={`tab ${selectedMetric === "CVR" ? "active" : ""}`}
             >
               お問い合わせ率
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleMetricChange("SD")}
               className={`tab ${selectedMetric === "SD" ? "active" : ""}`}
             >
               流入元デバイス
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleMetricChange("VR")}
               className={`tab ${selectedMetric === "" ? "active" : ""}`}
             >
               流入者属性
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleMetricChange("RU")}
               className={`tab ${selectedMetric === "RU" ? "active" : ""}`}
             >
               流入元URL
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleMetricChange("SK")}
               className={`tab ${selectedMetric === "SK" ? "active" : ""}`}
             >
               検索キーワード
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleMetricChange("TC")}
               className={`tab ${selectedMetric === "TC" ? "active" : ""}`}
             >
               クリック数
-            </button>
+            </Button>
           </div>
         </div>
-        <div className="chart-controls">
-          <Select
-            value={selectedDateRange}
-            onChange={handleSelectDateChange}
-            options={dateRangeOptions}
-            placeholder="データの範囲を選択"
-          />
-        </div>
       </div>
-      <div className="chart">{selectChart()}</div>
+      <div className="details-bottom">
+      {<div className="chart">{selectChart()}</div>}
+      </div>
     </div>
   );
 }

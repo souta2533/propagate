@@ -6,13 +6,21 @@ Chart.register(...registerables);
 
 // データを日付で昇順にソートする関数
 const sortDataByDate = (data) => {
+  if (!Array.isArray(data)) {
+    console.error("Data is not an array", data);
+    return [];
+  }
   return data.sort((a, b) => new Date(a.date) - new Date(b.date));
 };
 
 const LineChart = ({ data = [], dataKey }) => {
   if (!data || data.length === 0) {
     console.warn("Data is empty or null");
-    return <div>No data available</div>;
+    return (
+      <dev>
+        <h1>Please set your URL & PagePath!</h1>
+      </dev>
+    );
   }
 
   // 日付順にソート
@@ -24,11 +32,11 @@ const LineChart = ({ data = [], dataKey }) => {
       {
         label: dataKey,
         data: sortedData.map((item) => item[dataKey]),
-        borderColor: "#3399cc",
-        backgroundColor: "rgba(64, 224,208,0.2 )",
+        borderColor: "#00ccff",
+        backgroundColor: "rgba(32, 178,255 ,0.1 )",
         fill: true,
         tension: 0.1,
-        borderWidth: 1,
+        borderWidth: 2,
         pointRadius: 0,
         pointHitRadius: 20,
       },
