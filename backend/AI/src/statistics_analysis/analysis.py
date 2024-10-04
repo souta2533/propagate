@@ -9,6 +9,7 @@ from AI.statistics_analysis.correlation_analysis import CorrelationAnalysis
 from AI.statistics_analysis.regression_analysis import RegressionAnalysis
 from AI.statistics_analysis.time_series_analysis import TimeSeriesAnalysis
 from AI.statistics_analysis.variance_analysis import VarianceAnalysis
+from AI.prompts.prompt import Prompt
 
 
 security = HTTPBearer()    # JWT認証用のセキュリティ設定
@@ -117,6 +118,18 @@ async def main():
     results = analysis.perform_analysis(data_by_day=df[df['base_url'] == 'https://www.propagateinc.com'])
     for k, v in results.items():
         print(f"{k}: {v}")
+
+    prompt = Prompt()
+    prompt_for_issues = prompt.create_prompt_for_issues(
+        format_path='AI/static/analysis_format.txt',
+        user_info={
+            'industry': 'Web運用',
+            'goal': 'CVR向上',
+            'website_overview': 'Web運用のためのWebサイト'
+        },
+        result_of_analysis=results
+    )
+    print(f"Prompt for issues: {prompt_for_issues}")
 
 
 if __name__ == "__main__":

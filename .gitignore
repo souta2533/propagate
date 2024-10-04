@@ -27,5 +27,7 @@ yarn-error.log*
 backend/analytics_result.json
 backend/AI/static
 
-backend/AI/__init__.py
-backend/AI/statistics_analysis/__init__.py
+backend/AI/src/statistics_analysis/__pycache__/
+backend/AI/src/prompts/__pycache__/
+backend/AI/src/gpt/__pycache__/
+backend/AI/src/__pycache__/
