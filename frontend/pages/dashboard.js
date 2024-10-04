@@ -29,7 +29,7 @@ const CustomOption = (props) => {
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        padding: "10px",
+        fontSize: "1vw",
       }}
     >
       <span>{data.label}</span>
@@ -268,8 +268,6 @@ const Dashboard = () => {
       value: "-",
       previousValue: "-",
     },
-
-    
   ];
 
   const options = [
@@ -306,7 +304,7 @@ const Dashboard = () => {
   const [selectedUrl, setSelectedUrl] = useState("");
   const [sanitizedUrl, setSanitizedUrl] = useState("");
   const [metrics, setMetrics] = useState(sampleMetrics); // メトリクスのstate
-  const [selectedMetric, setSelectedMetric] = useState("PV (ページ閲覧数)"); // 選択中のメトリクス
+  const [selectedMetrics, setSelectedMetrics] = useState([]); // 選択中のメトリクス
   const [inputValue, setInputValue] = useState(""); // ここで useState を使って定義
 
   const [dataForDateRange, setDataForDateRange] = useState([]);
@@ -672,7 +670,7 @@ const Dashboard = () => {
         PV: 0,
         CV: 0,
         CVR: 0,
-        SS: 0,
+        UU: 0,
       },
     ];
   };
@@ -822,8 +820,6 @@ const Dashboard = () => {
         value: currentData.CV || 0,
         previousValue: preData.CV,
       },
-      
-      
     ]);
   };
 
@@ -846,42 +842,45 @@ const Dashboard = () => {
   }, [propertyId, dateRange, url]);
 
   const handleMetricChange = (metricTitle) => {
-    setSelectedMetric(metricTitle);
+    setSelectedMetrics((prevSelectedMetrics) => {
+      if (prevSelectedMetrics.includes(metricTitle)) {
+        return prevSelectedMetrics.filter((title) => title !== metricTitle);
+      } else if (prevSelectedMetrics.length < 2) {
+        return [...prevSelectedMetrics, metricTitle];
+      } else {
+        return [prevSelectedMetrics[1], metricTitle];
+      }
+    });
   };
 
   const renderContent = () => {
     if (!filteredData || filteredData.length === 0) {
-      if (selectedMetric === "PV (ページ閲覧数)") {
-        return <LineChart data={sampledata2} dataKey="PV" />;
-      }
-      if (selectedMetric === "UU (セッション数)") {
-        return <LineChart data={sampledata2} dataKey="UU" />;
-      }
-      if (selectedMetric === "CVR (お問い合わせ率)") {
-        return <LineChart data={sampledata2} dataKey="CVR" />;
-      }
-      if (selectedMetric === "CV (お問い合わせ数)") {
-        return <LineChart data={sampledata2} dataKey="CV" />;
-      }
-      
-      
+      return <div>No data</div>;
+    }
+    if (selectedMetrics.length === 0) {
+      return <div>メトリクスを選択してください</div>;
     }
 
-    if (selectedMetric === "PV (ページ閲覧数)") {
-      return <LineChart data={filteredData} dataKey="PV" />;
-    }
-    if (selectedMetric === "UU (セッション数)") {
-      return <LineChart data={filteredData} dataKey="UU" />;
-    }
-    if (selectedMetric === "CVR (お問い合わせ率)") {
-      return <LineChart data={filteredData} dataKey="CVR" />;
-    }
-    if (selectedMetric === "CV (お問い合わせ数)") {
-      return <LineChart data={filteredData} dataKey="CV" />;
-    }
-    
-    
-    return <div>URLを入力してください</div>;
+    const dataKeys = selectedMetrics
+      .map((metric) => {
+        switch (metric) {
+          case "PV (ページ閲覧数)":
+            return "PV";
+          case "UU (セッション数)":
+            return "UU";
+          case "CVR (お問い合わせ率)":
+            return "CVR";
+          case "CV (お問い合わせ数)":
+            return "CV";
+          default:
+            return "";
+        }
+      })
+      .filter((key) => key !== ""); // 空のキーを除外
+
+    console.log("Data Keys:", dataKeys); // デバッグ用ログ
+
+    return <LineChart data={filteredData} dataKeys={dataKeys} />;
   };
 
   function getQuery(searchData, searchId) {
@@ -1040,7 +1039,7 @@ const Dashboard = () => {
         </div>
       </header>
       <main className="dashboard-main">
-        <Sidebar className="sidebar" />
+        {/*<Sidebar className="sidebar" />*/}
         <div className="dashboard-main-left">
           <div className="dashboard-header">
             <h2 className="dashboard-title">アナリティクスデータ</h2>
@@ -1053,41 +1052,56 @@ const Dashboard = () => {
               placeholder="データ範囲選択"
             />
           </div>
-          <div className="dashboard-main-right">
-            <div className="center-content">
-              <div className="metrics-grid">
-                {metrics.map((metric, index) => (
+          <div className="center-content">
+            <div className="metrics-grid">
+              {metrics.map((metric, index) => {
+                const isActive = selectedMetrics.includes(metric.title);
+                const activeClass = isActive
+                  ? selectedMetrics.indexOf(metric.title) === 0
+                    ? "first"
+                    : "second"
+                  : "";
+                return (
                   <MetricCard
                     key={index}
                     title={metric.title} // カードのタイトル
                     value={metric.value} // カードに表示する値
                     previousValue={metric.previousValue}
-                    isActive={selectedMetric === metric.title}
+                    isActive={isActive}
                     onClick={() => handleMetricChange(metric.title)}
+                    className={`metric-card ${
+                      isActive ? "active" : ""
+                    } ${activeClass}`}
                   />
-                ))}
-              </div>
-              <div className="chart-content">
-                <Card className="chart-card">
-                  <CardContent className="chart-card-content">
-                    <div className="chart">
-                      {renderContent()}{" "}
-                      {/* ここで選択されたメトリクスに応じたグラフを表示 */}
-                    </div>
-                  </CardContent>
-                </Card>
-                <div className="dashboard-details">
-                  <button
-                    onClick={() => handelButtonClick(propertyId)}
-                    className="details-button"
-                  >
-                    詳細
-                  </button>
-                </div>
+                );
+              })}
+            </div>
+            <div className="chart-content">
+              <Card className="chart-card">
+                <CardContent className="chart-card-content">
+                  <div className="chart">
+                    {renderContent()}{" "}
+                    {/* ここで選択されたメトリクスに応じたグラフを表示 */}
+                  </div>
+                </CardContent>
+              </Card>
+              <div className="dashboard-details">
+                <button
+                  onClick={() => handelButtonClick(propertyId)}
+                  className="details-button"
+                >
+                  詳細
+                </button>
               </div>
             </div>
-            <div className="dashboard-sidebar">
-              <h3 className="sidebar-title">検索キーワード</h3>
+          </div>
+          <div className="dashboard-middle">
+            <div className="device-content">
+              <h2 className="device-title">流入元ソース</h2>
+              <div className="device-chart"></div>
+            </div>
+            <div className="search-content">
+              <h2 className="search-title">検索キーワード</h2>
               <div className="search-keywords">
                 {topQueries.map((Item, index) => (
                   <SearchKeyword
@@ -1099,8 +1113,30 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-          <div className="suggest-space"></div>
+          <div className="dashboard-bottom">
+            <div className="device-content">
+              <h2 className="device-title">流入元デバイス</h2>
+              <div className="device-chart"></div>
+            </div>
+            <div className="search-content">
+              <h2 className="search-title">検索キーワード</h2>
+              <div className="search-keywords">
+                {topQueries.map((Item, index) => (
+                  <SearchKeyword
+                    key={index}
+                    keyword={Item[0]}
+                    count={Item[1]}
+                  />
+                ))}
+              </div>
+            </div>
+            <div className="device-content">
+              <h2 className="device-title">流入元ソース</h2>
+              <div className="device-chart"></div>
+            </div>
+          </div>
         </div>
+        <div className="suggest-space"></div>
       </main>
     </div>
   );

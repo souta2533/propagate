@@ -8,10 +8,13 @@
   font-family: "Noto Sans JP", sans-serif;
   font-size: 100%;
   height: 100vh;
+  width: 100vw;
 }
 
 /* ヘッダー */
 .header {
+  position: sticky;
+  top: 0;
   background-color: #ffffff;
   padding: 10px;
   margin: 0;
@@ -32,8 +35,8 @@
 }
 
 .header-title {
-  font-size: 40px;
-  font-weight: 800;
+  font-size: 2vw;
+  font-weight: 600;
   padding-left: 5px;
   margin: 0;
 }
@@ -83,28 +86,33 @@
   padding-right: 0; /* 不要な余白を削除 */
 }
 
-/*mainのheaderを含めた領域*/
-.dashboard-main-left {
-  background-color: #ffffff;
-  width: 100%;
-}
-
 .dashboard-main-content {
   padding: 20px;
 }
 
-/*mainのheaderを含めていない領域*/
-.dashboard-main-right {
-  display: flex;
-  flex: 1;
+/*mainのheaderを含めた領域*/
+.dashboard-main-left {
+  background-color: #ffffff;
+  width: 70%;
+  padding: 1vw;
+}
+
+/*suggestのスペース*/
+.suggest-space {
+  width: 30%;
+  height: 100vh;
+  padding: 30px;
+  background-color: #ffffff;
+  margin: 20px;
+  border: 1px solid #cccccc;
+  border-radius: 10px;
 }
 
 .center-content {
-  width: 80%;
-  height: 60%;
+  width: 100%;
+  margin-bottom: 1vw;
   border: 1px solid #7272722f;
   border-radius: 15px;
-  margin-left: 20px;
   overflow: hidden;
 }
 
@@ -148,23 +156,31 @@
   background-color: #ffffff;
 }
 
+.metric-card.active.first {
+  background-color: #ffffff;
+  border-bottom: 3px solid #00ccff; /* 水色の下線 */
+}
+
+.metric-card.active.second {
+  background-color: #ffffff;
+  border-bottom: 3px solid #0056b3; /* 青色の下線 */
+}
+
 .metric-card-header {
-  font-size: 16px;
+  font-size: 1vw;
   color: #666666;
-  padding:5px;
+  padding: 5px;
 }
 
 .metric-value {
-  font-size: 30px;
+  font-size: 2vw;
   font-weight: 700;
-  padding-bottom :2px;
-
+  padding-bottom: 2px;
 }
 
 .metric-comparison {
-  font-size: 20px; /* text-xs */
-  color: #f9fafb; /* text-muted-foreground */
-
+  font-size: 1vw;
+  color: #f9fafb;
 }
 
 /*メインのヘッダ*/
@@ -172,13 +188,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 10px 0 10px;
+  width: 100%;
 }
 
 .dashboard-title {
-  font-size: 1.5rem; /* text-2xl */
-  font-weight: 600; /* font-semibold */
-  margin: 16px;
+  font-size: 1.4vw;
+  font-weight: 600;
 }
 
 /*react-select では以下のクラス名が自動的に付与されます：
@@ -215,7 +230,7 @@
   padding: 5px 10px;
   text-align: right;
   font-family: "Noto Sans JP", sans-serif;
-  font-size: 15px;
+  font-size: 1.5vw;
   border: none;
   transition: 0.5s;
 }
@@ -247,20 +262,45 @@
   color: #6b7280;
 }
 
-/* 検索欄 */
-.dashboard-sidebar {
-  background-color: #ffffff;
-  margin: 0 20px;
-  width: 20%;
-  height:550px;
+.dashboard-middle {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 1vw;
+  gap: 1vw;
+}
+
+.device-content {
+  width: 50%;
   border: 1px solid #cccccc;
   border-radius: 15px;
-  padding: 10px;
+  padding: 10px 20px;
   overflow-y: auto;
 }
 
-.sidebar-title {
-  font-size: 18px;
+.device-title {
+  font-size: 1.25vw;
+  font-weight: 600;
+  text-align: left;
+  margin-bottom: 5px;
+}
+
+/* 検索欄 */
+.search-content {
+  background-color: #ffffff;
+  width: 50%;
+  height: 30vh;
+  border: 1px solid #cccccc;
+  border-radius: 15px;
+  padding: 0 1vw;
+  overflow-y: auto;
+}
+
+.search-title {
+  position: sticky;
+  top: 0;
+  background-color: #ffffff;
+  font-size: 1.25vw;
+  padding: 0.5vw;
   font-weight: 600;
   text-align: left;
   margin-bottom: 5px;
@@ -283,7 +323,6 @@
 }
 
 .search-icon {
-  font-size: 25px;
   height: 15px;
   width: 15px;
   color: #6b7280;
@@ -299,25 +338,22 @@
 }
 
 .search-keyword-text {
-  font-size: 20px;
+  font-size: 1.25vw;
   font-weight: 500; /* font-medium */
   margin: 0;
 }
 
 .search-count-text {
-  font-size: 16px; /* text-xs */
+  font-size: 1vw; /* text-xs */
   color: #6b7280; /* text-gray-500 */
   margin: 0;
 }
 
-/*suggestのスペース*/
-.suggest-space {
-  padding: 20px;
-  background-color: #ffffff;
-  margin: 20px;
-  border: 1px solid #cccccc;
-  border-radius: 10px;
-  height: 150px;
+.dashboard-bottom {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 1vw;
+  gap: 1vw;
 }
 
 .overlay {
@@ -329,10 +365,6 @@
   background-color: rgba(0, 0, 0, 0.5); /* 半透明の黒で背景を暗くする */
   z-index: 10000; /* 他のコンテンツよりも前面に表示 */
   display: none; /* デフォルトでは非表示 */
-}
-
-.overlay.active {
-  display: block; /* アクティブ時に表示 */
 }
 
 /* レスポンシブコンテナ */
@@ -352,6 +384,9 @@
     width: 100vw;
     justify-content: flex-start;
     padding: 5px;
+  }
+  .header-title {
+    font-size: 5vw;
   }
 
   .header-left {
@@ -381,13 +416,26 @@
   }
 
   .dashboard-title {
-    margin: 20px 0;
+    margin: 4vw 0;
+    font-size: 4vw;
   }
 
   .header-dropdown-menu {
     display: flex;
     flex-direction: column;
     width: 30%;
+  }
+
+  .metric-card-header {
+    font-size: 3vw;
+  }
+
+  .metric-value {
+    font-size: 5vw;
+  }
+
+  .metric-comparison {
+    font-size: 3vw;
   }
 
   .sidebar {
@@ -440,8 +488,9 @@
 
   .center-content {
     margin: 0;
-    padding: 10px 0;
+    padding: 0;
     width: 100%;
+    height: 48%;
     border-top: none;
   }
 
@@ -469,10 +518,29 @@
     padding: 10px 0;
   }
 
+  .details-button {
+    font-size: 3vw;
+    margin-left: 1.5vw;
+  }
+
   .dashboard-sidebar {
     width: 100%;
-    margin-top: 24px;
-    margin: 10px 0;
-    padding: 5px;
+    margin: 3vw 0;
+    padding: 3vw;
+  }
+
+  .dashboard-sidebar-title {
+    font-size: 3vw;
+  }
+
+  .search-keyword-text {
+    font-size: 3vw;
+  }
+  .sidebar {
+    padding: 4vw;
+  }
+  .icon-text {
+    font-size: 3vw;
+    text-align: center;
   }
 }

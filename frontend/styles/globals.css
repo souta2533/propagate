@@ -22,10 +22,6 @@
   align-items: center;
 }
 
-.header h1 {
-  font-size: 24px;
-}
-
 .search-bar {
   display: flex;
   align-items: center;
