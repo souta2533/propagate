@@ -2,6 +2,10 @@ from collections import defaultdict
 from datetime import datetime
 import pandas as pd
 from urllib.parse import urlparse, unquote
+from logging import getLogger
+
+
+logger = getLogger(__name__)
 
 
 NUM = 30
@@ -18,7 +22,6 @@ def transform_data_by_date(data_by_date, source='dashboard'):
 
         details
             data_by_data[base_url][page_path][date] -> data_by_date[base_url][page_path]
-
     """
 
     if source == 'dashboard':
@@ -34,7 +37,6 @@ def transform_data_by_date(data_by_date, source='dashboard'):
                     "active_users": data.get("active_users", 0),
                     "UU": data.get("UU", 0),
                     "engaged_sessions": data.get("engaged_sessions", 0),
-                    "total_users": data.get("total_users", 0),
                     "city": data.get("city", {}),
                     "device_category": data.get("device_category", {}),
                     "query": data.get("query", {}),
@@ -43,6 +45,7 @@ def transform_data_by_date(data_by_date, source='dashboard'):
                     "ctr": data.get("ctr", 0),
                     "position": data.get("position", 0),
                     "country": data.get("country", {}),
+                    "source": data.get("source", {}),
                 }
 
                 transformed_data[base_url].append(d)
@@ -63,7 +66,6 @@ def transform_data_by_date(data_by_date, source='dashboard'):
                         "active_users": data.get("active_users", 0),
                         "UU": data.get("UU", 0),
                         "engaged_sessions": data.get("engaged_sessions", 0),
-                        "total_users": data.get("total_users", 0),
                         "city": data.get("city", {}),
                         "device_category": data.get("device_category", {}),
                         "query": data.get("query", {}),
@@ -72,6 +74,7 @@ def transform_data_by_date(data_by_date, source='dashboard'):
                         "ctr": data.get("ctr", 0),
                         "position": data.get("position", 0),
                         "country": data.get("country", {}),
+                        "source": data.get("source", {}),
                     }
 
                     flattened_data[base_url][page_path].append(flattened_entry)
@@ -112,7 +115,6 @@ def data_by_date(analytics_data, search_console_data):
                 "active_users": 0,
                 "UU": 0,
                 "engaged_sessions": 0,
-                "total_users": 0,
                 "city": defaultdict(int),       # Analytics Dataから取得
                 "device_category": defaultdict(int),
                 "query": defaultdict(int),
@@ -121,15 +123,15 @@ def data_by_date(analytics_data, search_console_data):
                 "ctr": 0,
                 "position": 0,
                 "country": defaultdict(int),
+                "source": defaultdict(int),
             }
         
         # 数値項目の計算
         data_by_date[base_url][date]['PV'] += entry.get('screen_page_views', 0)
         data_by_date[base_url][date]['CV'] += entry.get('conversions', 0)
         data_by_date[base_url][date]['active_users'] += entry.get('active_users', 0)
-        data_by_date[base_url][date]['UU'] += entry.get('sessions', 0)
+        data_by_date[base_url][date]['UU'] += entry.get('total_users', 0)
         data_by_date[base_url][date]['engaged_sessions'] += entry.get('engaged_sessions', 0)
-        data_by_date[base_url][date]['total_users'] += entry.get('total_users', 0)
 
         # カテゴリ項目のカウント
         city = entry.get('city')
@@ -140,11 +142,15 @@ def data_by_date(analytics_data, search_console_data):
         if device_category:
             data_by_date[base_url][date]['device_category'][device_category] += 1
 
+        source = entry.get('session_source')
+        if source:
+            data_by_date[base_url][date]['source'][source] += 1
+
     # Conversion Rateの計算
     for base_url, dates in data_by_date.items():
         for date, data in dates.items():
-            if data['total_users'] > 0:
-                data['CVR'] = data['CV'] / data['total_users']
+            if data['UU'] > 0:
+                data['CVR'] = data['CV'] / data['UU']
             else:
                 data['CVR'] = 0.0
 
@@ -171,7 +177,6 @@ def data_by_date(analytics_data, search_console_data):
                 "active_users": 0,
                 "UU": 0,
                 "engaged_sessions": 0,
-                "total_users": 0,
                 "city": defaultdict(int),       # Analytics Dataから取得
                 "device_category": defaultdict(int),
                 "query": defaultdict(int),
@@ -180,6 +185,7 @@ def data_by_date(analytics_data, search_console_data):
                 "ctr": 0,
                 "position": 0,
                 "country": defaultdict(int),
+                "source": defaultdict(int),
             }
         
         # クエリの集計
@@ -247,7 +253,12 @@ def data_by_page_path(analytics_data, search_console_data):
         base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
 
         # ページパスを取得
-        page_path = unquote(parsed_url.path)
+        full_page_path = unquote(parsed_url.path)
+        page_path_parts = full_page_path.split('/')
+        if len(page_path_parts) > 1:
+            page_path = '/' + page_path_parts[1]
+        else:
+            page_path = '/' + page_path_parts[1]
 
         if date not in data_by_page_path[base_url][page_path]:
             # 日付毎に初期データを設定
@@ -258,7 +269,6 @@ def data_by_page_path(analytics_data, search_console_data):
                 "active_users": 0,
                 "UU": 0,
                 "engaged_sessions": 0,
-                "total_users": 0,
                 "city": defaultdict(int),       # Analytics Dataから取得
                 "device_category": defaultdict(int),
                 "query": defaultdict(int),
@@ -267,15 +277,15 @@ def data_by_page_path(analytics_data, search_console_data):
                 "ctr": 0,
                 "position": 0,
                 "country": defaultdict(int),
+                "source": defaultdict(int),
             }
         
         # 数値項目の計算
         data_by_page_path[base_url][page_path][date]['PV'] += entry.get('screen_page_views', 0)
         data_by_page_path[base_url][page_path][date]['CV'] += entry.get('conversions', 0)
         data_by_page_path[base_url][page_path][date]['active_users'] += entry.get('active_users', 0)
-        data_by_page_path[base_url][page_path][date]['UU'] += entry.get('sessions', 0)
+        data_by_page_path[base_url][page_path][date]['UU'] += entry.get('total_users', 0)
         data_by_page_path[base_url][page_path][date]['engaged_sessions'] += entry.get('engaged_sessions', 0)
-        data_by_page_path[base_url][page_path][date]['total_users'] += entry.get('total_users', 0)
 
         # カテゴリ項目のカウント
         city = entry.get('city')
@@ -285,13 +295,17 @@ def data_by_page_path(analytics_data, search_console_data):
         device_category = entry.get('device_category')
         if device_category:
             data_by_page_path[base_url][page_path][date]['device_category'][device_category] += 1
+        
+        source = entry.get('session_source')    
+        if source:
+            data_by_page_path[base_url][page_path][date]['source'][source] += 1
 
     # Conversion Rateの計算
     for base_url, page_paths in data_by_page_path.items():
         for page_path, dates in page_paths.items():
             for date, data in dates.items():
-                if data['total_users'] > 0:
-                    data['CVR'] = data['CV'] / data['total_users']
+                if data['UU'] > 0:
+                    data['CVR'] = data['CV'] / data['UU']
                 else:
                     data['conversion_rate'] = 0.0
 
@@ -308,7 +322,14 @@ def data_by_page_path(analytics_data, search_console_data):
         # URLからパスを取得
         parsed_url = urlparse(page)
         base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
-        page_path = unquote(parsed_url.path)
+        
+        # ページパスを取得
+        full_page_path = unquote(parsed_url.path)
+        page_path_parts = full_page_path.split('/')
+        if len(page_path_parts) > 1:
+            page_path = '/' + page_path_parts[1]
+        else:
+            page_path = '/' + page_path_parts[1]
 
         if date not in data_by_page_path[base_url][page_path]:
             # 日付ごとに初期データを設定
@@ -319,7 +340,6 @@ def data_by_page_path(analytics_data, search_console_data):
                 "active_users": 0,
                 "UU": 0,
                 "engaged_sessions": 0,
-                "total_users": 0,
                 "city": defaultdict(int),       # Analytics Dataから取得
                 "device_category": defaultdict(int),
                 "query": defaultdict(int),
@@ -328,6 +348,7 @@ def data_by_page_path(analytics_data, search_console_data):
                 "ctr": 0,
                 "position": 0,
                 "country": defaultdict(int),
+                "source": defaultdict(int),
             }
 
         # クエリの集計
@@ -393,7 +414,14 @@ def aggregate_data(analytics_data, search_console_data):
         if base_url not in aggregated:
             aggregated[base_url] = {}
 
-        decoded_path = unquote(parsed_url.path)
+        # ページパスを取得
+        full_page_path = unquote(parsed_url.path)
+        page_path_parts = full_page_path.split('/')
+        if len(page_path_parts) > 1:
+            decoded_path = '/' + page_path_parts[1]
+        else:
+            decoded_path = '/' + page_path_parts[1]
+
         if decoded_path not in aggregated[base_url]:
             # page_locationごとに初期データを設定
             aggregated[base_url][decoded_path] = {
@@ -403,7 +431,6 @@ def aggregate_data(analytics_data, search_console_data):
                 "active_users": 0,
                 "UU": 0,
                 "engaged_sessions": 0,
-                "total_users": 0,
                 "city": defaultdict(int),       # Analytics Dataから取得
                 "device_category": defaultdict(int),
                 "query": defaultdict(int),
@@ -412,15 +439,15 @@ def aggregate_data(analytics_data, search_console_data):
                 "ctr": 0,
                 "position": 0,
                 "country": defaultdict(int),
+                "source": defaultdict(int),
             }
         
         # 数値項目の計算
         aggregated[base_url][decoded_path]['PV'] += entry.get('screen_page_views', 0)
         aggregated[base_url][decoded_path]['CV'] += entry.get('conversions', 0)
         aggregated[base_url][decoded_path]['active_users'] += entry.get('active_users', 0)
-        aggregated[base_url][decoded_path]['UU'] += entry.get('sessions', 0)
+        aggregated[base_url][decoded_path]['UU'] += entry.get('total_users', 0)
         aggregated[base_url][decoded_path]['engaged_sessions'] += entry.get('engaged_sessions', 0)
-        aggregated[base_url][decoded_path]['total_users'] += entry.get('total_users', 0)
 
         # カテゴリ項目のカウント
         city = entry.get('city')    
@@ -431,11 +458,15 @@ def aggregate_data(analytics_data, search_console_data):
         if device_category:
             aggregated[base_url][decoded_path]['device_category'][device_category] += 1
 
+        source = entry.get('session_source')
+        if source:
+            aggregated[base_url][decoded_path]['source'][source] += 1
+
     # Conversion Rateの計算
     for base_url, paths in aggregated.items():
         for page_path, data in paths.items():
-            if data['total_users'] > 0:
-                data['CVR'] = data['CV'] / data['total_users'] * 100
+            if data['UU'] > 0:
+                data['CVR'] = data['CV'] / data['UU'] * 100
             else:
                 data['conversion_rate'] = 0.0
 
@@ -451,7 +482,14 @@ def aggregate_data(analytics_data, search_console_data):
         if base_url not in aggregated:
             aggregated[base_url] = {}
 
-        decoded_path = unquote(parsed_url.path)
+        # ページパスを取得
+        full_page_path = unquote(parsed_url.path)
+        page_path_parts = full_page_path.split('/')
+        if len(page_path_parts) > 1:
+            decoded_path = '/' + page_path_parts[1]
+        else:
+            decoded_path = '/' + page_path_parts[1]
+
         if decoded_path not in aggregated[base_url]:
             # page_locationごとに初期データを設定
             aggregated[base_url][decoded_path] = {
@@ -461,7 +499,6 @@ def aggregate_data(analytics_data, search_console_data):
                 "active_users": 0,
                 "UU": 0,
                 "engaged_sessions": 0,
-                "total_users": 0,
                 "city": defaultdict(int),       # Analytics Dataから取得
                 "device_category": defaultdict(int),
                 "query": defaultdict(int),
@@ -470,6 +507,7 @@ def aggregate_data(analytics_data, search_console_data):
                 "ctr": 0,
                 "position": 0,
                 "country": defaultdict(int),
+                "source": defaultdict(int),
             }
         
         # クエリの集計
@@ -522,7 +560,6 @@ def aggregate_by_url(aggregated_data):
             "active_users": 0,
             "UU": 0,
             "engaged_sessions": 0,
-            "total_users": 0,
             "city": defaultdict(int),       # Analytics Dataから取得
             "device_category": defaultdict(int),
             "query": defaultdict(int),
@@ -531,6 +568,7 @@ def aggregate_by_url(aggregated_data):
             "ctr": 0,
             "position": 0,
             "country": defaultdict(int),
+            "source": defaultdict(int),
         }
 
         # Page Pathごとの集計をURLごとに集計
@@ -540,7 +578,6 @@ def aggregate_by_url(aggregated_data):
             url_summary[base_url]["active_users"] += data["active_users"]
             url_summary[base_url]["UU"] += data["UU"]
             url_summary[base_url]["engaged_sessions"] += data["engaged_sessions"]
-            url_summary[base_url]["total_users"] += data["total_users"]
             url_summary[base_url]["click"] += data["click"]
             url_summary[base_url]["impression"] += data["impression"]
             url_summary[base_url]["ctr"] += data["ctr"]
@@ -555,10 +592,12 @@ def aggregate_by_url(aggregated_data):
                 url_summary[base_url]["query"][query] += count
             for country, count in data["country"].items():
                 url_summary[base_url]["country"][country] += count
+            for source, count in data["source"].items():
+                url_summary[base_url]["source"][source] += count
 
         # Conversion Rateの計算
-        if url_summary[base_url]["total_users"] > 0:
-            url_summary[base_url]["CVR"] = url_summary[base_url]["CV"] / url_summary[base_url]["total_users"]
+        if url_summary[base_url]["UU"] > 0:
+            url_summary[base_url]["CVR"] = url_summary[base_url]["CV"] / url_summary[base_url]["UU"]
         else:
             url_summary[base_url]["CVR"] = 0.0
         
@@ -575,6 +614,8 @@ def aggregate_by_url(aggregated_data):
             url_summary[base_url]['country'] = get_top_n(url_summary[base_url]['country'])
         if 'query' in url_summary[base_url]:
             url_summary[base_url]['query'] = get_top_n(url_summary[base_url]['query'])
+        if 'source' in url_summary[base_url]:
+            url_summary[base_url]['source'] = get_top_n(url_summary[base_url]['source'])
 
     return url_summary
 
@@ -594,6 +635,7 @@ def transform_for_statistic_analysis(data_by_data):
             # device_category, queryを統計分析可能な形に変換
             top_device_category = max(entry['device_category'], key=entry['device_category'].get) if entry['device_category'] else None
             top_query = max(entry['query'], key=entry['query'].get) if entry['query'] else None
+            top_source = max(entry['session_source'], key=entry['session_source'].get) if entry['session_source'] else None
 
             transformed_data.append({
                 'base_url': base_url,
@@ -604,7 +646,6 @@ def transform_for_statistic_analysis(data_by_data):
                 'active_users': int(entry['active_users']),
                 'UU': int(entry['UU']),
                 'engaged_sessions': int(entry['engaged_sessions']),
-                'total_users': int(entry['total_users']),
                 'city': entry['city'],
                 'device_category': top_device_category,
                 'query': top_query,
@@ -612,6 +653,7 @@ def transform_for_statistic_analysis(data_by_data):
                 'impression': int(entry['impression']),
                 'ctr': float(entry['ctr']),
                 'position': float(entry['position']),
+                'source': top_source,
             })
 
     return transformed_data

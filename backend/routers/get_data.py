@@ -58,7 +58,7 @@ async def get_data_by_day_from_details(
         Detailsのページ用
         Analytics DataとSearch Console Dataを日付ごとに取得するエンドポイント
     """
-    logging.info("Fetching data by day from details")
+    # logging.info("Fetching data by day from details")
     # JWTトークンの検証
     jwt_token = credentials.credentials
     if not jwt_token:
@@ -99,15 +99,12 @@ async def get_aggregated_data_from_dashboard(
 
         search_console_table = SearchConsoleDataTable(supabase)
         search_console_data = await search_console_table.fetch_data(propertyId, startDate, endDate, token)
-        
-        # logging.info(f"Analytics data: {analytics_data}")
-        # logging.info(f"Search Console data: {search_console_data}")
 
         # データを集計
         aggregated_data = aggregate_data(analytics_data, search_console_data)
         aggregated_data_by_url = aggregate_by_url(aggregated_data)
 
-        logging.info(f"Aggregated data: {aggregated_data_by_url}")
+        # logging.info(f"Aggregated data: {aggregated_data_by_url}")
 
         return {"status": "success", "data": aggregated_data_by_url}
     except Exception as e:
