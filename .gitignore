@@ -25,3 +25,9 @@ yarn-error.log*
 .idea/
 
 backend/analytics_result.json
+backend/AI/static
+
+backend/AI/src/statistics_analysis/__pycache__/
+backend/AI/src/prompts/__pycache__/
+backend/AI/src/gpt/__pycache__/
+backend/AI/src/__pycache__/

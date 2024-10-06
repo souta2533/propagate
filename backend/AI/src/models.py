@@ -1,0 +1,6 @@
+from transformers import AutoModelForCausalLM
+
+
+def load_model(model_name):
+    model = AutoModelForCausalLM.from_pretrained(model_name, trust_remote_code=True)    # trust_remote_code: リモートのカスタムコードを信頼するかどうか(信頼できるモデルのみに使用する)
+    return model
