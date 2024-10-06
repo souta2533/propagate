@@ -22,7 +22,7 @@ const CustomLineChart = ({ data = [], dataKeys = [] }) => {
       </dev>
     );
   }
-  
+
   // データの形式を確認
   console.log("Data:", data);
   console.log("Data Keys:", dataKeys);
@@ -30,10 +30,11 @@ const CustomLineChart = ({ data = [], dataKeys = [] }) => {
   const graphData = {
     labels: data.map((item) => item.date),
     datasets: dataKeys.map((key, index) => ({
-      label:key,
-      data:data.map((item) => item[key]),
+      label: key,
+      data: data.map((item) => item[key]),
       borderColor: index === 0 ? "#00ccff" : "#0056b3",
-      backgroundColor: index === 0 ? "rgba(0, 123, 255, 0.1)" : "rgba(0, 86, 179, 0.1)",
+      backgroundColor:
+        index === 0 ? "rgba(0, 123, 255, 0.1)" : "rgba(0, 86, 179, 0.1)",
       fill: false,
       tension: 0.1,
       borderWidth: 2,
@@ -57,13 +58,13 @@ const CustomLineChart = ({ data = [], dataKeys = [] }) => {
         },
       },
       "y-axis-0": {
-        type:"linear",
-        position:"left",
+        type: "linear",
+        position: "left",
         beginAtZero: true, //Y軸を０に設定
       },
       "y-axis-1": {
-        type:"linear",
-        position:"right",
+        type: "linear",
+        position: "right",
         beginAtZero: true, //Y軸を０に設定
         grid: {
           drawOnChartArea: false,
@@ -74,7 +75,7 @@ const CustomLineChart = ({ data = [], dataKeys = [] }) => {
       tooltip: {
         enabled: true, //ツールチップを有効にする
         callbacks: {
-          label:function(context) {
+          label: function (context) {
             const label = context.dataset.label || "";
             const value = context.raw;
             return `${label}: ${value}`;
@@ -83,10 +84,10 @@ const CustomLineChart = ({ data = [], dataKeys = [] }) => {
       },
       legend: {
         display: true, //凡例
-        align:'end',
+        align: "end",
         labels: {
           usePointStyle: true,
-          pointStyle: 'line',
+          pointStyle: "line",
           font: {
             size: 12,
           },

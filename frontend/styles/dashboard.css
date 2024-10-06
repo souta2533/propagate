@@ -97,6 +97,10 @@
   padding: 1vw;
 }
 
+.sidebar {
+  display: none;
+}
+
 /*suggestのスペース*/
 .suggest-space {
   width: 30%;

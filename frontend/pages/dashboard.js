@@ -10,12 +10,12 @@ import { useSearchConsoleData } from "../hooks/useSearchConsoleData";
 import { useAggregatedData } from "../hooks/useAggregatedData";
 import Button from "@mui/material/Button";
 import { Card, CardContent } from "../components/ui/Card";
-import Select, { components } from "react-select";
+import Select from "react-select";
+import CreatableSelect from "react-select/creatable";
 import Sidebar from "../components/ui/Sidebar";
 import MetricCard from "../components/ui/MetricCard";
 import LineChart from "../components/graph/LineChart";
 import "../styles/dashboard.css";
-import "../styles/react-select.css";
 
 //Selectのカスタム
 const CustomOption = (props) => {
@@ -301,8 +301,8 @@ const Dashboard = () => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [url, setUrl] = useState(""); // URL用のstate
   const [urlOptions, setUrlOptions] = useState([]);
-  const [selectedUrl, setSelectedUrl] = useState("");
-  const [sanitizedUrl, setSanitizedUrl] = useState("");
+  const [selectedUrl, setSelectedUrl] = useState(null);
+  const [sanitizedUrl, setSanitizedUrl] = useState(null);
   const [metrics, setMetrics] = useState(sampleMetrics); // メトリクスのstate
   const [selectedMetrics, setSelectedMetrics] = useState([]); // 選択中のメトリクス
   const [inputValue, setInputValue] = useState(""); // ここで useState を使って定義
@@ -317,29 +317,27 @@ const Dashboard = () => {
     return <div>Loading...</div>;
   }
 
-  //detailsのリンクにpropertyIdを紐づける
-  const handelButtonClick = (propertyId) => {
-    router.push(`/${propertyId}/details`);
-  };
-
-  //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.URL処理
   //localStorageからURLリストを取得
   useEffect(() => {
     const storedUrls = JSON.parse(localStorage.getItem("urlOptions")) || [];
     setUrlOptions(storedUrls);
   }, []);
 
-  //URL削除処理
-  const handleDelete = (urlToDelete) => {
-    const updatedUrls = urlOptions.filter(
-      (option) => option.value !== urlToDelete.value
-    );
-    setUrlOptions(updatedUrls);
-    localStorage.setItem("urlOptions", JSON.stringify(updatedUrls));
-
-    if (selectedUrl && selectedUrl.value === urlToDelete.value) {
-      setSelectedUrl(null);
+  const handleUrl = (inputValue) => {
+    if (!inputValue) {
+      alert("URLを入力してください");
+      return;
     }
+
+    console.log("登録されたURL:", inputValue);
+    alert(`URL: ${inputValue} が登録されました！`);
+
+    const storedUrls = JSON.parse(localStorage.getItem("urlOptions")) || [];
+    const newUrl = { label: inputValue, value: inputValue };
+    storedUrls.push(newUrl);
+    localStorage.setItem("urlOptions", JSON.stringify(storedUrls));
+
+    setUrlOptions(storedUrls);
   };
 
   //URL選択時の処理
@@ -347,21 +345,10 @@ const Dashboard = () => {
     setSelectedUrl(selectedOption);
     setUrl(selectedOption.value);
     console.log("SelectedURL:", selectedOption.value);
+    const url = selectedOption.value;
+    const saniUrl = url.replace(/\/+$/, "");
+    setSanitizedUrl(saniUrl);
   };
-
-  /////////////////////////////////////////////////////できるならコンテキストで保管したい
-  const addUrlToList = (newUrl) => {
-    if (!addUrlToList.includes(newUrl)) {
-      SpeechRecognitionResultList((prevList) => [...prevList, newUrl]);
-    }
-  };
-
-  useEffect(() => {
-    if (router.query.url) {
-      const decodedUrl = decodeURIComponent(router.query.url);
-      setInputValue(decodedUrl);
-    }
-  }, [router.query.url]);
 
   // Sessionの取得
   const { fetchedSession, loading: sessionLoading } = useSessionData();
@@ -441,12 +428,12 @@ const Dashboard = () => {
   } = useDataByDay(session, propertyIds, startDate, endDate);
 
   console.log("Data By Day: ", fetchedDataByDay); //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.
-  if (dataByDay && dataByDay[propertyId] && url) {
+  if (dataByDay && dataByDay[propertyId]) {
     console.log("DDBP:", dataByDay[propertyId]);
     console.log("SNURL:", sanitizedUrl);
     console.log("DD:", dataByDay[propertyId][sanitizedUrl]);
   } else {
-    //console.warn("dataByDay または url が存在しないか無効です");
+    console.log("dataByDay または url が存在しないか無効です");
   }
 
   useEffect(() => {
@@ -829,17 +816,17 @@ const Dashboard = () => {
       //const data = getAnalyticsData(propertyId);
       //console.log("data:", data);
       const data = dataByDay[propertyId]?.[sanitizedUrl] || [];
-      console.log("DateByDAY for PRO:", data);
+      //console.log("DateByDAY for PRO:", data);
       const filtered = filterDataByDateRange(data, dateRange); //>>>>>>>>>>>>>>>>>>>>>>>>>>>>-300
       const prefiltered = preFilterDataByDateRange(data, dateRange); //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>603
-      console.log("PreData:", prefiltered);
-      console.log("dateRange", dateRange);
-      console.log("Fetched Data for Property:", data); // デバッグ用ログ
-      console.log("filtered data:", filtered);
+      //console.log("PreData:", prefiltered);
+      //console.log("dateRange", dateRange);
+      //console.log("Fetched Data for Property:", data); // デバッグ用ログ
+      //console.log("filtered data:", filtered);
       setFilteredData(filtered); //>>>>>>>>>-300
       calculateCurrentAndPreviousData(filtered, prefiltered); //>>>>>>>>>>>>>>>646
     }
-  }, [propertyId, dateRange, url]);
+  }, [selectedUrl, dateRange]);
 
   const handleMetricChange = (metricTitle) => {
     setSelectedMetrics((prevSelectedMetrics) => {
@@ -983,18 +970,19 @@ const Dashboard = () => {
         <div className="header-left">
           <h1 className="header-title">Propagate Analytics</h1>
           <form onSubmit={handleSubmit}>
-            <Select
+            <CreatableSelect
               className="url-select"
               styles={customStyles}
               value={selectedUrl}
               onChange={handleUrlChange}
               options={urlOptions}
-              placeholder="URLを選択してください"
-              components={{
-                Option: (props) => (
-                  <CustomOption {...props} onDelete={handleDelete} />
-                ),
-              }}
+              placeholder="URLを追加してください"
+              onCreateOption={handleUrl}
+              //={(inputValue) => {
+              //const newOption = { value: inputValue, label: inputValue };
+              //setUrlOptions((prevOptions) => [...prevOptions, newOption]);
+              //handleUrl(inputValue);
+              //}}
             />
           </form>
         </div>
@@ -1039,7 +1027,7 @@ const Dashboard = () => {
         </div>
       </header>
       <main className="dashboard-main">
-        {/*<Sidebar className="sidebar" />*/}
+        {<Sidebar className="sidebar" />}
         <div className="dashboard-main-left">
           <div className="dashboard-header">
             <h2 className="dashboard-title">アナリティクスデータ</h2>
@@ -1085,14 +1073,14 @@ const Dashboard = () => {
                   </div>
                 </CardContent>
               </Card>
-              <div className="dashboard-details">
+              {/*<div className="dashboard-details">
                 <button
                   onClick={() => handelButtonClick(propertyId)}
                   className="details-button"
                 >
                   詳細
                 </button>
-              </div>
+              </div>*/}
             </div>
           </div>
           <div className="dashboard-middle">
