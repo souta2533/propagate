@@ -266,6 +266,13 @@
   color: #6b7280;
 }
 
+.web-metrics-chart {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 1vw;
+  gap: 1vw;
+}
+
 .dashboard-middle {
   display: flex;
   flex-direction: row;

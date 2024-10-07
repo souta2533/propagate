@@ -15,6 +15,7 @@ import CreatableSelect from "react-select/creatable";
 import Sidebar from "../components/ui/Sidebar";
 import MetricCard from "../components/ui/MetricCard";
 import LineChart from "../components/graph/LineChart";
+import WebMetricsChart from "../components/graph/WebMetricsChart";
 import "../styles/dashboard.css";
 
 //Selectのカスタム
@@ -826,7 +827,7 @@ const Dashboard = () => {
       setFilteredData(filtered); //>>>>>>>>>-300
       calculateCurrentAndPreviousData(filtered, prefiltered); //>>>>>>>>>>>>>>>646
     }
-  }, [selectedUrl, dateRange]);
+  }, [sanitizedUrl, dateRange]);
 
   const handleMetricChange = (metricTitle) => {
     setSelectedMetrics((prevSelectedMetrics) => {
@@ -1083,6 +1084,9 @@ const Dashboard = () => {
               </div>*/}
             </div>
           </div>
+          <div className="web-metrics-chart">
+            <WebMetricsChart />
+          </div>
           <div className="dashboard-middle">
             <div className="device-content">
               <h2 className="device-title">流入元ソース</h2>
@@ -1107,19 +1111,11 @@ const Dashboard = () => {
               <div className="device-chart"></div>
             </div>
             <div className="search-content">
-              <h2 className="search-title">検索キーワード</h2>
-              <div className="search-keywords">
-                {topQueries.map((Item, index) => (
-                  <SearchKeyword
-                    key={index}
-                    keyword={Item[0]}
-                    count={Item[1]}
-                  />
-                ))}
-              </div>
+              <h2 className="search-title">地域</h2>
+              <div className="search-keywords"></div>
             </div>
             <div className="device-content">
-              <h2 className="device-title">流入元ソース</h2>
+              <h2 className="device-title">年齢</h2>
               <div className="device-chart"></div>
             </div>
           </div>
