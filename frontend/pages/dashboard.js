@@ -15,6 +15,7 @@ import CreatableSelect from "react-select/creatable";
 import Sidebar from "../components/ui/Sidebar";
 import MetricCard from "../components/ui/MetricCard";
 import LineChart from "../components/graph/LineChart";
+import BarChart from "../components/graph/BarChart";
 import WebMetricsChart from "../components/graph/WebMetricsChart";
 import "../styles/dashboard.css";
 
@@ -312,6 +313,8 @@ const Dashboard = () => {
   const [formattedAnalytics, setFormattedAnalytics] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const router = useRouter();
+
+  const [sourceChartData, setSourceChartData] = useState([]);
 
   //Loadingの設定
   if (loading) {
@@ -887,31 +890,57 @@ const Dashboard = () => {
     return topQueries;
   }
 
-  function getQuery2(data, searchId) {
-    const queryCountMap = new Map();
+  const topQueries = getQuery(aggregatedData, propertyId);
 
-    // 各エントリのqueryを集計
-    data.forEach((entry) => {
-      const query = entry.searchId;
-      if (queryCountMap.has(query)) {
-        queryCountMap.set(query, queryCountMap.get(query) + 1);
-      } else {
-        queryCountMap.set(query, 1);
-      }
-    });
+  function getSourceData(data, id) {
+    const sourceData = data[id]?.[sanitizedUrl]?.source;
 
-    // Mapを配列に変換し、頻度順にソート
-    const sortedQueries = Array.from(queryCountMap.entries()).sort(
+    if (!sourceData) {
+      return [];
+    }
+    console.log("SourceData:", sourceData);
+    const sortedEntries = Object.entries(sourceData).sort(
       (a, b) => b[1] - a[1]
     );
+    const top5Entries = sortedEntries.slice(0, 5);
 
-    // 上位7つを取得
-    const top7Queries = sortedQueries.slice(0, 7);
-
-    return top7Queries;
+    const top5SourceData = Object.fromEntries(top5Entries);
+    return top5SourceData;
   }
 
-  const topQueries = getQuery(aggregatedData, propertyId);
+  const sourceData = getSourceData(aggregatedData, propertyId);
+
+  function getDeviceData(data, id) {
+    const deviceData = data[id]?.[sanitizedUrl]?.device_category;
+    if (!deviceData) {
+      return [];
+    }
+    console.log("DeviceData:", deviceData);
+    const sortedEntries = Object.entries(deviceData).sort(
+      (a, b) => b[1] - a[1]
+    );
+    const top5Entries = sortedEntries.slice(0, 5);
+
+    const top5SourceData = Object.fromEntries(top5Entries);
+    return top5SourceData;
+  }
+
+  const deviceData = getDeviceData(aggregatedData, propertyId);
+
+  function getAreaData(data, id) {
+    const areaData = data[id]?.[sanitizedUrl]?.city;
+    if (!areaData) {
+      return [];
+    }
+    console.log("AreaData:", areaData);
+    const sortedEntries = Object.entries(areaData).sort((a, b) => b[1] - a[1]);
+    const top5Entries = sortedEntries.slice(0, 5);
+
+    const top5SourceData = Object.fromEntries(top5Entries);
+    return top5SourceData;
+  }
+
+  const areaData = getAreaData(aggregatedData, propertyId);
 
   const SearchKeyword = ({ keyword, count }) => {
     // キーワードが空のときは何も表示しない
@@ -988,6 +1017,14 @@ const Dashboard = () => {
           </form>
         </div>
         <div className="header-right">
+          <Select
+            className="custom-select"
+            styles={customStyles}
+            value={selectedOption}
+            onChange={handleSelectChange}
+            options={options}
+            placeholder="データ範囲選択"
+          />
           <Button
             variant="ghost"
             startIcon={<Settings className="Icon" />}
@@ -1030,17 +1067,6 @@ const Dashboard = () => {
       <main className="dashboard-main">
         {<Sidebar className="sidebar" />}
         <div className="dashboard-main-left">
-          <div className="dashboard-header">
-            <h2 className="dashboard-title">アナリティクスデータ</h2>
-            <Select
-              className="custom-select"
-              styles={customStyles}
-              value={selectedOption}
-              onChange={handleSelectChange}
-              options={options}
-              placeholder="データ範囲選択"
-            />
-          </div>
           <div className="center-content">
             <div className="metrics-grid">
               {metrics.map((metric, index) => {
@@ -1090,7 +1116,9 @@ const Dashboard = () => {
           <div className="dashboard-middle">
             <div className="device-content">
               <h2 className="device-title">流入元ソース</h2>
-              <div className="device-chart"></div>
+              <div className="device-chart">
+                <BarChart data={sourceData} />
+              </div>
             </div>
             <div className="search-content">
               <h2 className="search-title">検索キーワード</h2>
@@ -1106,16 +1134,20 @@ const Dashboard = () => {
             </div>
           </div>
           <div className="dashboard-bottom">
-            <div className="device-content">
-              <h2 className="device-title">流入元デバイス</h2>
-              <div className="device-chart"></div>
+            <div className="bottom-content">
+              <h2 className="bottom-title">流入元デバイス</h2>
+              <div className="device-chart">
+                <BarChart data={deviceData} />
+              </div>
             </div>
-            <div className="search-content">
-              <h2 className="search-title">地域</h2>
-              <div className="search-keywords"></div>
+            <div className="bottom-content">
+              <h2 className="bottom-title">地域</h2>
+              <div className="area-chart">
+                <BarChart data={areaData} />
+              </div>
             </div>
-            <div className="device-content">
-              <h2 className="device-title">年齢</h2>
+            <div className="bottom-content">
+              <h2 className="bottom-title">年齢</h2>
               <div className="device-chart"></div>
             </div>
           </div>

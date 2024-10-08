@@ -34,6 +34,7 @@ const MetricCard = ({ title, value, previousValue, isActive, onClick }) => {
         {value ? value.toLocaleString() : "0"}{" "}
         {/* 数字をフォーマットして表示 */}
       </div>
+      <div className="metric-text">同期間比</div>
       <div
         className="metric-comparison"
         style={{ color: getComparisonColor(comValue) }}

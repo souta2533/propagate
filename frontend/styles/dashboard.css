@@ -34,6 +34,12 @@
   gap: 16px;
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .header-title {
   font-size: 2vw;
   font-weight: 600;
@@ -103,11 +109,15 @@
 
 /*suggestのスペース*/
 .suggest-space {
+  position: fixed;
+  right: 0;
+  top: 0;
+  top: 80px;
   width: 30%;
-  height: 100vh;
+  height: 90vh;
   padding: 30px;
   background-color: #ffffff;
-  margin: 20px;
+  margin: 10px;
   border: 1px solid #cccccc;
   border-radius: 10px;
 }
@@ -180,6 +190,11 @@
   font-size: 2vw;
   font-weight: 700;
   padding-bottom: 2px;
+}
+
+.metric-text {
+  font-size: 0.8vw;
+  color: #666666;
 }
 
 .metric-comparison {
@@ -271,7 +286,7 @@
   flex-direction: row;
   align-items: center;
   width: 100%;
-  height: 50%;
+  height: 30%;
   margin-bottom: 1vw;
   gap: 1vw;
 }
@@ -285,6 +300,7 @@
 
 .device-content {
   width: 50%;
+  height: 35vh;
   border: 1px solid #cccccc;
   border-radius: 15px;
   padding: 10px 20px;
@@ -302,7 +318,7 @@
 .search-content {
   background-color: #ffffff;
   width: 50%;
-  height: 30vh;
+  height: 35vh;
   border: 1px solid #cccccc;
   border-radius: 15px;
   padding: 0 1vw;
@@ -368,6 +384,27 @@
   flex-direction: row;
   margin-bottom: 1vw;
   gap: 1vw;
+}
+
+.bottom-content {
+  width: 33%;
+  height: 25vh;
+  border: 1px solid #cccccc;
+  border-radius: 15px;
+  padding: 0 1vw;
+  overflow-y: auto;
+  margin-bottom: 1vw;
+}
+
+.bottom-title {
+  position: sticky;
+  top: 0;
+  background-color: #ffffff;
+  font-size: 1.25vw;
+  padding: 0.5vw;
+  font-weight: 600;
+  text-align: left;
+  margin-bottom: 5px;
 }
 
 .overlay {

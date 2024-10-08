@@ -1,7 +1,9 @@
 import React from "react";
 import { Doughnut } from "react-chartjs-2";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import { Chart } from "chart.js";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import "../../styles/components/webMetrics.css";
 
 /*const shadowPlugin = {
   id: "shadow",
@@ -60,11 +62,22 @@ const data1 = {
 };
 
 const data2 = {
+  labels: ["クリック数"],
+  datasets: [
+    {
+      data: [500],
+      backgroundColor: ["rgba(93, 160, 199)"],
+      borderWidth: 0,
+    },
+  ],
+};
+
+const data3 = {
   labels: ["お問い合わせ数"],
   datasets: [
     {
       data: [50],
-      backgroundColor: ["rgba(173, 216, 230)"],
+      backgroundColor: ["rgba(80, 137, 170)"],
       borderWidth: 0,
     },
   ],
@@ -77,15 +90,20 @@ const options = {
       display: false,
     },
     datalabels: {
-      display: true,
+      display: false,
       color: "white",
       backgroundColor: "rgba(0, 0, 0, 0.7)",
       borderRadius: 5,
-      align: "center",
       anchor: "center",
-      offset: 10,
+      align: "center",
+      padding: {
+        top: 10,
+        bottom: 10,
+        left: 10,
+        right: 10,
+      },
       font: {
-        size: 30,
+        size: "25",
         family: "Noto Sans JP",
         weight: "bold",
       },
@@ -112,8 +130,8 @@ const WebMetricsChart = () => {
     >
       <div
         style={{
-          width: "50%",
-          height: "80%",
+          width: "35%",
+          height: "100%",
           transform: "scale(0.7,1)",
           position: "relative",
         }}
@@ -154,11 +172,30 @@ const WebMetricsChart = () => {
             plugins={[ChartDataLabels]}
           />
         </div>
+        <div>
+          <div
+            style={{
+              position: "absolute",
+              top: "30%",
+              left: "0",
+              color: "white",
+              backgroundColor: "rgba(0, 0, 0, 0.7)",
+              textAlign: "center",
+              fontSize: "2vw",
+              fontWeight: "bold",
+              zIndex: 100,
+              borderRadius: "10px",
+              padding: "10px",
+            }}
+          >
+            ページ閲覧数<br></br>5000件
+          </div>
+        </div>
       </div>
       <div
         style={{
           width: "30%",
-          height: "50%",
+          height: "85%",
           transform: "scale(0.7,1)",
           position: "relative",
         }}
@@ -170,7 +207,7 @@ const WebMetricsChart = () => {
             left: 0,
             width: "100%",
             height: "100%",
-            transform: "scale(1.1,1) translateY(0vw) translateX(1vw)",
+            transform: "scale(1.1,1) translateY(0vw) translateX(1.5vw)",
           }}
         >
           <Doughnut
@@ -194,18 +231,38 @@ const WebMetricsChart = () => {
           }}
         >
           <Doughnut
-            data={data1}
+            data={data2}
             options={options}
             plugins={[ChartDataLabels]}
           />
         </div>
+        <div>
+          <div
+            style={{
+              position: "absolute",
+              top: "30%",
+              left: "0",
+              color: "white",
+              backgroundColor: "rgba(0, 0, 0, 0.7)",
+              textAlign: "center",
+              fontSize: "1.75vw",
+              fontWeight: "bold",
+              zIndex: 100,
+              borderRadius: "10px",
+              padding: "10px",
+            }}
+          >
+            クリック数<br></br>500件
+          </div>
+        </div>
       </div>
       <div
         style={{
-          width: "30%",
-          height: "30%",
+          width: "25%",
+          height: "75%",
           transform: "scale(0.7,1)",
           position: "relative",
+          overflow: "visible",
         }}
       >
         <div
@@ -215,6 +272,7 @@ const WebMetricsChart = () => {
             left: 0,
             width: "100%",
             height: "100%",
+            overflow: "visible",
             transform: "scale(1.1,1) translateY(0) translateX(1vw)",
           }}
         >
@@ -236,13 +294,33 @@ const WebMetricsChart = () => {
             left: 0,
             width: "100%",
             height: "100%",
+            overflow: "visible",
           }}
         >
           <Doughnut
-            data={data1}
+            data={data3}
             options={options}
             plugins={[ChartDataLabels]}
           />
+        </div>
+        <div>
+          <div
+            style={{
+              position: "absolute",
+              top: "30%",
+              left: "0",
+              color: "white",
+              backgroundColor: "rgba(0, 0, 0, 0.7)",
+              textAlign: "center",
+              fontSize: "1.5vw",
+              fontWeight: "bold",
+              zIndex: 100,
+              borderRadius: "10px",
+              padding: "10px",
+            }}
+          >
+            お問い合わせ数<br></br>50件
+          </div>
         </div>
       </div>
     </div>
