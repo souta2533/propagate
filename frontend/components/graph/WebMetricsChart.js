@@ -105,11 +105,101 @@ const WebMetricsChart = () => {
         width: "100%",
         height: "100%",
         display: "flex",
-        justifyContent: "center",
+        justifyContent: "flex-start",
         alignItems: "center",
         position: "relative",
       }}
     >
+      <div
+        style={{
+          width: "50%",
+          height: "80%",
+          transform: "scale(0.7,1)",
+          position: "relative",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            transform: "scale(1.1,1) translateY(0) translateX(2vw)",
+          }}
+        >
+          <Doughnut
+            data={shadowData}
+            options={{
+              cutout: "60%",
+              plugins: {
+                datalabels: { display: false },
+                legend: { display: false, legend: { display: false } },
+              },
+            }}
+          />
+        </div>
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+          }}
+        >
+          <Doughnut
+            data={data1}
+            options={options}
+            plugins={[ChartDataLabels]}
+          />
+        </div>
+      </div>
+      <div
+        style={{
+          width: "30%",
+          height: "50%",
+          transform: "scale(0.7,1)",
+          position: "relative",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            transform: "scale(1.1,1) translateY(0vw) translateX(1vw)",
+          }}
+        >
+          <Doughnut
+            data={shadowData}
+            options={{
+              cutout: "60%",
+              plugins: {
+                datalabels: { display: false },
+                legend: { display: false },
+              },
+            }}
+          />
+        </div>
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+          }}
+        >
+          <Doughnut
+            data={data1}
+            options={options}
+            plugins={[ChartDataLabels]}
+          />
+        </div>
+      </div>
       <div
         style={{
           width: "30%",
@@ -125,10 +215,19 @@ const WebMetricsChart = () => {
             left: 0,
             width: "100%",
             height: "100%",
-            transform: "scale(1.1,1) translateY(0) translateX(2vw)",
+            transform: "scale(1.1,1) translateY(0) translateX(1vw)",
           }}
         >
-          <Doughnut data={shadowData} options={{ cutout: "60%" }} />
+          <Doughnut
+            data={shadowData}
+            options={{
+              cutout: "60%",
+              plugins: {
+                datalabels: { display: false },
+                legend: { display: false },
+              },
+            }}
+          />
         </div>
         <div
           style={{
