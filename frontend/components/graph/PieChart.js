@@ -4,7 +4,6 @@ import { Pie } from "react-chartjs-2";
 const PieChart = ({ data }) => {
   console.log("PieData:", data);
   if (!data || data.length === 0) {
-    console.warn("Data is empty or null");
     return null;
   }
 

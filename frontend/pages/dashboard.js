@@ -9,6 +9,8 @@ import { useAnalyticsData } from "../hooks/useAnalyticsData";
 import { useSearchConsoleData } from "../hooks/useSearchConsoleData";
 import { useAggregatedData } from "../hooks/useAggregatedData";
 import Button from "@mui/material/Button";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { Card, CardContent } from "../components/ui/Card";
 import Select from "react-select";
 import CreatableSelect from "react-select/creatable";
@@ -672,10 +674,10 @@ const Dashboard = () => {
   };
 
   // オプションが選択された時に実行される関数
-  const handleSelectChange = (selectedOption) => {
-    setDateRange(selectedOption.value); // 選択されたオプションを状態に保存
-    setSelectedOption(selectedOption);
-    console.log("selectedOption:", selectedOption.value);
+  const handleDateRangeChange = (e) => {
+    setDateRange(e.target.value); // 選択されたオプションを状態に保存
+    setSelectedOption(e.target.value);
+    console.log("selectedOption:", e.target.value);
   };
 
   const preFilterDataByDateRange = (data, dateRange) => {
@@ -1065,20 +1067,41 @@ const Dashboard = () => {
               className="custom-select"
               styles={customStyles}
               value={selectedOption}
-              onChange={handleSelectChange}
+              onChange={handleDateRangeChange}
               options={options}
               placeholder="ページパス選択"
             />
           </div>
           <div className="dashboard-header-right">
+            <ToggleButtonGroup
+              value={dateRange}
+              exclusive
+              onChange={handleDateRangeChange}
+              aria-label="Date Range"
+            >
+              <ToggleButton value="過去7日間" aria-label="過去7日間">
+                過去7日間
+              </ToggleButton>
+              <ToggleButton value="過去28日間" aria-label="過去28日間">
+                過去28日間
+              </ToggleButton>
+              <ToggleButton value="過去90日間" aria-label="過去90日間">
+                過去90日間
+              </ToggleButton>
+              <ToggleButton value="カスタム" aria-label="カスタム">
+                カスタム
+              </ToggleButton>
+            </ToggleButtonGroup>
+            {/*
             <Select
               className="custom-select"
               styles={customStyles}
               value={selectedOption}
-              onChange={handleSelectChange}
+              onChange={handleDateRangeChange}
               options={options}
               placeholder="データ範囲選択"
             />
+            */}
           </div>
         </div>
         <div className="dashboard-top">

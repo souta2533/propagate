@@ -41,7 +41,6 @@ const getMuiTheme = () =>
   });
 const Table = ({ data }) => {
   if (!Array.isArray(data) || data.length === 0) {
-    console.error("Invalid or empty data format");
     return null;
   }
 
