@@ -29,19 +29,31 @@ const CustomLineChart = ({ data = [], dataKeys = [] }) => {
 
   const graphData = {
     labels: data.map((item) => item.date),
-    datasets: dataKeys.map((key, index) => ({
-      label: key,
-      data: data.map((item) => item[key]),
-      borderColor: index === 0 ? "#00ccff" : "#0056b3",
-      backgroundColor:
-        index === 0 ? "rgba(0, 123, 255, 0.1)" : "rgba(0, 86, 179, 0.1)",
-      fill: false,
-      tension: 0.1,
-      borderWidth: 2,
-      pointRadius: 0,
-      pointHitRadius: 20,
-      yAxisID: `y-axis-${index}`,
-    })),
+    datasets: dataKeys.map((key, index) => {
+      let borderColor;
+
+      if (key === "PV") {
+        borderColor = "#0000ff";
+      } else if (key === "UU") {
+        borderColor = "#ff8800";
+      } else if (key === "CVR") {
+        borderColor = "#ff0000";
+      } else if (key === "CV") {
+        borderColor = "#ee00ff";
+      }
+
+      return {
+        label: key,
+        data: data.map((item) => item[key]),
+        borderColor: borderColor,
+        fill: false,
+        tension: 0.1,
+        borderWidth: 2,
+        pointRadius: 0,
+        pointHitRadius: 20,
+        yAxisID: `y-axis-${index}`,
+      };
+    }),
   };
 
   const options = {

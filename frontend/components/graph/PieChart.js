@@ -5,11 +5,7 @@ const PieChart = ({ data }) => {
   console.log("PieData:", data);
   if (!data || data.length === 0) {
     console.warn("Data is empty or null");
-    return (
-      <dev>
-        <h1>Please set your URL & PagePath!</h1>
-      </dev>
-    );
+    return null;
   }
 
   const labels = data.map((item) => item[0]);
@@ -20,7 +16,7 @@ const PieChart = ({ data }) => {
     datasets: [
       {
         data: values, // 各セクションの値
-        backgroundColor: ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"], // セクションの色
+        backgroundColor: ["#25DFBB", "#00C49F", "#4154A7", "#AA70A7"], // セクションの色
         borderColor: ["#ffffff"], // 境界線の色
         borderWidth: 1, // 境界線の幅
       },
@@ -35,7 +31,7 @@ const PieChart = ({ data }) => {
       },
       legend: {
         display: true, // 凡例の表示
-        position: "bottom", // 凡例の位置
+        position: "right", // 凡例の位置
       },
     },
   };

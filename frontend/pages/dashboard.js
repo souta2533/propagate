@@ -16,7 +16,12 @@ import Sidebar from "../components/ui/Sidebar";
 import MetricCard from "../components/ui/MetricCard";
 import LineChart from "../components/graph/LineChart";
 import BarChart from "../components/graph/BarChart";
+import PieChart from "../components/graph/PieChart";
+import PercentageTable from "../components/graph/PercentageTable";
+import Table from "../components/graph/Table";
+import Table2 from "../components/graph/Table2";
 import WebMetricsChart from "../components/graph/WebMetricsChart";
+import Trialgle from "../components/graph/Trialgle";
 import "../styles/dashboard.css";
 
 //Selectのカスタム
@@ -251,22 +256,22 @@ const Dashboard = () => {
   // サンプルメトリクスデータ
   const sampleMetrics = [
     {
-      title: "PV (ページ閲覧数)",
+      title: "ページ閲覧数(PV)",
       value: "-",
       previousValue: "-",
     },
     {
-      title: "UU (セッション数)",
+      title: "セッション数(UU)",
       value: "-",
       previousValue: "-",
     },
     {
-      title: "CVR (お問い合わせ率)",
+      title: "問い合わせ率(CVR)",
       value: "-",
       previousValue: "-",
     },
     {
-      title: "CV (お問い合わせ数)",
+      title: "問い合わせ数(CV))",
       value: "-",
       previousValue: "-",
     },
@@ -786,17 +791,17 @@ const Dashboard = () => {
     // サンプルメトリクスの設定
     setMetrics([
       {
-        title: "PV (ページ閲覧数)",
+        title: "ページ閲覧数(PV)",
         value: currentData.PV || 0,
         previousValue: preData.PV,
       },
       {
-        title: "UU (セッション数)",
+        title: "セッション数(UU)",
         value: currentData.UU || 0,
         previousValue: preData.UU,
       },
       {
-        title: "CVR (お問い合わせ率)",
+        title: "問い合わせ率(CVR)",
         value:
           currentData.UU > 0
             ? ((currentData.CV / currentData.UU) * 100).toFixed(2) + "%"
@@ -807,7 +812,7 @@ const Dashboard = () => {
             : "0%", // 前月の UU が 0 の場合も "0%" を表示
       },
       {
-        title: "CV (お問い合わせ数)",
+        title: "問い合わせ数(CV)",
         value: currentData.CV || 0,
         previousValue: preData.CV,
       },
@@ -855,13 +860,13 @@ const Dashboard = () => {
     const dataKeys = selectedMetrics
       .map((metric) => {
         switch (metric) {
-          case "PV (ページ閲覧数)":
+          case "ページ閲覧数(PV)":
             return "PV";
-          case "UU (セッション数)":
+          case "セッション数(UU)":
             return "UU";
-          case "CVR (お問い合わせ率)":
+          case "問い合わせ率(CVR)":
             return "CVR";
-          case "CV (お問い合わせ数)":
+          case "問い合わせ数(CV)":
             return "CV";
           default:
             return "";
@@ -902,10 +907,10 @@ const Dashboard = () => {
     const sortedEntries = Object.entries(sourceData).sort(
       (a, b) => b[1] - a[1]
     );
-    const top5Entries = sortedEntries.slice(0, 5);
+    //const top5Entries = sortedEntries.slice(0, 5);
 
-    const top5SourceData = Object.fromEntries(top5Entries);
-    return top5SourceData;
+    //const top5SourceData = Object.fromEntries(top5Entries);
+    return sortedEntries;
   }
 
   const sourceData = getSourceData(aggregatedData, propertyId);
@@ -919,10 +924,10 @@ const Dashboard = () => {
     const sortedEntries = Object.entries(deviceData).sort(
       (a, b) => b[1] - a[1]
     );
-    const top5Entries = sortedEntries.slice(0, 5);
+    //const top5Entries = sortedEntries.slice(0, 5);
 
-    const top5SourceData = Object.fromEntries(top5Entries);
-    return top5SourceData;
+    //const top5SourceData = Object.fromEntries(top5Entries);
+    return sortedEntries;
   }
 
   const deviceData = getDeviceData(aggregatedData, propertyId);
@@ -934,10 +939,10 @@ const Dashboard = () => {
     }
     console.log("AreaData:", areaData);
     const sortedEntries = Object.entries(areaData).sort((a, b) => b[1] - a[1]);
-    const top5Entries = sortedEntries.slice(0, 5);
+    //const top5Entries = sortedEntries.slice(0, 5);
 
-    const top5SourceData = Object.fromEntries(top5Entries);
-    return top5SourceData;
+    //const top5SourceData = Object.fromEntries(top5Entries);
+    return sortedEntries;
   }
 
   const areaData = getAreaData(aggregatedData, propertyId);
@@ -999,6 +1004,8 @@ const Dashboard = () => {
       <header className="header">
         <div className="header-left">
           <h1 className="header-title">Propagate Analytics</h1>
+        </div>
+        <div className="header-right">
           <form onSubmit={handleSubmit}>
             <CreatableSelect
               className="url-select"
@@ -1008,24 +1015,10 @@ const Dashboard = () => {
               options={urlOptions}
               placeholder="URLを追加してください"
               onCreateOption={handleUrl}
-              //={(inputValue) => {
-              //const newOption = { value: inputValue, label: inputValue };
-              //setUrlOptions((prevOptions) => [...prevOptions, newOption]);
-              //handleUrl(inputValue);
-              //}}
             />
           </form>
-        </div>
-        <div className="header-right">
-          <Select
-            className="custom-select"
-            styles={customStyles}
-            value={selectedOption}
-            onChange={handleSelectChange}
-            options={options}
-            placeholder="データ範囲選択"
-          />
-          <Button
+          {/*設定ボタン
+            <Button
             variant="ghost"
             startIcon={<Settings className="Icon" />}
             className="header-button"
@@ -1033,7 +1026,7 @@ const Dashboard = () => {
             onClick={toggleDropdown}
           >
             <span className="sr-only"></span>
-          </Button>
+          </Button>*/}
           {isDropdownOpen && (
             <div className="header-dropdown-menu">
               <Button
@@ -1066,8 +1059,30 @@ const Dashboard = () => {
       </header>
       <main className="dashboard-main">
         {<Sidebar className="sidebar" />}
-        <div className="dashboard-main-left">
-          <div className="center-content">
+        <div className="dashboard-header">
+          <div className="dashboard-header-left">
+            <Select
+              className="custom-select"
+              styles={customStyles}
+              value={selectedOption}
+              onChange={handleSelectChange}
+              options={options}
+              placeholder="ページパス選択"
+            />
+          </div>
+          <div className="dashboard-header-right">
+            <Select
+              className="custom-select"
+              styles={customStyles}
+              value={selectedOption}
+              onChange={handleSelectChange}
+              options={options}
+              placeholder="データ範囲選択"
+            />
+          </div>
+        </div>
+        <div className="dashboard-top">
+          <div className="dashboard-top-left">
             <div className="metrics-grid">
               {metrics.map((metric, index) => {
                 const isActive = selectedMetrics.includes(metric.title);
@@ -1110,49 +1125,98 @@ const Dashboard = () => {
               </div>*/}
             </div>
           </div>
-          <div className="web-metrics-chart">
-            <WebMetricsChart />
+          <div className="dashboard-top-right">
+            <div className="suggest-space"></div>
           </div>
-          <div className="dashboard-middle">
-            <div className="device-content">
-              <h2 className="device-title">流入元ソース</h2>
-              <div className="device-chart">
-                <BarChart data={sourceData} />
-              </div>
+        </div>
+        <div className="web-metrics-chart">
+          {/*<WebMetricsChart />*/}
+          <div className="triangle-chart-container">
+            <Trialgle
+              wPercent={65}
+              hPercent={25}
+              direction="right"
+              color="#4682b4"
+            />
+            <Trialgle
+              wPercent={40}
+              hPercent={15}
+              direction="right"
+              color="#1e90ff"
+            />
+            <Trialgle
+              wPercent={20}
+              hPercent={8}
+              direction="right"
+              color="#87cefa"
+            />
+            <div className="triangle-chart-text1 ">検索表示回数</div>
+            <div className="triangle-chart-text2">クリック数</div>
+            <div className="triangle-chart-text3">お問合せ数</div>
+          </div>
+        </div>
+        <div className="dashboard-middle">
+          <div className="dashboard-middle-content">
+            <div className="middle-content-text">
+              <h2 className="middle-title">流入経路</h2>
+              <h5 className="middle-subtitle">
+                ユーザーがどのような手段や経路を通じてWebサイトを訪れたかを示す数
+              </h5>
             </div>
-            <div className="search-content">
-              <h2 className="search-title">検索キーワード</h2>
-              <div className="search-keywords">
-                {topQueries.map((Item, index) => (
-                  <SearchKeyword
-                    key={index}
-                    keyword={Item[0]}
-                    count={Item[1]}
-                  />
-                ))}
-              </div>
+            <div className="middle-chart">
+              <Table2 data={sourceData} dataKeys="流入数" />
             </div>
           </div>
-          <div className="dashboard-bottom">
-            <div className="bottom-content">
-              <h2 className="bottom-title">流入元デバイス</h2>
-              <div className="device-chart">
-                <BarChart data={deviceData} />
-              </div>
+          <div className="dashboard-middle-content">
+            <div className="middle-content-text">
+              <h2 className="middle-title">
+                検索数とクリック数の多いキーワード
+              </h2>
+              <h5 className="middle-subtitle">
+                Google検索で、Webサイトが検索一覧に表示された回数とクリックされた回数
+              </h5>
             </div>
-            <div className="bottom-content">
-              <h2 className="bottom-title">地域</h2>
-              <div className="area-chart">
-                <BarChart data={areaData} />
-              </div>
-            </div>
-            <div className="bottom-content">
-              <h2 className="bottom-title">年齢</h2>
-              <div className="device-chart"></div>
+            <div className="search-keywords">
+              {/*topQueries.map((Item, index) => (
+                <SearchKeyword key={index} keyword={Item[0]} count={Item[1]} />
+              ))}*/}
+              <Table data={topQueries} />
             </div>
           </div>
         </div>
-        <div className="suggest-space"></div>
+        <div className="dashboard-bottom">
+          <div className="dashboard-bottom-content">
+            <div className="bottom-content-text">
+              <h2 className="bottom-title">ディバイス</h2>
+              <h5 className="bottom-subtitle">
+                ユーザーがWebサイトにアクセスする際に使用した機器の割合
+              </h5>
+            </div>
+            <div className="bottom-chart">
+              <PieChart data={deviceData} />
+            </div>
+          </div>
+          <div className="dashboard-bottom-content">
+            <div className="bottom-content-text">
+              <h2 className="bottom-title">地域</h2>
+              <h5 className="bottom-subtitle">
+                ユーザーがWebサイトにアクセスした地域別の割合
+              </h5>
+            </div>
+            <div className="bottom-chart">
+              <PercentageTable data={areaData} className="Percentage-graph" />
+            </div>
+          </div>
+          <div className="dashboard-bottom-content">
+            <div className="bottom-content-text">
+              <h2 className="bottom-title">性別・男女</h2>
+              <h5 className="bottom-subtitle">
+                Webサイトにアクセスしたユーザ情報
+              </h5>
+            </div>
+            <div className="bottom-chart"></div>
+          </div>
+        </div>
       </main>
     </div>
   );
