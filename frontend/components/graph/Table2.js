@@ -34,6 +34,8 @@ const getMuiTheme = () =>
             fontWeight: "bold",
             fontSize: "15px",
             padding: "10px",
+            backgroundColor: "#f9f9f9",
+            position: "sticky",
           },
         },
       },

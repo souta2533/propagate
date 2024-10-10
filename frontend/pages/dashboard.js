@@ -26,32 +26,6 @@ import WebMetricsChart from "../components/graph/WebMetricsChart";
 import TriangleChart from "../components/graph/TriangleChart";
 import "../styles/dashboard.css";
 
-//Selectのカスタム
-const CustomOption = (props) => {
-  const { data, innerRef, innerProps } = props;
-
-  return (
-    <div
-      ref={innerRef}
-      {...innerProps}
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        fontSize: "1vw",
-      }}
-    >
-      <span>{data.label}</span>
-      <FaTrash
-        onClick={(e) => {
-          e.stopPropagation(); // オプションの選択を防ぐ
-          props.onDelete(data); // 削除機能を呼び出す
-        }}
-        style={{ cursor: "pointer", color: "black" }}
-      />
-    </div>
-  );
-};
 const customStyles = {
   control: (provided) => ({
     ...provided,
@@ -63,7 +37,7 @@ const customStyles = {
   "&:hover": {},
   menu: (provided) => ({
     ...provided,
-    backgroundColor: "#fff", // メニュー背景色
+    backgroundColor: "#ffffff", // メニュー背景色
     zIndex: 9999, // メニューが他の要素の上に表示されるように
   }),
   "&:hover": {},
@@ -1072,10 +1046,10 @@ const Dashboard = () => {
         <div className="dashboard-middle">
           <div className="dashboard-middle-content">
             <div className="middle-content-text">
-              <h2 className="middle-title">流入経路</h2>
-              <h5 className="middle-subtitle">
+              <p className="middle-title">流入経路</p>
+              <p className="middle-subtitle">
                 ユーザーがどのような手段や経路を通じてWebサイトを訪れたかを示す数
-              </h5>
+              </p>
             </div>
             <div className="middle-chart">
               <Table2 data={sourceData} dataKeys="流入数" />
@@ -1083,12 +1057,10 @@ const Dashboard = () => {
           </div>
           <div className="dashboard-middle-content">
             <div className="middle-content-text">
-              <h2 className="middle-title">
-                検索数とクリック数の多いキーワード
-              </h2>
-              <h5 className="middle-subtitle">
+              <p className="middle-title">検索数とクリック数の多いキーワード</p>
+              <p className="middle-subtitle">
                 Google検索で、Webサイトが検索一覧に表示された回数とクリックされた回数
-              </h5>
+              </p>
             </div>
             <div className="search-keywords">
               {/*topQueries.map((Item, index) => (
@@ -1099,12 +1071,12 @@ const Dashboard = () => {
           </div>
         </div>
         <div className="dashboard-bottom">
-          <div className="dashboard-bottom-content">
+          <div className="dashboard-bottom-left">
             <div className="bottom-content-text">
-              <h2 className="bottom-title">ディバイス</h2>
-              <h5 className="bottom-subtitle">
+              <p className="bottom-title">ディバイス</p>
+              <p className="bottom-subtitle">
                 ユーザーがWebサイトにアクセスする際に使用した機器の割合
-              </h5>
+              </p>
             </div>
             <div className="bottom-chart">
               <PieChart data={deviceData} />
@@ -1112,10 +1084,10 @@ const Dashboard = () => {
           </div>
           <div className="dashboard-bottom-content">
             <div className="bottom-content-text">
-              <h2 className="bottom-title">地域</h2>
-              <h5 className="bottom-subtitle">
+              <p className="bottom-title">地域</p>
+              <p className="bottom-subtitle">
                 ユーザーがWebサイトにアクセスした地域別の割合
-              </h5>
+              </p>
             </div>
             <div className="bottom-chart">
               <PercentageTable data={areaData} className="Percentage-graph" />
@@ -1123,10 +1095,10 @@ const Dashboard = () => {
           </div>
           <div className="dashboard-bottom-content">
             <div className="bottom-content-text">
-              <h2 className="bottom-title">性別・男女</h2>
-              <h5 className="bottom-subtitle">
+              <p className="bottom-title">性別・男女</p>
+              <p className="bottom-subtitle">
                 Webサイトにアクセスしたユーザ情報
-              </h5>
+              </p>
             </div>
             <div className="bottom-chart"></div>
           </div>

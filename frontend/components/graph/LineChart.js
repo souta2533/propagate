@@ -63,7 +63,7 @@ const CustomLineChart = ({ data = [], dataKeys = [] }) => {
       x: {
         ticks: {
           autoSkip: true,
-          maxTicksLimit: 20, //X軸のラベル表示
+          maxTicksLimit: 7, //X軸のラベル表示
         },
         grid: {
           display: false,
@@ -109,7 +109,7 @@ const CustomLineChart = ({ data = [], dataKeys = [] }) => {
   };
 
   const divStyle = {
-    height: "350px",
+    height: "28vw",
   };
 
   return (
