@@ -1,5 +1,5 @@
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta
 import pandas as pd
 from urllib.parse import urlparse, unquote
 from logging import getLogger
@@ -79,6 +79,87 @@ def transform_data_by_date(data_by_date, source='dashboard'):
 
                     flattened_data[base_url][page_path].append(flattened_entry)
         return flattened_data
+
+def sort_by_date(data, source='dashboard'):
+    """
+        日付順にsortする関数
+    """
+    if source == 'dashboard':
+        sorted_data = {}
+        for base_url, entries in data.items():
+            sorted_entries = sorted(entries, key=lambda x: x['date'])
+            sorted_data[base_url] = sorted_entries
+
+    elif source == 'details':
+        sorted_data = {}
+        for base_url, page_paths in data.items():
+            sorted_data[base_url] = {}
+            for page_path, entries in page_paths.items():
+                sorted_entries = sorted(entries, key=lambda x: x['date'])
+                sorted_data[base_url][page_path] = sorted_entries
+                
+    return sorted_data
+
+# def fill_missing_date(data, source='dashboard'):
+#     """
+#         日付が存在しないデータを初期化する関数
+#     """
+#     def daterange(start, end):
+#         for n in range(int((end - start).days) + 1):
+#             yield start + timedelta(n)
+
+#     # 初期値
+#     data_by_date = {
+#                 "PV": 0,
+#                 "CV": 0,
+#                 "CVR": 0.0,
+#                 "active_users": 0,
+#                 "UU": 0,
+#                 "engaged_sessions": 0,
+#                 "city": defaultdict(int),       # Analytics Dataから取得
+#                 "device_category": defaultdict(int),
+#                 "query": defaultdict(int),
+#                 "click": 0,                    
+#                 "impression": 0,
+#                 "ctr": 0,
+#                 "position": 0,
+#                 "country": defaultdict(int),
+#                 "source": defaultdict(int),
+#             }
+    
+#     # データのもっとの古い日付と最新の日付を取得
+#     all_dates = []
+#     if source == 'dashboard':
+#         for base_url, entries in data.items():
+#             for entry in entries:
+#                 all_dates.append(entry['date'], "%Y-%m-%d")
+            
+#     elif source == 'details':
+#         for base_url, page_paths in data.items():
+#             for page_path, entries in page_paths.items():
+#                 for entry in entries:
+#                     all_dates.append(entry['date'], "%Y-%m-%d") 
+
+#     if not all_dates:
+#         return data
+    
+#     start_date = min(all_dates) 
+#     end_date = max(all_dates)
+
+#     filled_data = {}
+
+#     if source == 'dashboard':
+#         for base_url, entries in data.items():
+#             filled_data[base_url] = []
+#             for date in daterange(start_date, end_date):
+#                 date_str = date.strftime("%Y-%m-%d")
+#                 if date_str in entries:
+#                     filled_data[base_url].append(entries[date_str])
+#                 else:
+#                     filled_data[base_url].append(data_by_date)
+
+#     if source == 'dashboard':
+
 
 def data_by_date(analytics_data, search_console_data):
     """

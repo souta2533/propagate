@@ -4,12 +4,15 @@ from transformers import AutoTokenizer
 import os
 
 
-class TextDataset(Dataset):
-    def __init__(self, file_path, tokenizer, max_length=512):
-        # ファイルからデータを読み込む
-        with open(file_path, 'r', encoding='utf-8') as f:
-            self.data = json.load(f)
+def load_dataset(data_path):
+    with open(data_path, 'r', encoding='utf-8') as f:
+        data = json.load(f)
 
+    return data
+
+class TextDataset(Dataset):
+    def __init__(self, data, tokenizer, max_length=512):
+        self.data = data
         self.tokenizer = tokenizer
         self.max_length = max_length
 
