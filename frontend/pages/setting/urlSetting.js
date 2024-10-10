@@ -72,7 +72,7 @@ useEffect(() => {
 
   return (
     <div className="urlsetting-container">
-      <form className="urlsetting-form" onSubmit={handleSubmit}>
+      <div className="urlsetting-form" onSubmit={handleUrl}>
         <h1 className="url-text">URL設定ページ</h1>
         <form className="main-form" onSubmit={handleUrl}>
           <div className="url-form">
