@@ -3,11 +3,16 @@
   padding: 0;
 }
 
+.details-bottom {
+  padding:20px;
+}
+
 .header {
   width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding:20px;
 }
 
 .metric-select,
@@ -69,8 +74,9 @@ button {
   background-color: white;
   border-bottom: 1px solid #ddd;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 16px;
   color: #333;
+  padding:0 20px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
@@ -88,7 +94,7 @@ button {
   padding: 8px 25px;
   border: none;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 18px;
   color: #333;
 }
 

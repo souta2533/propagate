@@ -6,6 +6,7 @@
   width: 20%;
   border-right: 1px solid #cccccc;
   transition: transform 0.3s ease-in-out;
+  padding:5px;
 }
 /*sidebarのmenubutton*/
 .menu-list {
@@ -33,7 +34,8 @@
 
 .icon-text {
   text-align: left;
-  font-weight: 600px;
+  font-size: 16px;
+  font-weight: 700px;
   display: flex;
   align-items: center;
   padding: 10px;

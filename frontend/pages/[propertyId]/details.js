@@ -11,15 +11,16 @@ import Select from "react-select";
 import Popover from "../../components/ui/Popover";
 import { X, Calendar as CalendarIcon } from "lucide-react";
 import LineChart from "../../components/graph/LineChart";
+import MultiLineChart from "../../components/graph/MultiLineChart";
 import BarChart from "../../components/graph/BarChart";
 import PieChart from "../../components/graph/PieChart";
 import Table from "../../components/graph/Table";
 import Table2 from "../../components/graph/Table2";
+import PercentageTable from "../../components/graph/PercentageTable";
 import ParrialDataChart from "../../components/graph/ParrialDataChart";
 import { Grid, Paper, Typography, Box } from "@mui/material";
 
 import "../../styles/details.css";
-import PercentageTable from "../../components/ui/PercentageTable";
 
 const customStyles = {
   control: (provided) => ({
@@ -456,12 +457,6 @@ export default function Details() {
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////ここが何回も繰り返されている
   function getQuery(searchData, searchId, url, object = "") {
-    // 最後の / を削除
-    //const sanitizedUrl = url.replace(/\/+$/, "");
-    //console.log(sanitizedUrl);
-    //console.log("serchId:", searchId);
-    //console.log("SearchData;", searchData);
-    // searchData[searchId] から URL 部分（キー）を取得
     const dataObject = searchData[searchId][url];
     if (!dataObject) {
       //console.warn("No data found for the given searchId:", searchId);
@@ -584,7 +579,8 @@ export default function Details() {
       );
     } else if (selectedMetric === "SD") {
       return (
-        <div>
+      <div>
+        <MultiLineChart data={filteredData} dataKey="device_category" />
           <PercentageTable
             data={device}
             title="流入元デバイス"
@@ -592,7 +588,7 @@ export default function Details() {
             className="Percentage-graph"
           />
           <Table2 data={device} dataKey="流入元デバイス" />
-          <PieChart data={device} />
+
         </div>
       ); //流入元デバイス
     } else if (selectedMetric === "VR") {
@@ -604,14 +600,15 @@ export default function Details() {
             subtitle="上位7項目"
             className="Percentage-graph"
           />
-          <PercentageTable
+          
+          <Table2 data={city} dataKey="流入者属性" />
+          {/*<PercentageTable
             data={country}
             title="流入者属性（国別）"
             subtitle="上位7項目"
             className="Percentage-graph"
           />
-          <Table2 data={city} dataKey="流入者属性" />
-          <Table2 data={country} dataKey="流入者属性" />
+          <Table2 data={country} dataKey="流入者属性" />*/}
         </div>
       ); // 流入者属性
     } else if (selectedMetric === "RU") {
@@ -619,6 +616,7 @@ export default function Details() {
     } else if (selectedMetric === "SK") {
       return (
         <div>
+          <MultiLineChart data={filteredData} dataKey="query" />
           <PercentageTable
             data={query}
             title="検索キーワード"
@@ -752,10 +750,10 @@ export default function Details() {
           total_users: 0,
           UU: 0,
           CVR: 0,
-          device_category: [],
-          city: [],
-          country: [],
-          query: [],
+          device_category: {desktop:0, mobile:0, tablet:0},
+          city: {},
+          country: {jpn:0},
+          query: {},
           click: 0,
         }
       );
@@ -773,14 +771,49 @@ export default function Details() {
         total_users: 0,
         UU: 0,
         CVR: 0,
-        device_category: [],
-        city: [],
-        country: [],
-        query: [],
+        device_category: {desktop:0, mobile:0, tablet:0},
+        city: {shibuya:0},
+        country: {jpn:0},
+        query: {ホームページ:0},
         click: 0,
       },
     ];
   };
+
+  /*function aggregateDevicesByDate(data) {
+    const aggregated = {};
+
+    if (!data || !Array.isArray(data)) {
+      return [];
+    }
+  
+    data.forEach(item => {
+      const date = item.date;
+      const deviceCategory = item.device_category ? Object.keys(item.device_category)[0] : 'unknown';
+  
+      if (!aggregated[date]) {
+        aggregated[date] = {};
+      }
+  
+      if (!aggregated[date][deviceCategory]) {
+        aggregated[date][deviceCategory] = 0;
+      }
+  
+      aggregated[date][deviceCategory]++;
+    });
+  
+    // 結果を日付でソートし、見やすい形式に変換
+    const result = Object.entries(aggregated).sort(([a], [b]) => a.localeCompare(b)).map(([date, devices]) => ({
+      date,
+      devices
+    }));
+  
+    return result;
+  }
+
+const aggregatedResult = aggregateDevicesByDate(filteredData);
+console.log(JSON.stringify(aggregatedResult, null, 2));
+*/
 
   /*
   const aggregateData = (data) => {
@@ -847,7 +880,8 @@ export default function Details() {
           </Button>
         </div>
       </div>
-      <div className="graph-control">
+      
+        <div className="graph-control">
         <div className="filter-section">
           <div className="date-range">
             <Select
@@ -943,7 +977,9 @@ export default function Details() {
           </div>
         </div>
       </div>
+      <div className="details-bottom">
       {<div className="chart">{selectChart()}</div>}
+      </div>
     </div>
   );
 }
