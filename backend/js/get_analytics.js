@@ -14,19 +14,19 @@ function initialDateMapForNewPagePath(dateMap, allDates, newPagePath) {
   allDates.forEach(date => {
     if (!dateMap[date][newPagePath]) {
       dateMap[date][newPagePath] = {
-        pageLocation: '',
-        pagePath: newPagePath,
+        page_location: '',
+        page_path: newPagePath,
         date: date,
-        deviceCategory: '',
-        sessionSource: '',
+        device_category: '',
+        session_source: '',
         city: '',
-        firstUserSourceMedium: '',
-        screenPageViews: 0,
+        first_user_source_medium: '',
+        screen_page_views: 0,
         conversions: 0,
-        activeUsers: 0,
+        active_users: 0,
         sessions: 0,
-        engagedSessions: 0,
-        totalUsers: 0,
+        engaged_sessions: 0,
+        total_users: 0,
       };
     }
   });
@@ -80,19 +80,19 @@ async function handler(req, res) {
     let initialDateMap = allDates.reduce((acc, date)=> {
       acc[date] = {};
       acc[date]['/'] = {
-        pageLocation: '',
-        pagePath: '/',
+        page_location: '',
+        page_path: '/',
         date: date,
-        deviceCategory: '',
-        sessionSource: '',
+        device_category: '',
+        session_source: '',
         city: '',
-        firstUserSourceMedium: '',
-        screenPageViews: 0,
+        first_user_source_medium: '',
+        screen_page_views: 0,
         conversions: 0,
-        activeUsers: 0,
+        active_users: 0,
         sessions: 0,
-        engagedSessions: 0,
-        totalUsers: 0,
+        engaged_sessions: 0,
+        total_users: 0,
       };
       return acc;
     }, {});
@@ -166,19 +166,19 @@ async function handler(req, res) {
         }
 
         initialDateMap[date][pagePath] = {
-          pageLocation: dimensions[0],
-          pagePath: dimensions[1],
+          page_location: dimensions[0],
+          page_path: dimensions[1],
           date: date,  
-          deviceCategory: dimensions[3],
-          sessionSource: dimensions[4],
+          device_category: dimensions[3],
+          session_source: dimensions[4],
           city: dimensions[5],
-          firstUserSourceMedium: dimensions[6],
-          screenPageViews: metrics[0],
+          first_user_source_medium: dimensions[6],
+          screen_page_views: metrics[0],
           conversions: metrics[1],
-          activeUsers: metrics[2],
+          active_users: metrics[2],
           sessions: metrics[3],
-          engagedSessions: metrics[4],
-          totalUsers: metrics[5],
+          engaged_sessions: metrics[4],
+          total_users: metrics[5],
         };
       });
     } else {

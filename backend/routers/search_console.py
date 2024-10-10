@@ -3,9 +3,10 @@ import logging
 
 from js_runner import run_js_script
 from db.supabase_client import supabase
+from db.db_operations import AnalyticsDataTable
 from models.request import SearchConsoleRequest
-# from db.supabase_client import customer_emails_table
 from db.db_operations import PropertyTable, save_search_console_data
+from utils.data_process import data_by_date
 
 
 router = APIRouter()
@@ -21,9 +22,6 @@ logger = logging.getLogger(__name__)
 """
 @router.post("/get-search-console")
 async def get_search_console(data: SearchConsoleRequest):
-    # logger.info(f"Recieved accessToken: {data.accessToken}")
-    # logger.info(f"Recieved URL: {data.url}")
-
     # トークンが存在するか確認
     if not data.accessToken:
         raise HTTPException(status_code=400, detail="Access token is missing")
@@ -34,8 +32,7 @@ async def get_search_console(data: SearchConsoleRequest):
     
     try:
         result = run_js_script("./js/get_search_console.js", data.model_dump())
-        # print(f"result: {result}")
-        # logger.info(f"Result of get_search_console: {result}")
+        
         if result == "NoData" or result == "" or result is None:
             # return []
             raise HTTPException(status_code=404, detail=f'No data available from Search Console({data.url})')
@@ -51,11 +48,14 @@ async def get_search_console(data: SearchConsoleRequest):
             # URLからPropertyIDを取得
             property_table = PropertyTable(supabase)
             property_id = await property_table.get_property_id_by_url(data.url)
-            # logger.info(f"PropertyID: {property_id}")
 
             # Search ConsoleのデータをDBに保存
-            # await save_search_console_data(property_id, result)
-        return result
+            analytics_data_table = AnalyticsDataTable(supabase)
+            search_console_data = data_by_date(analytics_data=None, search_console_data=result, url_depth=2)
+
+            await analytics_data_table.insert_search_console_data(property_id, search_console_data)
+        return HTTPException(status_code=200, detail="Success to get Search Console data")
+    
     except HTTPException as e:
         if "403" in str(e) or e.status_code == 403:
             raise HTTPException(status_code=403, detail="Access denied: User does not have sufficient permissions for this URL")
