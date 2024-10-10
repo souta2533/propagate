@@ -4,7 +4,7 @@ import logging
 import os
 
 from db.supabase_client import supabase
-from db.db_operations import AnalyticsData, SearchConsoleDataTable
+from db.db_operations import AnalyticsData, SearchConsoleDataTable, AnalyticsDataTable
 from utils.data_process import data_by_date, data_by_page_path, aggregate_data, aggregate_by_url
 
 

@@ -161,7 +161,7 @@ def sort_by_date(data, source='dashboard'):
 #     if source == 'dashboard':
 
 
-def data_by_date(analytics_data, search_console_data):
+def data_by_date(analytics_data, search_console_data, url_depth=1):
     """
         日付ごとにデータを集計する関数
         ページパスは考慮せず, URLごとに集計
@@ -186,7 +186,13 @@ def data_by_date(analytics_data, search_console_data):
 
         # URLからドメイン部分を取得
         parsed_url = urlparse(page_location)
-        base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+        if url_depth == 1:
+            base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+        elif url_depth == 2:
+            base_url = f"{parsed_url.scheme}://{parsed_url.netloc}{'/'.join(parsed_url.path.split('/')[:2])}"
+        else:
+            raise ValueError("url_depth must be 1 or 2")
+        
         if date not in data_by_date[base_url]:
             # 日付ごとに初期データを設定
             data_by_date[base_url][date] = {
@@ -247,7 +253,12 @@ def data_by_date(analytics_data, search_console_data):
 
         # URLからパスを取得
         parsed_url = urlparse(page)
-        base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+        if url_depth == 1:
+            base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+        elif url_depth == 2:
+            base_url = f"{parsed_url.scheme}://{parsed_url.netloc}{'/'.join(parsed_url.path.split('/')[:2])}"
+        else:
+            raise ValueError("url_depth must be 1 or 2")
 
         if date not in data_by_date[base_url]:
             # 日付ごとに初期データを設定
@@ -342,7 +353,7 @@ def data_by_page_path(analytics_data, search_console_data):
             page_path = '/' + page_path_parts[1]
 
         if date not in data_by_page_path[base_url][page_path]:
-            # 日付毎に初期データを設定
+            # 日付け毎に初期データを設定
             data_by_page_path[base_url][page_path][date] = {
                 "PV": 0,
                 "CV": 0,
@@ -738,3 +749,12 @@ def transform_for_statistic_analysis(data_by_data):
             })
 
     return transformed_data
+
+
+if __name__ == '__main__':
+    page_location = 'https://example.com/blog/2021/01/01'
+    parsed_url = urlparse(page_location)
+    base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+    print(f"base_url: {base_url}")
+    base_url = f"{parsed_url.scheme}://{parsed_url.netloc}{'/'.join(parsed_url.path.split('/')[:2])}"
+    print(f"base_url: {base_url}")

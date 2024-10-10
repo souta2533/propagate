@@ -401,22 +401,22 @@ export default function Home() {
 
   // 特定の条件を満たした際に，呼び出される
   // 第2引数（[selectedProperty]）に指定した変数が変更された際に，呼び出される
-  useEffect(() => {
-    let timeout;
-    if (propertyList.length > 1 && customerInfo.length > 1 && !isAnalyticsFetched) {
-      const fetchAnalytics = async () => {
-        await fetchAnalyticsData(); // fetchAnalyticsDataが完了するまで待機
-        timeout = setTimeout(() => setIsAnalyticsFetched(false), 5 * 60 * 1000); // 5分後にリセット
-      };
+  // useEffect(() => {
+  //   let timeout;
+  //   if (propertyList.length > 1 && customerInfo.length > 1 && !isAnalyticsFetched) {
+  //     const fetchAnalytics = async () => {
+  //       await fetchAnalyticsData(); // fetchAnalyticsDataが完了するまで待機
+  //       timeout = setTimeout(() => setIsAnalyticsFetched(false), 5 * 60 * 1000); // 5分後にリセット
+  //     };
   
-      fetchAnalytics();
-    }
+  //     fetchAnalytics();
+  //   }
   
-    // クリーンアップ処理
-    return () => {
-      if (timeout) clearTimeout(timeout);
-    };
-  }, [propertyList, customerInfo, isAnalyticsFetched]);
+  //   // クリーンアップ処理
+  //   return () => {
+  //     if (timeout) clearTimeout(timeout);
+  //   };
+  // }, [propertyList, customerInfo, isAnalyticsFetched]);
 
   useEffect(() => {
     let timeout;
