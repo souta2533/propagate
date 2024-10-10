@@ -33,18 +33,11 @@ async def get_data_by_day(
     
     try:
         # DBからデータを取得
-        # analytics_table = AnalyticsData(supabase)
-        # analytics_data = await analytics_table.fetch_data(propertyId, startDate, endDate, jwt_token)
-
-        # search_console_table = SearchConsoleDataTable(supabase)
-        # search_console_data = await search_console_table.fetch_data(propertyId, startDate, endDate, jwt_token)
-        # data_by_day = data_by_date(analytics_data, search_console_data)
-
         analytics_data_table = AnalyticsDataTable(supabase)
         data_by_date = await analytics_data_table.fetch_data(propertyId, startDate, endDate, jwt_token)
         data_by_date_by_base_url = aggregate_by_base_url(data_by_date)
-        logging.info(f"Data by date: {data_by_date_by_base_url}")
-        return {"status": "success", "data": data_by_date}
+        
+        return {"status": "success", "data": data_by_date_by_base_url}
 
     except Exception as e:
         log.error(f"Error: {e}")
