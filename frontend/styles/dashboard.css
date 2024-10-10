@@ -4,21 +4,24 @@
 .dashboard-container {
   display: flex;
   flex-direction: column;
-  background-color: #ffffff; /* bg-gray-100 */
+  background-color: #f8f8f8;
   font-family: "Noto Sans JP", sans-serif;
   font-size: 100%;
-  height: 100vh;
+  width: 100vw;
 }
 
 /* ヘッダー */
 .header {
-  background-color: #ffffff;
-  padding: 10px;
-  margin: 0;
+  position: sticky;
+  top: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #e5e7eb;
+  width: 100%;
+  color: #ffffff;
+  background-color: #000000;
+  padding: 10px;
+  margin: 0;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   z-index: 1500;
   font-family: "Noto Sans JP", sans-serif;
@@ -32,18 +35,21 @@
 }
 
 .header-title {
-  font-size: 40px;
-  font-weight: 800;
+  font-size: 1.5vw;
+  font-weight: 600;
   padding-left: 5px;
   margin: 0;
 }
 
-.header-button {
-  /* スタイルはButtonコンポーネントで管理 */
-  border: none;
-  background-color: #ffffff;
-  border-radius: 30px;
-  justify-content: center;
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header.select {
+  background-color: #000000;
+  color: #ffffff;
 }
 
 .header-dropdown-menu {
@@ -75,50 +81,71 @@
   transition: 0.5s;
 }
 
+.sidebar {
+  display: none;
+}
+
 /* メインコンテンツ */
 .dashboard-main {
-  padding: 0;
+  padding: 1vw 7vw;
   display: flex;
+  flex-direction: column;
   justify-content: space-between; /* 子要素間のスペースを均等に配置 */
-  padding-right: 0; /* 不要な余白を削除 */
 }
 
-/*mainのheaderを含めた領域*/
-.dashboard-main-left {
-  background-color: #ffffff;
-  width: 100%;
-}
-
-.dashboard-main-content {
-  padding: 20px;
-}
-
-/*mainのheaderを含めていない領域*/
-.dashboard-main-right {
+/*メインのヘッダ*/
+.dashboard-header {
   display: flex;
-  flex: 1;
+  width: 100%;
+  margin-bottom: 1vw;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.center-content {
-  width: 80%;
-  height: 60%;
-  border: 1px solid #7272722f;
+.dashboard-top {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 55vh;
+  margin-bottom: 1vw;
+  gap: 1vw;
   border-radius: 15px;
-  margin-left: 20px;
   overflow: hidden;
 }
 
-.chart-content {
-  padding: 10px;
+.dashboard-top-left {
+  width: 70%;
+  padding: 1vw;
+  background-color: #ffffff;
+}
+
+.dashboard-top-right {
+  width: 30%;
+  height: 100%;
+  padding: 30px;
+  background-color: #ffffff;
+
+  border-radius: 10px;
+}
+
+.chart-card-content {
+  width: 100%;
+  background-color: #ffffff;
+  padding-top: 10px; /* pt-6 */
+}
+
+.chart-card-content canvas {
+  width: 100%;
 }
 
 /* メトリックカード */
 .metric-card {
-  background-color: #72727211;
-  border-right: 1px solid #f3f3f3;
-  padding: 10px 10px 10px 10px;
+  background-color: #ffffff;
+  border: 1px solid #7272722f;
+  border-radius: 5px;
+  padding: 1vw;
   transition: 0.5s;
-  display: flex;
+  display: grid;
   flex-direction: column;
   align-items: center;
 }
@@ -132,53 +159,63 @@
   background-color: #ffffff;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 0;
-}
-
-.metric-card:last-child {
-  border-right: none;
+  gap: 1vw;
 }
 
 .metric-card:hover {
-  background-color: #ffffff;
   transition: 0.5s;
 }
 
-.metric-card.active {
-  background-color: #ffffff;
+.metric-card:nth-child(1).active {
+  border: 1px solid #0000ff;
+  border-left: 0.4vw solid #0000ff;
+}
+
+.metric-card:nth-child(2).active {
+  border: 1px solid #ff8800;
+  border-left: 0.4vw solid #ff8800;
+}
+
+.metric-card:nth-child(3).active {
+  border: 1px solid #ff0000;
+  border-left: 0.4vw solid #ff0000;
+}
+
+.metric-card:nth-child(4).active {
+  border: 1px solid #ee00ff;
+  border-left: 0.4vw solid #ee00ff;
 }
 
 .metric-card-header {
-  font-size: 16px;
-  color: #666666;
-  padding:5px;
+  font-size: 01vw;
+  color: #000000;
+  font-weight: 600;
+  padding: 5px;
 }
 
 .metric-value {
-  font-size: 30px;
+  font-size: 2vw;
   font-weight: 700;
-  padding-bottom :2px;
+  justify-self: left;
+  padding-bottom: 2px;
+}
 
+.metric-text {
+  font-size: 0.8vw;
+  color: #666666;
+}
+
+.metric-bottom {
+  display: flex;
 }
 
 .metric-comparison {
-  font-size: 20px; /* text-xs */
-  color: #f9fafb; /* text-muted-foreground */
-
+  font-size: 1vw;
+  color: #f9fafb;
 }
 
-/*メインのヘッダ*/
-.dashboard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 10px 0 10px;
-}
-
-.dashboard-title {
-  font-size: 1.5rem; /* text-2xl */
-  font-weight: 600; /* font-semibold */
-  margin: 16px;
+.chart-content {
+  padding: 10px;
 }
 
 /*react-select では以下のクラス名が自動的に付与されます：
@@ -215,55 +252,98 @@
   padding: 5px 10px;
   text-align: right;
   font-family: "Noto Sans JP", sans-serif;
-  font-size: 15px;
+  font-size: 1.5vw;
   border: none;
   transition: 0.5s;
 }
 
-.chart-card-content {
+.dashboard-center {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   width: 100%;
-  background-color: #ffffff;
-  padding-top: 10px; /* pt-6 */
+  height: 35vh;
+  margin-bottom: 1vw;
+  gap: 1vw;
 }
 
-.chart-card-content canvas {
+.dashboard-center-left {
+  width: 70%;
+  height: 100%;
+  background-color: #ffffff;
+}
+
+.dashboard-center-right {
+  width: 30%;
+  height: 100%;
+  background-color: #ffffff;
+}
+.triangle-chart-container {
+  position: relative; /* 子要素を絶対配置するための基準 */
   width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
 }
 
-/*詳細ページボタン*/
-.dashboard-details {
-  text-align: left;
+.triangle-chart {
+  position: absolute; /* 重ねて表示するために絶対配置 */
 }
 
-.details-button {
-  background-color: #f0f0f0;
-  border: none;
-  border-radius: 20px;
-  padding: 5px 20px;
-  font-family: "Noto Sans JP", sans-serif;
+.triangle-chart-text1 {
+  position: absolute; /* 重ねて表示するために絶対配置 */
+  left: 20%;
+  font-size: 1.5vw;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: #4c4c4c;
+}
+.triangle-chart-text2 {
+  position: absolute; /* 重ねて表示するために絶対配置 */
+  left: 50%;
+  font-size: 1.5vw;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: #4c4c4c;
+}
+.triangle-chart-text3 {
+  position: absolute; /* 重ねて表示するために絶対配置 */
+  left: 80%;
+  font-size: 1.5vw;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: #4c4c4c;
 }
 
-.details-button:hover {
-  color: #6b7280;
+.dashboard-middle {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 3vw;
+  gap: 2vw;
 }
 
-/* 検索欄 */
-.dashboard-sidebar {
+.middle-content-text {
+  position: sticky;
+  top: 0;
   background-color: #ffffff;
-  margin: 0 20px;
-  width: 20%;
-  height:550px;
-  border: 1px solid #cccccc;
-  border-radius: 15px;
-  padding: 10px;
-  overflow-y: auto;
-}
-
-.sidebar-title {
-  font-size: 18px;
+  font-size: 1.25vw;
+  padding-top: 2vw;
   font-weight: 600;
   text-align: left;
   margin-bottom: 5px;
+  z-index: 10;
+}
+
+.dashboard-middle-content {
+  width: 50%;
+  height: 55vh;
+  padding: 0 2vw 2vw 2vw;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
+  border-radius: 15px;
+
+  overflow-y: auto;
 }
 
 .search-keywords {
@@ -283,7 +363,6 @@
 }
 
 .search-icon {
-  font-size: 25px;
   height: 15px;
   width: 15px;
   color: #6b7280;
@@ -299,25 +378,51 @@
 }
 
 .search-keyword-text {
-  font-size: 20px;
+  font-size: 1.25vw;
   font-weight: 500; /* font-medium */
   margin: 0;
 }
 
 .search-count-text {
-  font-size: 16px; /* text-xs */
+  font-size: 1vw; /* text-xs */
   color: #6b7280; /* text-gray-500 */
   margin: 0;
 }
 
-/*suggestのスペース*/
-.suggest-space {
-  padding: 20px;
+.dashboard-bottom {
+  display: flex;
+  flex-direction: row;
+  height: 55vh;
+  margin-bottom: 1vw;
+  gap: 2vw;
+}
+
+.dashboard-bottom-content {
+  width: 33%;
+  height: 100%;
   background-color: #ffffff;
-  margin: 20px;
-  border: 1px solid #cccccc;
-  border-radius: 10px;
-  height: 150px;
+  border-radius: 15px;
+  padding: 0 2vw 2vw 2vw;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  margin-bottom: 1vw;
+}
+
+.bottom-content-text {
+  position: sticky;
+  top: 0;
+  background-color: #ffffff;
+  font-size: 1.25vw;
+  padding-top: 2vw;
+  font-weight: 600;
+  text-align: left;
+  margin-bottom: 5px;
+  z-index: 10;
+}
+
+.bottom-chart {
+  width: 100%;
+  height: 100%;
 }
 
 .overlay {
@@ -329,10 +434,6 @@
   background-color: rgba(0, 0, 0, 0.5); /* 半透明の黒で背景を暗くする */
   z-index: 10000; /* 他のコンテンツよりも前面に表示 */
   display: none; /* デフォルトでは非表示 */
-}
-
-.overlay.active {
-  display: block; /* アクティブ時に表示 */
 }
 
 /* レスポンシブコンテナ */
@@ -352,6 +453,9 @@
     width: 100vw;
     justify-content: flex-start;
     padding: 5px;
+  }
+  .header-title {
+    font-size: 5vw;
   }
 
   .header-left {
@@ -381,13 +485,26 @@
   }
 
   .dashboard-title {
-    margin: 20px 0;
+    margin: 4vw 0;
+    font-size: 4vw;
   }
 
   .header-dropdown-menu {
     display: flex;
     flex-direction: column;
     width: 30%;
+  }
+
+  .metric-card-header {
+    font-size: 3vw;
+  }
+
+  .metric-value {
+    font-size: 5vw;
+  }
+
+  .metric-comparison {
+    font-size: 3vw;
   }
 
   .sidebar {
@@ -440,8 +557,9 @@
 
   .center-content {
     margin: 0;
-    padding: 10px 0;
+    padding: 0;
     width: 100%;
+    height: 48%;
     border-top: none;
   }
 
@@ -469,10 +587,29 @@
     padding: 10px 0;
   }
 
+  .details-button {
+    font-size: 3vw;
+    margin-left: 1.5vw;
+  }
+
   .dashboard-sidebar {
     width: 100%;
-    margin-top: 24px;
-    margin: 10px 0;
-    padding: 5px;
+    margin: 3vw 0;
+    padding: 3vw;
+  }
+
+  .dashboard-sidebar-title {
+    font-size: 3vw;
+  }
+
+  .search-keyword-text {
+    font-size: 3vw;
+  }
+  .sidebar {
+    padding: 4vw;
+  }
+  .icon-text {
+    font-size: 3vw;
+    text-align: center;
   }
 }

@@ -1,17 +1,17 @@
 import React from "react";
 import MUIDataTable from "mui-datatables";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import "../../styles/components/sourceTable.css";
 
 const getMuiTheme = () =>
   createTheme({
-      components:{
+    components: {
       MUIDataTable: {
         styleOverrides: {
-          paper:{
-            boxShadow:"none",
+          paper: {
+            boxShadow: "none",
           },
-        
-    },
+        },
       },
       MUIDataTableToolbar: {
         styleOverrides: {
@@ -22,79 +22,75 @@ const getMuiTheme = () =>
       },
       MUIDataTableBodyCell: {
         styleOverrides: {
-        root: {
-          padding: "8px", // セルのパディングを変更
-          fontSize: "15px", // フォントサイズを変更
-          borderRight: '1px solid #e0e0e0', // 右側のボーダーを追加
-          '&:last-child': {
-            borderRight: 'none', // 最後のセルの右ボーダーを削除
+          root: {
+            padding: "8px",
+            fontSize: "15px",
+          },
+        },
+      },
+      MUIDataTableHeadCell: {
+        styleOverrides: {
+          root: {
+            fontWeight: "bold",
+            fontSize: "15px",
+            padding: "10px",
           },
         },
       },
     },
-      MUIDataTableHeadCell: {
-        styleOverrides: {
-        root: {
-          fontWeight: "bold",
-          borderRight: '1px solid #ffffff',
-            '&:last-child': {
-              borderRight: 'none',
-            },
-        },
-      },
-    },
-    
-    },
   });
-
-const Table = ({ data, dataKey }) => {
+const Table = ({ data }) => {
   if (!Array.isArray(data) || data.length === 0) {
-    console.error("Invalid or empty data format");
     return null;
   }
 
   // `date`列と`dataKey`で指定された列を表示
   const columns = [
-    { name: "date", label: "Date" },
-    { name: dataKey || "defaultKey", label: dataKey || "Default Key" }, // 2列目がundefinedの場合はデフォルト値を設定
+    { name: "number", label: "No" },
+    { name: "query", label: "キーワード" },
+    {
+      name: "count",
+      label: "表示回数",
+    }, // 2列目は`dataKey`で指定された列
+    { name: "click", label: "クリック数" },
   ];
 
   // データをテーブル用に整形
-  const tableData = data.map((item) => ({
-    date: item.date, // 1列目は常に`date`
-    [dataKey]: item[dataKey] ?? "", // 2列目は`dataKey`の値。無い場合は空白
-  }));
+  const tableData = data.map((item, index) => {
+    const row = {
+      number: index + 1,
+      query: item[0],
+      count: 1024,
+      click: item[1],
+    };
+    console.log(row);
+    return row;
+  });
 
   // options 設定（必要に応じてカスタマイズ可能）
   const options = {
-    filterType: "checkbox",
+    filterType: "dropdown",
     selectableRows: "none", // 行の選択を無効にする
-    responsive: "standard", // scrollMaxHeightの代わりにstandardを使用
+    responsive: "vertical", // scrollMaxHeightの代わりにstandardを使用
     download: false,
     print: false,
     search: false,
     viewColumns: false,
-    rowsPerPageOptions: [5, 7, 10],
+    rowsPerPage: data.length,
+    rowsPerPageOptions: [data.length],
+    sort: true,
+    pagination: false,
     textLabels: {
       body: {
         noMatch: "データが見つかりません",
-      },
-      pagination: {
-        next: "次へ",
-        previous: "前へ",
-        rowsPerPage: "行数",
       },
     },
   };
 
   return (
-    <ThemeProvider theme={getMuiTheme()}> <MUIDataTable
-    
-    data={tableData} // 2行目以降のデータを提供
-    columns={columns}
-    options={options} // オプション設定
-  /></ThemeProvider>
-   
+    <ThemeProvider theme={getMuiTheme()}>
+      <MUIDataTable data={tableData} columns={columns} options={options} />
+    </ThemeProvider>
   );
 };
 

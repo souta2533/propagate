@@ -1,14 +1,29 @@
 import React from "react";
 import { Bar } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+
+// 必要なコンポーネントを登録
+ChartJS.register(
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const BarChart = ({ data }) => {
   if (!data || data.length === 0) {
     console.warn("Data is empty or null");
-    return (
-      <dev>
-        <h1>Please set your URL & PagePath!</h1>
-      </dev>
-    );
+    return null;
   }
 
   // dataをchart.jsが必要とする形式に変換
@@ -26,6 +41,7 @@ const BarChart = ({ data }) => {
   };
 
   const options = {
+    indexAxis: "y",
     scales: {
       x: {
         beginAtZero: true, // X軸の開始点をゼロにする
@@ -38,6 +54,13 @@ const BarChart = ({ data }) => {
     plugins: {
       tooltip: {
         enabled: true, // ツールチップを有効化
+        callbacks: {
+          label: function (context) {
+            const label = context.dataset.label || "";
+            const value = context.raw;
+            return `${value}`;
+          },
+        },
       },
       legend: {
         display: false, // 凡例を非表示にする
