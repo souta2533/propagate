@@ -362,7 +362,7 @@ class AnalyticsDataTable:
                 for d in data:
                     # 既存のデータをチェック
                     existing_data = self.supabase.table("AnalyticsDataTable") \
-                        .select("*") \
+                        .select("id") \
                         .eq("property_id", property_id) \
                         .eq("url", base_url_depth2) \
                         .eq("date", d['date']) \
@@ -386,6 +386,7 @@ class AnalyticsDataTable:
                         .eq("date", d['date']).execute()
                     
                     else:
+                        # upsert: すでにデータが存在する場合は更新，存在しない場合は新規追加
                         response = self.supabase.table("AnalyticsDataTable").upsert({
                             "property_id": property_id,
                             "url": base_url_depth2,
@@ -413,7 +414,7 @@ class AnalyticsDataTable:
                 for d in data:
                     # 既存のデータをチェック
                     existing_data = self.supabase.table("AnalyticsDataTable") \
-                        .select("*") \
+                        .select("id") \
                         .eq("property_id", property_id) \
                         .eq("url", base_url_depth2) \
                         .eq("date", d['date']) \
@@ -448,7 +449,41 @@ class AnalyticsDataTable:
         
         except APIError as e:
             logging.error(f"Error to save Search Console Data: {e}")
-             
+    
+    async def fetch_data(self, property_id, start_date, end_date, jwt_token):
+        """
+            指定された期間のデータ(AnalyticsDataとSearchConsoleData)を取得
+        """
+        all_data = []
+        offset = 0
+
+        try:
+            while True:
+                # バッチ処理でデータを取得
+                response = self.supabase \
+                    .table("AnalyticsDataTable") \
+                    .select("*") \
+                    .eq("property_id", property_id) \
+                    .gte("date", start_date) \
+                    .lte("date", end_date) \
+                    .range(offset, offset + BATCH_SIZE - 1) \
+                    .execute()
+                
+                # データがない場合，ループを終了
+                if not response.data or response.data == []:
+                    break
+
+                # データをリストに追加
+                all_data.extend(response.data)
+
+                # オフセットを更新
+                offset += BATCH_SIZE
+
+        except APIError as e:
+            logging.error(f"Error to fetch data: {e}")
+            
+        return all_data if all_data else None
+
 class UnregisteredTable:
     """
         UnregisteredTable
