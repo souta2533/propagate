@@ -257,13 +257,27 @@
   transition: 0.5s;
 }
 
-.web-metrics-chart {
+.dashboard-center {
+  display: flex;
+  flex-direction: row;
   align-items: center;
   width: 100%;
   height: 35vh;
   margin-bottom: 1vw;
+  gap: 1vw;
 }
 
+.dashboard-center-left {
+  width: 70%;
+  height: 100%;
+  background-color: #ffffff;
+}
+
+.dashboard-center-right {
+  width: 30%;
+  height: 100%;
+  background-color: #ffffff;
+}
 .triangle-chart-container {
   position: relative; /* 子要素を絶対配置するための基準 */
   width: 100%;
