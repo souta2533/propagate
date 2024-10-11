@@ -33,6 +33,8 @@ const customStyles = {
     boxShadow: "none",
     padding: "5px 10px",
     cursor: "pointer",
+    //backgroundColor: "#f0f0f0",
+    overflowX: "auto",
   }),
   "&:hover": {},
   menu: (provided) => ({
@@ -655,18 +657,20 @@ const Dashboard = () => {
       prePV = 0,
       preCV = 0,
       preUU = 0;
-    // ループ処理でPV, CV, UUを集計
-    filteredData.forEach((data) => {
-      totalPV += data.PV || 0;
-      totalCV += data.CV || 0;
-      totalUU += data.UU || 0;
-    });
 
-    previousData.forEach((data) => {
-      prePV += data.PV || 0;
-      preCV += data.CV || 0;
-      preUU += data.SS || 0;
-    });
+    // ループ処理でPV, CV, UUを集計
+    if (Array.isArray(filteredData)) {
+      filteredData.forEach((data) => {
+        totalPV += data.PV || 0;
+        totalCV += data.CV || 0;
+        totalUU += data.UU || 0;
+      });
+      previousData.forEach((data) => {
+        prePV += data.PV || 0;
+        preCV += data.CV || 0;
+        preUU += data.SS || 0;
+      });
+    }
 
     const currentData = {
       PV: totalPV,
@@ -1041,7 +1045,9 @@ const Dashboard = () => {
               </div>*/}
             </div>
           </div>
-          <div className="dashboard-top-right"></div>
+          <div className="dashboard-top-right">
+            <p className="dashboard-top-right-title">サイトの分析・提案</p>
+          </div>
         </div>
         <div className="dashboard-middle">
           <div className="dashboard-middle-content">

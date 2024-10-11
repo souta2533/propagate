@@ -109,7 +109,7 @@ const CustomLineChart = ({ data = [], dataKeys = [] }) => {
   };
 
   const divStyle = {
-    height: "28vw",
+    height: "80vw",
   };
 
   return (
