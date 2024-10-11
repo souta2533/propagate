@@ -26,14 +26,52 @@ import WebMetricsChart from "../components/graph/WebMetricsChart";
 import TriangleChart from "../components/graph/TriangleChart";
 import "../styles/dashboard.css";
 
-const customStyles = {
+const customStyles1 = {
+  control: (provided) => ({
+    ...provided,
+    backgroundColor: "#000000",
+    color: "#ffffff",
+    border: "1px solid #ffffff",
+    borderRadius: "10vw",
+    boxShadow: "none",
+    padding: "0.5vw",
+    cursor: "pointer",
+    overflowX: "auto",
+    width: "15vw",
+
+    "@media (max-width: 768px)": {
+      width: "40vw",
+      height: "5vw",
+      padding: "2vw",
+    },
+  }),
+  "&:hover": {},
+  menu: (provided) => ({
+    ...provided,
+    backgroundColor: "#ffffff", // メニュー背景色
+    zIndex: 9999, // メニューが他の要素の上に表示されるように
+  }),
+  "&:hover": {},
+  option: (provided, state) => ({
+    ...provided,
+    backgroundColor: state.isFocused ? "#f0f0f0" : "#fff", // フォーカスされたときのオプションの背景色
+    color: state.isFocused ? "#333" : "#000", // フォーカスされたときのオプションの文字色
+    padding: 10,
+  }),
+  singleValue: (provided) => ({
+    ...provided,
+    color: "#ffffff", // 選択されたオプションのテキスト色
+  }),
+};
+
+const customStyles2 = {
   control: (provided) => ({
     ...provided,
     border: "none",
     boxShadow: "none",
     padding: "5px 10px",
     cursor: "pointer",
-    //backgroundColor: "#f0f0f0",
+    backgroundColor: "#ffffff",
     overflowX: "auto",
   }),
   "&:hover": {},
@@ -700,6 +738,11 @@ const Dashboard = () => {
         previousValue: preData.UU,
       },
       {
+        title: "問い合わせ数(CV)",
+        value: currentData.CV || 0,
+        previousValue: preData.CV,
+      },
+      {
         title: "問い合わせ率(CVR)",
         value:
           currentData.UU > 0
@@ -709,11 +752,6 @@ const Dashboard = () => {
           preData.UU > 0
             ? ((preData.CV / preData.UU) * 100).toFixed(2) + "%"
             : "0%", // 前月の UU が 0 の場合も "0%" を表示
-      },
-      {
-        title: "問い合わせ数(CV)",
-        value: currentData.CV || 0,
-        previousValue: preData.CV,
       },
     ]);
   };
@@ -908,11 +946,11 @@ const Dashboard = () => {
           <form onSubmit={handleSubmit}>
             <CreatableSelect
               className="url-select"
-              styles={customStyles}
+              styles={customStyles1}
               value={selectedUrl}
               onChange={handleUrlChange}
               options={urlOptions}
-              placeholder="URLを追加してください"
+              placeholder="URL選択"
               onCreateOption={handleUrl}
             />
           </form>
@@ -957,12 +995,11 @@ const Dashboard = () => {
         </div>
       </header>
       <main className="dashboard-main">
-        {<Sidebar className="sidebar" />}
         <div className="dashboard-header">
           <div className="dashboard-header-left">
             <Select
               className="custom-select"
-              styles={customStyles}
+              styles={customStyles2}
               value={selectedOption}
               onChange={handleDateRangeChange}
               options={options}
@@ -1088,7 +1125,7 @@ const Dashboard = () => {
               <PieChart data={deviceData} />
             </div>
           </div>
-          <div className="dashboard-bottom-content">
+          <div className="dashboard-bottom-center">
             <div className="bottom-content-text">
               <p className="bottom-title">地域</p>
               <p className="bottom-subtitle">
@@ -1099,7 +1136,7 @@ const Dashboard = () => {
               <PercentageTable data={areaData} className="Percentage-graph" />
             </div>
           </div>
-          <div className="dashboard-bottom-content">
+          <div className="dashboard-bottom-right">
             <div className="bottom-content-text">
               <p className="bottom-title">性別・男女</p>
               <p className="bottom-subtitle">
@@ -1110,6 +1147,7 @@ const Dashboard = () => {
           </div>
         </div>
       </main>
+      {<Sidebar className="sidebar" />}
     </div>
   );
 };
