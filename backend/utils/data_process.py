@@ -1,4 +1,5 @@
 from collections import defaultdict
+import copy
 from datetime import datetime, timedelta
 import pandas as pd
 from urllib.parse import urlparse, unquote
@@ -839,6 +840,9 @@ def arrange_by_url(data):
     """
         DBから取得したデータをURLごとのデータ構造に変更する関数
     """
+    if data is None:
+        return None
+    
     arranged_data = defaultdict(list)
 
     for record in data:
@@ -854,8 +858,10 @@ def initialize_missing_data(data_by_date, start_date, end_date):
     """
         期間内でデータが存在しない場合に初期化する関数
     """ 
+    if data_by_date is None:
+        return None
+    
     initial_data = {
-            "date": "",
             "PV": 0,
             "CV": 0,
             "CVR": 0.0,
@@ -868,6 +874,7 @@ def initialize_missing_data(data_by_date, start_date, end_date):
             "click": 0,                    
             "impression": 0,
             "ctr": 0,
+            "date": "",
             "position": 0,
             "country": defaultdict(int),
             "source": defaultdict(int),
@@ -880,25 +887,29 @@ def initialize_missing_data(data_by_date, start_date, end_date):
     # URLごとに処理
     for url, records in data_by_date.items():
         # 既存の日付データを取得
-        existing_dates = {record['date'] for record in records}
+        existing_dates = [record['date'] for record in records]
 
         # 日付リストから不足している日付を追加
         for date in date_list:
             date = datetime.strptime(date, "%Y-%m-%d").strftime("%Y/%m/%d")
             if date not in existing_dates:
-                initial_data['date'] = date
-                data_by_date[url].append(initial_data)
+                initial_data_copy = copy.deepcopy(initial_data)
+                initial_data_copy['date'] = date
+                data_by_date[url].append(initial_data_copy)
 
     return data_by_date
 
 def sort_by_date(data_by_date):
     """
         日付順にsortする関数
-        data: [{}]
     """
+    if data_by_date is None:
+        logger.error("data_by_date is None") 
+        return data_by_date
+    
     try:
-        for url, records in data_by_date.items():
-            if records is None or records['date'] is None:
+        for url, records in data_by_date.items():   # records: []
+            if records is None:
                 logger.error(f"Error: date is None ({url})")
                 continue
 
@@ -907,6 +918,8 @@ def sort_by_date(data_by_date):
                 key=lambda x: datetime.strptime(x['date'], "%Y/%m/%d")
             )
             data_by_date[url] = sorted_data
+
+        return data_by_date
     
     except Exception as e:
         logger.error(f"Error: {e}")
