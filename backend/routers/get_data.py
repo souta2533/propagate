@@ -5,7 +5,7 @@ import os
 
 from db.supabase_client import supabase
 from db.db_operations import AnalyticsData, SearchConsoleDataTable, AnalyticsDataTable
-from utils.data_process import data_by_date, data_by_page_path, aggregate_data, aggregate_by_url, aggregate_by_base_url
+from utils.data_process import aggregate_data, aggregate_by_url, aggregate_by_base_url, arrange_by_url, initialize_missing_data, sort_by_date
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -35,9 +35,17 @@ async def get_data_by_day(
         # DBからデータを取得
         analytics_data_table = AnalyticsDataTable(supabase)
         data_by_date = await analytics_data_table.fetch_data(propertyId, startDate, endDate, jwt_token)
-        data_by_date_by_base_url = aggregate_by_base_url(data_by_date)
-        
-        return {"status": "success", "data": data_by_date_by_base_url}
+
+        # URLごとにデータ構造を整理
+        data_by_url = arrange_by_url(data_by_date)
+
+        # 日付がないデータには初期値を設定
+        data_by_url = initialize_missing_data(data_by_url, startDate, endDate)
+
+        # 日付でソート
+        # data_by_url = sort_by_date(data_by_url)
+
+        return {"status": "success", "data": data_by_url}
 
     except Exception as e:
         log.error(f"Error: {e}")
@@ -62,15 +70,11 @@ async def get_data_by_day_from_details(
     
     try:
         # DBからデータを取得
-        analytics_table = AnalyticsData(supabase)
-        analytics_data = await analytics_table.fetch_data(propertyId, startDate, endDate, jwt_token)
+        analytics_data_table = AnalyticsDataTable(supabase)
+        data_by_date = await analytics_data_table.fetch_data(propertyId, startDate, endDate, jwt_token)
+        data_by_date_by_base_url = aggregate_by_base_url(data_by_date)
 
-        search_console_table = SearchConsoleDataTable(supabase)
-        search_console_data = await search_console_table.fetch_data(propertyId, startDate, endDate, jwt_token)
-
-        data = data_by_page_path(analytics_data, search_console_data)
-
-        return {"status": "success", "data": data}
+        return {"status": "success", "data": data_by_date_by_base_url}
     
     except Exception as e:
         log.error(f"Error: {e}")

@@ -29,12 +29,14 @@ def run_js_script(script_name, input_data):
         # print("STDDECODE: ", stdout.decode().strip()[:500])
 
         if stderr:            
-            print(f"JavaScript Error: {stderr.decode()}\n")
+            logger.error(f"JavaScript Error: {stderr.decode()}\n")
             raise Exception(f"JavaScript Error: {stderr.decode()}") 
         
         # 出力結果をJSON形式に変換
-        # print('Raw stdout from Node.hs script: ', stdout.decode())
-        # print(json.loads(stdout.decode()))
+        # logger.info(f"STDOUT from JavaScript: {stdout.decode()}")
+        # logger.info(f"STDERR from JavaScript: {stderr.decode()}")
+        # logger.info(f"STDOUT from JavaScript: {json.loads(stdout.decode())[500]}")
+
 
         # 出力が空だった場合，Noneを返す
         if stdout.decode().strip() == "NoData" or stdout.decode().strip() == "":
@@ -52,5 +54,5 @@ def run_js_script(script_name, input_data):
         elif '403' in str(e):
             return "Access denied"
         else:
-            print(f"Failed to run JavaScript: {e}")
+            logger.error(f"Failed to run JavaScript: {e}")
             return None

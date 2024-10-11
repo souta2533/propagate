@@ -80,25 +80,6 @@ def transform_data_by_date(data_by_date, source='dashboard'):
                     flattened_data[base_url][page_path].append(flattened_entry)
         return flattened_data
 
-def sort_by_date(data, source='dashboard'):
-    """
-        日付順にsortする関数
-    """
-    if source == 'dashboard':
-        sorted_data = {}
-        for base_url, entries in data.items():
-            sorted_entries = sorted(entries, key=lambda x: x['date'])
-            sorted_data[base_url] = sorted_entries
-
-    elif source == 'details':
-        sorted_data = {}
-        for base_url, page_paths in data.items():
-            sorted_data[base_url] = {}
-            for page_path, entries in page_paths.items():
-                sorted_entries = sorted(entries, key=lambda x: x['date'])
-                sorted_data[base_url][page_path] = sorted_entries
-                
-    return sorted_data
 
 # def fill_missing_date(data, source='dashboard'):
 #     """
@@ -160,9 +141,9 @@ def sort_by_date(data, source='dashboard'):
 
 #     if source == 'dashboard':
 
-
 def data_by_date(analytics_data, search_console_data, url_depth=1):
     """
+        DBに保存する前に実行
         日付ごとにデータを集計する関数
         ページパスは考慮せず, URLごとに集計
     """
@@ -180,7 +161,7 @@ def data_by_date(analytics_data, search_console_data, url_depth=1):
         if not page_location:
             continue
 
-        date = datetime.strptime(entry.get("date"), "%Y%m%d").strftime("%Y-%m-%d")
+        date = datetime.strptime(entry.get("date"), "%Y%m%d").strftime("%Y/%m/%d")
         if not date:
             continue
 
@@ -237,7 +218,7 @@ def data_by_date(analytics_data, search_console_data, url_depth=1):
     for base_url, dates in data_by_date.items():
         for date, data in dates.items():
             if data['UU'] > 0:
-                data['CVR'] = data['CV'] / data['UU']
+                data['CVR'] = round(data['CV'] / data['UU'] * 100, 3)
             else:
                 data['CVR'] = 0.0
 
@@ -247,7 +228,7 @@ def data_by_date(analytics_data, search_console_data, url_depth=1):
         if not page:
             continue
         
-        date = entry.get('date')
+        date = datetime.strptime(entry.get("date"), "%Y-%m-%d").strftime("%Y/%m/%d")
         if not date:
             continue
 
@@ -281,10 +262,10 @@ def data_by_date(analytics_data, search_console_data, url_depth=1):
             }
         
         # クエリの集計
-        data_by_date[base_url][date]['click'] += entry.get('click', 0)
-        data_by_date[base_url][date]['impression'] += entry.get('impression', 0)
+        data_by_date[base_url][date]['click'] += entry.get('clicks', 0)
+        data_by_date[base_url][date]['impression'] += entry.get('impressions', 0)
         data_by_date[base_url][date]['ctr'] += entry.get('ctr', 0)
-        data_by_date[base_url][date]['position'] += entry.get('position', 0)
+        data_by_date[base_url][date]['position'] += int(entry.get('position', 0))
 
         # カテゴリ項目のカウント
         query = entry.get('query')
@@ -299,7 +280,7 @@ def data_by_date(analytics_data, search_console_data, url_depth=1):
     for base_url, dates in data_by_date.items():
         for date, data in dates.items():
             if data['impression'] > 0:
-                data['ctr'] = (data['click'] / data['impression']) * 100
+                data['ctr'] = round((data['click'] / data['impression']) * 100, 3)
             else:
                 data['ctr'] = 0.0
     
@@ -854,6 +835,159 @@ def aggregate_by_base_url(data):
 
     return base_url_aggregates
 
+def arrange_by_url(data):
+    """
+        DBから取得したデータをURLごとのデータ構造に変更する関数
+    """
+    arranged_data = defaultdict(list)
+
+    for record in data:
+        url = record.get('url', None) 
+        if url is None:
+            continue
+
+        arranged_data[url].append(record)
+
+    return arranged_data
+
+def initialize_missing_data(data_by_date, start_date, end_date):
+    """
+        期間内でデータが存在しない場合に初期化する関数
+    """ 
+    initial_data = {
+            "date": "",
+            "PV": 0,
+            "CV": 0,
+            "CVR": 0.0,
+            "active_users": 0,
+            "UU": 0,
+            "engaged_sessions": 0,
+            "city": defaultdict(int),       # Analytics Dataから取得
+            "device_category": defaultdict(int),
+            "query": defaultdict(int),
+            "click": 0,                    
+            "impression": 0,
+            "ctr": 0,
+            "position": 0,
+            "country": defaultdict(int),
+            "source": defaultdict(int),
+    }
+
+    start_dt = datetime.strptime(start_date, "%Y-%m-%d")
+    end_dt = datetime.strptime(end_date, "%Y-%m-%d")
+    date_list = [(start_dt + timedelta(days=x)).strftime("%Y-%m-%d") for x in range((end_dt - start_dt).days + 1)]
+
+    # URLごとに処理
+    for url, records in data_by_date.items():
+        # 既存の日付データを取得
+        existing_dates = {record['date'] for record in records}
+
+        # 日付リストから不足している日付を追加
+        for date in date_list:
+            date = datetime.strptime(date, "%Y-%m-%d").strftime("%Y/%m/%d")
+            if date not in existing_dates:
+                initial_data['date'] = date
+                data_by_date[url].append(initial_data)
+
+    return data_by_date
+
+def sort_by_date(data_by_date):
+    """
+        日付順にsortする関数
+        data: [{}]
+    """
+    try:
+        for url, records in data_by_date.items():
+            if records is None or records['date'] is None:
+                logger.error(f"Error: date is None ({url})")
+                continue
+
+            sorted_data = sorted(
+                records,
+                key=lambda x: datetime.strptime(x['date'], "%Y/%m/%d")
+            )
+            data_by_date[url] = sorted_data
+    
+    except Exception as e:
+        logger.error(f"Error: {e}")
+        return data_by_date
+
+def aggregate_by_path(data):
+    """
+        URLのパスをキーとして集計する関数
+    """
+    data_by_path = defaultdict(lambda: {
+        "PV": 0,
+        "CV": 0,
+        "CVR": 0.0,
+        "active_users": 0,
+        "UU": 0,
+        "engaged_sessions": 0,
+        "city": defaultdict(int),       # Analytics Dataから取得
+        "device_category": defaultdict(int),
+        "query": defaultdict(int),
+        "click": 0,                    
+        "impression": 0,
+        "ctr": 0,
+        "position": 0,
+        "country": defaultdict(int),
+        "source": defaultdict(int),
+    })
+
+    # データをPathごとに集計
+    for record in data:
+        url = record.get('url', None)
+        if url is None:
+            continue
+
+         # 数値項目の計算
+        data_by_path[url]['PV'] += record.get('PV') if record.get('PV') is not None else 0
+        data_by_path[url]['CV'] += record.get('CV') if record.get('CV') is not None else 0
+        data_by_path[url]['active_users'] += record.get('active_users') if record.get('active_users') is not None else 0
+        data_by_path[url]['UU'] += record.get('UU') if record.get('UU') is not None else 0
+        data_by_path[url]['engaged_sessions'] += record.get('engaged_sessions') if record.get('engaged_sessions') is not None else 0
+        data_by_path[url]['click'] += record.get('click') if record.get('click') is not None else 0
+        data_by_path[url]['impression'] += record.get('impression') if record.get('impression') is not None else 0
+        data_by_path[url]['position'] += float(record.get('position')) if record.get('position') is not None else 0.0
+
+        # カテゴリ項目のカウント
+        cities = record.get('city') if record.get('city') is not None else {}
+        if cities is not None:
+            for city, v in cities.items():
+                data_by_path[url]['city'][city] += 1
+        
+        device_categories = record.get('device_category') if record.get('device_category') is not None else {}
+        if device_categories is not None:
+            for device_category, v in device_categories.items():
+                data_by_path[url]['device_category'][device_category] += 1
+
+        queries = record.get('query') if record.get('query') is not None else {}
+        if queries is not None:
+            for query, v in queries.items():
+                data_by_path[url]['query'][query] += 1
+
+        countries = record.get('country') if record.get('country') is not None else {}
+        if countries is not None:
+            for country, v in countries.items():
+                data_by_path[url]['country'][country] += 1
+
+        # Conversion Rateの計算
+        if data_by_path[url]['UU'] > 0:
+            data_by_path[url]['CVR'] = data_by_path[url]['CV'] / data_by_path[url]['UU']
+
+        # CTRの平均値を計算
+        if data_by_path[url]['impression'] > 0:
+            data_by_path[url]['ctr'] = (data_by_path[url]['click'] / data_by_path[url]['impression']) * 100
+
+        # city, country, queryは上位30件のみ渡す
+        if 'city' in data_by_path[url]:
+            data_by_path[url]['city'] = get_top_n(data_by_path[url]['city'])
+        if 'country' in data_by_path[url]:
+            data_by_path[url]['country'] = get_top_n(data_by_path[url]['country'])
+        if 'query' in data_by_path[url]:
+            data_by_path[url]['query'] = get_top_n(data_by_path[url]['query'])
+        
+    return data_by_path
 
 if __name__ == '__main__':
     page_location = 'https://example.com/blog/2021/01/01'
