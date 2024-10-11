@@ -25,25 +25,28 @@ const PercentageTable = ({ data, title, subtitle }) => {
           const percentage = ((item[1] / total) * 100).toFixed(1);
 
           return (
-            <div key={index} className="table-row">
-              <div className="label">{item[0]}</div>
-              <div
-                className="bar"
-                aria-label={`Bar for ${item[0]} showing ${percentage}%`}
-                role="progressbar"
-              >
+            <div key={index} className="table-row" style={{ display: 'flex', flexDirection: 'column' }}>
+              <div className="label" style={{ marginBottom: '5px' }}>{item[0]}</div>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
                 <div
-                  className="bar-fill"
-                  style={{
-                    width: `${percentage}%`,
-                    backgroundColor: `#25DFBB`,
-                  }}
-                ></div>
-              </div>
-              <div className="percentage">
-                {item[1]}({percentage}%)
+                  className="bar"
+                  aria-label={`Bar for ${item[0]} showing ${percentage}%`}
+                  role="progressbar"
+                  style={{ flex: 1, marginRight: '8px' }}
+                >
+                  <div
+                    className="bar-fill"
+                    style={{
+                      width: `${percentage}%`,
+                      backgroundColor: `#25DFBB`,
+                      height: '5px',
+                    }}
+                  ></div>
+                </div>
+                <div className="percentage">{percentage}%</div>
               </div>
             </div>
+
           );
         })}
       </div>
