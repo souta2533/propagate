@@ -75,13 +75,13 @@ async def get_aggregated_data_from_dashboard(
 
 
         # データを集計
-        # aggregated_data = aggregate_by_path(data_by_date)
+        aggregated_data = aggregate_by_path(data_by_date)
         # aggregated_data = aggregate_data(analytics_data, search_console_data)
         # aggregated_data_by_url = aggregate_by_url(aggregated_data)
 
         # logging.info(f"Aggregated data: {aggregated_data_by_url}")
 
-        return {"status": "success", "data": data_by_date}
+        return {"status": "success", "data": aggregated_data}
     except Exception as e:
         log.error(f"Error: {e}")
         raise HTTPException(status_code=500, detail="Failed to get aggregated data from dashboard")

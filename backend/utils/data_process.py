@@ -14,6 +14,7 @@ def get_top_n(data_dict, n=NUM):
         """
         ソートして上位n件を返す関数
         """
+        logger.info(f"Data dict: {data_dict}")
         return dict(sorted(data_dict.items(), key=lambda x: x[1], reverse=True)[:n])
 
 def transform_data_by_date(data_by_date, source='dashboard'):
@@ -929,6 +930,9 @@ def aggregate_by_path(data):
     """
         URLのパスをキーとして集計する関数
     """
+    if data is None:
+        return None
+    
     data_by_path = defaultdict(lambda: {
         "PV": 0,
         "CV": 0,
@@ -961,7 +965,7 @@ def aggregate_by_path(data):
         data_by_path[url]['engaged_sessions'] += record.get('engaged_sessions') if record.get('engaged_sessions') is not None else 0
         data_by_path[url]['click'] += record.get('click') if record.get('click') is not None else 0
         data_by_path[url]['impression'] += record.get('impression') if record.get('impression') is not None else 0
-        data_by_path[url]['position'] += float(record.get('position')) if record.get('position') is not None else 0.0
+        data_by_path[url]['position'] += int(record.get('position')) if record.get('position') is not None else 0
 
         # カテゴリ項目のカウント
         cities = record.get('city') if record.get('city') is not None else {}
@@ -986,21 +990,22 @@ def aggregate_by_path(data):
 
         # Conversion Rateの計算
         if data_by_path[url]['UU'] > 0:
-            data_by_path[url]['CVR'] = data_by_path[url]['CV'] / data_by_path[url]['UU']
+            data_by_path[url]['CVR'] = round(data_by_path[url]['CV'] / data_by_path[url]['UU'] * 100, 3)
 
         # CTRの平均値を計算
         if data_by_path[url]['impression'] > 0:
-            data_by_path[url]['ctr'] = (data_by_path[url]['click'] / data_by_path[url]['impression']) * 100
+            data_by_path[url]['ctr'] = round((data_by_path[url]['click'] / data_by_path[url]['impression']) * 100, 3)
 
         # city, country, queryは上位30件のみ渡す
-        if 'city' in data_by_path[url]:
-            data_by_path[url]['city'] = get_top_n(data_by_path[url]['city'])
-        if 'country' in data_by_path[url]:
-            data_by_path[url]['country'] = get_top_n(data_by_path[url]['country'])
-        if 'query' in data_by_path[url]:
-            data_by_path[url]['query'] = get_top_n(data_by_path[url]['query'])
+        # if 'city' in data_by_path[url]:
+        #     data_by_path[url]['city'] = get_top_n(data_by_path[url]['city'])
+        # if 'country' in data_by_path[url]:
+        #     data_by_path[url]['country'] = get_top_n(data_by_path[url]['country'])
+        # if 'query' in data_by_path[url]:
+        #     data_by_path[url]['query'] = get_top_n(data_by_path[url]['query'])
         
     return data_by_path
+
 
 if __name__ == '__main__':
     page_location = 'https://example.com/blog/2021/01/01'
