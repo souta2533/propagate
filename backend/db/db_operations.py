@@ -10,7 +10,7 @@ from utils.batch import batch_process
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 log = logging.getLogger("uvicorn")
 
-# NUM_DATA = 200
+BATCH_SIZE = 100
 
 
 class PropagateAccountTable:
@@ -326,8 +326,163 @@ class SearchConsoleDataTable:
             logging.error(f"Error: {e}")
             return None
         
+class AnalyticsDataTable:
+    """
+        Google AnalyticsとSearch Consoleのデータを取得するクラス
+            - id
+            - property_id
+            - url (2つ階層まで)
+            - date
+            - PV
+            - CV
+            - CVR
+            - active_users
+            - UU
+            - engaged_sessions
+            - city
+            - device_category
+            - query
+            - click
+            - impression
+            - ctr
+            - position
+            - country
+            - source
+            - created_at
+    """
+    def __init__(self, supabase_client: Client) -> None:
+        self.supabase = supabase_client
 
+    async def insert_analytics_data(self, property_id, data_by_date):
+        """
+            data_by_date[base_url] 
+        """
+        try:
+            for base_url_depth2, data in data_by_date.items():
+                for d in data:
+                    # 既存のデータをチェック
+                    existing_data = self.supabase.table("AnalyticsDataTable") \
+                        .select("id") \
+                        .eq("property_id", property_id) \
+                        .eq("url", base_url_depth2) \
+                        .eq("date", d['date']) \
+                        .execute()
+                    
+                    if existing_data.data:
+                        # すでにデータが存在する場合，AnalyticsDataのみを更新
+                        response = self.supabase.table("AnalyticsDataTable").update({
+                            "PV": d['PV'],
+                            "CV": d['CV'],
+                            "CVR": d['CVR'],
+                            "active_users": d['active_users'],
+                            "UU": d['UU'],
+                            "engaged_sessions": d['engaged_sessions'],
+                            "city": d['city'],
+                            "device_category": d['device_category'],
+                            "source": d['source'],
+                        }) \
+                        .eq("property_id", property_id) \
+                        .eq("url", base_url_depth2) \
+                        .eq("date", d['date']).execute()
+                    
+                    else:
+                        # upsert: すでにデータが存在する場合は更新，存在しない場合は新規追加
+                        response = self.supabase.table("AnalyticsDataTable").upsert({
+                            "property_id": property_id,
+                            "url": base_url_depth2,
+                            "date": d['date'],
+                            "PV": d['PV'],
+                            "CV": d['CV'],
+                            "CVR": d['CVR'],
+                            "active_users": d['active_users'],
+                            "UU": d['UU'],
+                            "engaged_sessions": d['engaged_sessions'],
+                            "city": d['city'],
+                            "device_category": d['device_category'],
+                            "source": d['source'],
+                        }, on_conflict=["property_id, url, date"]).execute()
 
+        except APIError as e:
+            logging.error(f"Error to save Analytics Data: {e}")
+
+    async def insert_search_console_data(self, property_id, data_by_date):
+        """
+            data_by_date[base_url]
+        """
+        try:
+            for base_url_depth2, data in data_by_date.items():
+                for d in data:
+                    # 既存のデータをチェック
+                    existing_data = self.supabase.table("AnalyticsDataTable") \
+                        .select("id") \
+                        .eq("property_id", property_id) \
+                        .eq("url", base_url_depth2) \
+                        .eq("date", d['date']) \
+                        .execute()
+                    
+                    if existing_data.data:
+                        # すでにデータが存在する場合，SearchConsoleDataのみを更新
+                        response = self.supabase.table("AnalyticsDataTable").update({
+                            "query": d['query'],
+                            "click": d['click'],
+                            "impression": d['impression'],
+                            "ctr": d['ctr'],
+                            "position": d['position'],
+                            "country": d['country'],
+                        }) \
+                        .eq("property_id", property_id) \
+                        .eq("url", base_url_depth2) \
+                        .eq("date", d['date']).execute()
+
+                    else:
+                        response = self.supabase.table("AnalyticsDataTable").upsert({
+                            "property_id": property_id,
+                            "url": base_url_depth2,
+                            "date": d['date'],
+                            "query": d['query'],
+                            "click": d['click'],
+                            "impression": d['impression'],
+                            "ctr": d['ctr'],
+                            "position": d['position'],
+                            "country": d['country'],
+                        }, on_conflict=["property_id, url, date"]).execute()
+        
+        except APIError as e:
+            logging.error(f"Error to save Search Console Data: {e}")
+    
+    async def fetch_data(self, property_id, start_date, end_date, jwt_token):
+        """
+            指定された期間のデータ(AnalyticsDataとSearchConsoleData)を取得
+        """
+        all_data = []
+        offset = 0
+
+        try:
+            while True:
+                # バッチ処理でデータを取得
+                response = self.supabase \
+                    .table("AnalyticsDataTable") \
+                    .select("*") \
+                    .eq("property_id", property_id) \
+                    .gte("date", start_date) \
+                    .lte("date", end_date) \
+                    .range(offset, offset + BATCH_SIZE - 1) \
+                    .execute()
+                
+                # データがない場合，ループを終了
+                if not response.data or response.data == []:
+                    break
+
+                # データをリストに追加
+                all_data.extend(response.data)
+
+                # オフセットを更新
+                offset += BATCH_SIZE
+
+        except APIError as e:
+            logging.error(f"Error to fetch data: {e}")
+            
+        return all_data if all_data else None
 
 class UnregisteredTable:
     """

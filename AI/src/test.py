@@ -30,7 +30,7 @@ def test(args):
     model = load_model(checkpoint_path=latest_checkpoint_path)
     model.eval()
 
-    # テストデータのロード
+    # テストデータのロード     
     data = load_dataset(args.data_path)
     test_dataset = TextDataset(data, tokenizer)
     test_dataloader = DataLoader(test_dataset, batch_size=1, shuffle=True)

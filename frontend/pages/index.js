@@ -9,7 +9,7 @@ import { checkUserRole } from '../lib/checkRole';
 
 
 const PROPAGATE_EMAIL = "propagate1@gmail.com";  // 事前に作成しておくPropagateのメールアドレス
-const EMAIL_PROPAGATE_ID = 35;  // 事前に作成しておくPropagateのメールアドレス
+const EMAIL_PROPAGATE_ID = 35;                   // 事前に作成しておくPropagateのメールアドレス
 const EMAIL_CUSTOMER = "egnpropagate85@gmail.com";    // 顧客が入力するメールアドレス
 
 

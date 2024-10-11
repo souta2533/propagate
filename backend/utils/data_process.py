@@ -161,7 +161,7 @@ def sort_by_date(data, source='dashboard'):
 #     if source == 'dashboard':
 
 
-def data_by_date(analytics_data, search_console_data):
+def data_by_date(analytics_data, search_console_data, url_depth=1):
     """
         日付ごとにデータを集計する関数
         ページパスは考慮せず, URLごとに集計
@@ -186,7 +186,13 @@ def data_by_date(analytics_data, search_console_data):
 
         # URLからドメイン部分を取得
         parsed_url = urlparse(page_location)
-        base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+        if url_depth == 1:
+            base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+        elif url_depth == 2:
+            base_url = f"{parsed_url.scheme}://{parsed_url.netloc}{'/'.join(parsed_url.path.split('/')[:2])}"
+        else:
+            raise ValueError("url_depth must be 1 or 2")
+        
         if date not in data_by_date[base_url]:
             # 日付ごとに初期データを設定
             data_by_date[base_url][date] = {
@@ -247,7 +253,12 @@ def data_by_date(analytics_data, search_console_data):
 
         # URLからパスを取得
         parsed_url = urlparse(page)
-        base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+        if url_depth == 1:
+            base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+        elif url_depth == 2:
+            base_url = f"{parsed_url.scheme}://{parsed_url.netloc}{'/'.join(parsed_url.path.split('/')[:2])}"
+        else:
+            raise ValueError("url_depth must be 1 or 2")
 
         if date not in data_by_date[base_url]:
             # 日付ごとに初期データを設定
@@ -342,7 +353,7 @@ def data_by_page_path(analytics_data, search_console_data):
             page_path = '/' + page_path_parts[1]
 
         if date not in data_by_page_path[base_url][page_path]:
-            # 日付毎に初期データを設定
+            # 日付け毎に初期データを設定
             data_by_page_path[base_url][page_path][date] = {
                 "PV": 0,
                 "CV": 0,
@@ -738,3 +749,116 @@ def transform_for_statistic_analysis(data_by_data):
             })
 
     return transformed_data
+
+def aggregate_by_base_url(data):
+    """
+        data: AnalyticsDataTableに格納されているデータ
+    """
+    if data is None:
+        return None
+    
+    base_url_aggregates = defaultdict(lambda: {
+        'PV': 0,
+        'CV': 0,
+        'CVR': 0.0,
+        'active_users': 0,
+        'UU': 0,
+        'engaged_sessions': 0,
+        'click': 0,
+        'impression': 0,
+        'ctr': 0,
+        'position': 0,
+        'city': defaultdict(int),
+        'device_category': defaultdict(int),
+        'query': defaultdict(int),
+        'country': defaultdict(int),
+        'source': defaultdict(int),
+    })
+
+    for record in data:
+        url = record.get('url', None)
+        if not url or url is None:
+            continue
+
+        parsed_url = urlparse(url)
+        base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+
+        # Base URLごとに集計
+        base_url_aggregates[base_url]['PV'] += record.get('PV') if record.get('PV') is not None else 0
+        base_url_aggregates[base_url]['CV'] += record.get('CV') if record.get('CV') is not None else 0
+        base_url_aggregates[base_url]['CVR'] += record.get('CVR') if record.get('CVR') is not None else 0.0
+        base_url_aggregates[base_url]['active_users'] += record.get('active_users') if record.get('active_users') is not None else 0
+        base_url_aggregates[base_url]['UU'] += record.get('UU') if record.get('UU') is not None else 0
+        base_url_aggregates[base_url]['engaged_sessions'] += record.get('engaged_sessions') if record.get('engaged_sessions') is not None else 0
+        base_url_aggregates[base_url]['click'] += record.get('click') if record.get('click') is not None else 0
+        base_url_aggregates[base_url]['impression'] += record.get('impression') if record.get('impression') is not None else 0
+        base_url_aggregates[base_url]['ctr'] += record.get('ctr') if record.get('ctr') is not None else 0.0
+        base_url_aggregates[base_url]['position'] += float(record.get('position')) if record.get('position') is not None else 0.0
+
+        # logger.info(base_url_aggregates)
+
+        # カテゴリ項目のカウント
+        cities = record.get('city') if record.get('city') is not None else {}
+        if cities is not None:
+            for city, v in cities.items():
+                base_url_aggregates[base_url]['city'][city] += 1
+
+        device_categories = record.get('device_category') if record.get('device_category') is not None else {}
+        if device_categories is not None:
+            # logger.info(device_categories)
+            for device_category, v in device_categories.items():
+                base_url_aggregates[base_url]['device_category'][device_category] += 1
+
+        queries = record.get('query') if record.get('query') is not None else {}
+        if queries is not None:
+            # logger.info(queries)
+            for query, v in queries.items():
+                base_url_aggregates[base_url]['query'][query] += 1
+        
+        countries = record.get('country') if record.get('country') is not None else {}
+        if countries is not None:
+            # logger.info(countries)  
+            for country, v in countries.items():
+                base_url_aggregates[base_url]['country'][country] += 1
+        
+        sources = record.get('source') if record.get('source') is not None else {}
+        if sources is not None:
+            logger.info(sources)
+            for source, v in sources.items():
+                base_url_aggregates[base_url]['source'][source] += 1
+
+    # Conversion Rateの計算
+    for base_url, data in base_url_aggregates.items():
+        if data['UU'] > 0:
+            data['CVR'] = data['CV'] / data['UU']
+        else:
+            data['CVR'] = 0.0
+    
+    # CTRの平均値を計算
+    for base_url, data in base_url_aggregates.items():
+        if data['impression'] > 0:
+            data['ctr'] = (data['click'] / data['impression']) * 100
+        else:
+            data['ctr'] = 0.0
+
+    # city, country, queryは上位30件のみ渡す
+    for base_url, data in base_url_aggregates.items():
+        if 'city' in data:
+            base_url_aggregates[base_url]['city'] = get_top_n(data['city'])
+        if 'country' in data:
+            base_url_aggregates[base_url]['country'] = get_top_n(data['country'])
+        if 'query' in data:
+            base_url_aggregates[base_url]['query'] = get_top_n(data['query'])
+        if 'source' in data:
+            base_url_aggregates[base_url]['source'] = get_top_n(data['source'])
+
+    return base_url_aggregates
+
+
+if __name__ == '__main__':
+    page_location = 'https://example.com/blog/2021/01/01'
+    parsed_url = urlparse(page_location)
+    base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+    print(f"base_url: {base_url}")
+    base_url = f"{parsed_url.scheme}://{parsed_url.netloc}{'/'.join(parsed_url.path.split('/')[:2])}"
+    print(f"base_url: {base_url}")

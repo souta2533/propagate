@@ -28,7 +28,7 @@ const MetricCard = ({ title, value, previousValue, isActive, onClick }) => {
       onClick={onClick} // カードクリック時のイベント
     >
       <div className="metric-card-header">
-        <h3>{title}</h3> {/* カードのタイトルを表示 */}
+        <p>{title}</p> {/* カードのタイトルを表示 */}
       </div>
       <div className="metric-value">
         {value ? value.toLocaleString() : "0"}{" "}
