@@ -313,7 +313,7 @@ const Dashboard = () => {
     refetchSearchConsoleData,
   ]);
 
-  // AnalyticsとSearch Consoleのデータを取得
+  // data by day (AnalyticsとSearch Console)のデータを取得
   const {
     data: fetchedDataByDay,
     error: dataByDayError,

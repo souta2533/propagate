@@ -30,7 +30,7 @@ const fetchData = async (session, propertyIds, startDate, endDate) => {
             if (data) {
                 dataByDay[propertyId] = data;
             }
-        } catch (error) {
+        } catch (error) {   
             console.error("Error fetching data by day:", error);
         }
     }

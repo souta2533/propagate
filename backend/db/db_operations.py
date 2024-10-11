@@ -10,7 +10,7 @@ from utils.batch import batch_process
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 log = logging.getLogger("uvicorn")
 
-BATCH_SIZE = 100
+BATCH_SIZE = 1000
 
 
 class PropagateAccountTable:
@@ -462,7 +462,7 @@ class AnalyticsDataTable:
                 # バッチ処理でデータを取得
                 response = self.supabase \
                     .table("AnalyticsDataTable") \
-                    .select("*") \
+                    .select("PV, CV, CVR, UU, active_users, city, click, country, ctr, date, device_category, engaged_sessions, impression, position, query, source, url") \
                     .eq("property_id", property_id) \
                     .gte("date", start_date) \
                     .lte("date", end_date) \

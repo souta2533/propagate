@@ -31,18 +31,18 @@ async def get_search_console(data: SearchConsoleRequest):
         raise HTTPException(status_code=400, detail="URL is missing or invalid")
     
     try:
+        logger.info(data.model_dump())
         result = run_js_script("./js/get_search_console.js", data.model_dump())
-        
+
         if result == "NoData" or result == "" or result is None:
             # return []
-            raise HTTPException(status_code=404, detail=f'No data available from Search Console({data.url})')
+            raise HTTPException(status_code=404, detail=f'No data available from Search Console ({data.url})')
         elif result == 'Access denied':
             raise HTTPException(status_code=403, detail="Access denied: User does not have sufficient permissions for this URL")
         elif result == 'UnregisteredForSearchConsole':
             raise HTTPException(status_code=400, detail="Unregistered for Search Console")
         elif result is None:
-            logger.info("Result of get_search_console is None")
-            logger.error(f"Error: {result}")
+            logger.error(f"Error ({data.url}): {result}")
             raise HTTPException(status_code=500, detail='Failed to get Search Console data')
         else:   
             # URLからPropertyIDを取得
@@ -52,7 +52,6 @@ async def get_search_console(data: SearchConsoleRequest):
             # Search ConsoleのデータをDBに保存
             analytics_data_table = AnalyticsDataTable(supabase)
             search_console_data = data_by_date(analytics_data=None, search_console_data=result, url_depth=2)
-
             await analytics_data_table.insert_search_console_data(property_id, search_console_data)
         return HTTPException(status_code=200, detail="Success to get Search Console data")
     
