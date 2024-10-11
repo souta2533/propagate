@@ -29,6 +29,11 @@ const getMuiTheme = () =>
             overflow: "hidden",
             textOverflow: "ellipsis",
             maxWidth: "15vw",
+            "@media (max-width: 768px)": {
+              fontSize: "12px",
+              padding: "6px",
+              maxWidth: "40vw", // 小さい画面での列幅を調整
+            },
           },
         },
       },
@@ -41,7 +46,11 @@ const getMuiTheme = () =>
             backgroundColor: "#f9f9f9",
             position: "sticky",
             top: 0,
-            zIndex: 100,
+            zIndex: 50,
+            "@media (max-width: 768px)": {
+              fontSize: "12px",
+              padding: "6px",
+            },
           },
         },
       },
@@ -64,7 +73,7 @@ const Table2 = ({ data }) => {
           style: {
             width: "5%",
             "@media (max-width: 768px)": {
-              width: "5%",
+              width: "10%",
             },
           },
         }),
