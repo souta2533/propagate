@@ -25,6 +25,10 @@ const getMuiTheme = () =>
           root: {
             padding: "8px",
             fontSize: "15px",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            maxWidth: "15vw",
           },
         },
       },
@@ -36,17 +40,21 @@ const getMuiTheme = () =>
             padding: "10px",
             backgroundColor: "#f9f9f9",
             position: "sticky",
+            top: 0,
+            zIndex: 100,
           },
         },
       },
     },
   });
-const Table = ({ data }) => {
+
+const Table2 = ({ data }) => {
   if (!Array.isArray(data) || data.length === 0) {
     return null;
   }
+  
+  const totalCount = data.reduce((sum, item) => sum + item[1], 0);
 
-  // `date`列と`dataKey`で指定された列を表示
   const columns = [
     {
       name: "number",
@@ -54,9 +62,9 @@ const Table = ({ data }) => {
       options: {
         setCellProps: () => ({
           style: {
-            width: "2vw",
+            width: "5%",
             "@media (max-width: 768px)": {
-              width: "10vw",
+              width: "5%",
             },
           },
         }),
@@ -68,9 +76,9 @@ const Table = ({ data }) => {
       options: {
         setCellProps: () => ({
           style: {
-            width: "3vw",
+            width: "15%",
             "@media (max-width: 768px)": {
-              width: "10vw",
+              width: "40%",
             },
           },
         }),
@@ -102,7 +110,7 @@ const Table = ({ data }) => {
             >
               <div
                 style={{
-                  width: `${(value / data[0][1]) * 100}%`,
+                  width: `${(value / totalCount) * 100}%`,
                   backgroundColor: "#25DFBB",
                   height: "100%",
                 }}
@@ -110,36 +118,28 @@ const Table = ({ data }) => {
             </div>
           </div>
         ),
-        options: {
-          setCellProps: () => ({
-            style: {
-              width: "10vw",
-              "@media (max-width: 768px)": {
-                width: "20vw",
-              },
+        setCellProps: () => ({
+          style: {
+            width: "80%",
+            "@media (max-width: 768px)": {
+              width: "50%",
             },
-          }),
-        },
+          },
+        }),
       },
-    }, // 2列目は`dataKey`で指定された列
+    },
   ];
 
-  // データをテーブル用に整形
-  const tableData = data.map((item, index) => {
-    const row = {
-      number: index + 1,
-      query: item[0],
-      count: item[1],
-    };
-    console.log(row);
-    return row;
-  });
+  const tableData = data.map((item, index) => ({
+    number: index + 1,
+    query: item[0],
+    count: item[1],
+  }));
 
-  // options 設定（必要に応じてカスタマイズ可能）
   const options = {
     filterType: "dropdown",
-    selectableRows: "none", // 行の選択を無効にする
-    responsive: "vertical", // scrollMaxHeightの代わりにstandardを使用
+    selectableRows: "none",
+    responsive: "standard",
     download: false,
     print: false,
     search: false,
@@ -148,6 +148,9 @@ const Table = ({ data }) => {
     rowsPerPageOptions: [data.length],
     sort: true,
     pagination: false,
+    fixedHeader: true, // ヘッダー行を固定
+    fixedSelectColumn: true, // 固定する列がある場合に使用
+    tableBodyMaxHeight: "300px", // テーブル本体の最大高さを指定
     textLabels: {
       body: {
         noMatch: "データが見つかりません",
@@ -162,10 +165,10 @@ const Table = ({ data }) => {
   );
 };
 
-export default Table;
+export default Table2;
 
-{
-  /*
+
+/*
  // options 設定
  オプションの詳細
 download: trueにすると、CSV形式でデータをダウンロードするためのボタンが表示されます。
@@ -193,4 +196,3 @@ rowsPerPageOptions: 1ページに表示する行数の選択肢を設定しま�
 
 例: rowsPerPageOptions: [5, 10, 20]で、5、10、20行から選択できるようになります。
 */
-}

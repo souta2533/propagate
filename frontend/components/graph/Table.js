@@ -35,6 +35,9 @@ const getMuiTheme = () =>
             fontSize: "15px",
             padding: "10px",
             backgroundColor: "#f9f9f9",
+            position: "sticky",
+            top: 0,
+            zIndex: 100,
           },
         },
       },
@@ -81,6 +84,9 @@ const Table = ({ data }) => {
     rowsPerPageOptions: [data.length],
     sort: true,
     pagination: false,
+    fixedHeader: true,
+    fixedSelectColumn: true,
+    tableBodyMaxHeight: "300px",
     textLabels: {
       body: {
         noMatch: "データが見つかりません",
