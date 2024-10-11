@@ -7,35 +7,91 @@ const PieChart = ({ data }) => {
     return null;
   }
 
-  const labels = data.map((item) => item[0]);
+  const labels = data.map((item) => {
+    switch (item[0]) {
+      case "desktop":
+        return "デスクトップ";
+      case "tablet":
+        return "タブレット";
+      case "mobile":
+        return "モバイル";
+      case "smart tv":
+        return "スマートテレビ";
+      default:
+        return item[0]; // その他はそのまま
+    }
+  });
   const values = data.map((item) => item[1]);
+  const totalValue = values.reduce((acc, value) => acc + value, 0);
 
   const chartData = {
-    labels: labels, // ラベル（セクション名）
+    labels: labels, 
     datasets: [
       {
-        data: values, // 各セクションの値
-        backgroundColor: ["#25DFBB", "#00C49F", "#4154A7", "#AA70A7"], // セクションの色
-        borderColor: ["#ffffff"], // 境界線の色
-        borderWidth: 1, // 境界線の幅
+        data: values,
+        backgroundColor: ["#25DFBB", "#00C49F", "#4154A7", "#AA70A7"],
+        borderColor: ["#ffffff"],
+        borderWidth: 1,
       },
     ],
   };
 
   const options = {
-    responsive: true, // レスポンシブ対応
+    responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       tooltip: {
-        enabled: true, // ツールチップを表示
+        enabled: true,
       },
       legend: {
-        display: true, // 凡例の表示
-        position: "right", // 凡例の位置
+        display: false, // カスタム凡例を使用するため、デフォルトの凡例を無効化
       },
     },
   };
 
-  return <Pie data={chartData} options={options} />;
+  // カスタムHTML凡例を生成
+  const customLegend = () => {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        {data.map((item, index) => {
+          const percentage = ((item[1] / totalValue) * 100).toFixed(1);
+          return (
+            <div key={index} style={{ marginBottom: '10px', display: 'flex', alignItems: 'center' }}>
+              {/* カスタムの色付き丸アイコン */}
+              <div
+                style={{
+                  width: '10px',
+                  height: '10px',
+                  backgroundColor: chartData.datasets[0].backgroundColor[index],
+                  borderRadius: '50%',
+                  marginRight: '10px',
+                }}
+              ></div>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                {/* ラベル */}
+                <span>{labels[index]}</span>
+                {/* パーセンテージ（大きく、グレーに） */}
+                <span style={{ fontSize: '1.5vw', color: 'gray' }}>{percentage}%</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      {/* 円グラフのコンテナ */}
+      <div style={{ width: '7vw', height: '7vw' }}>
+        <Pie data={chartData} options={options} />
+      </div>
+      {/* カスタム凡例を右側に表示 */}
+      <div style={{ marginLeft: '2vw' }}>
+        {customLegend()}
+      </div>
+    </div>
+  );
 };
 
 export default PieChart;
