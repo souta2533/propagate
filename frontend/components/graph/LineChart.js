@@ -109,7 +109,10 @@ const CustomLineChart = ({ data = [], dataKeys = [] }) => {
   };
 
   const divStyle = {
-    height: "80vw",
+    height: "27vw",
+    "@media (max-width: 768px)": {
+      height: "400vw",
+    },
   };
 
   return (

@@ -31,18 +31,20 @@ const customStyles1 = {
     ...provided,
     backgroundColor: "#000000",
     color: "#ffffff",
-    border: "1px solid #ffffff",
+    border: "2px solid #ffffff",
     borderRadius: "10vw",
     boxShadow: "none",
     padding: "0.5vw",
     cursor: "pointer",
-    overflowX: "auto",
     width: "15vw",
+    overflowX: "scroll",
+    alignItems: "center",
 
     "@media (max-width: 768px)": {
       width: "40vw",
-      height: "5vw",
-      padding: "2vw",
+      padding: "1vw",
+      overflowX: "scroll",
+      alignItems: "center",
     },
   }),
   "&:hover": {},
@@ -71,8 +73,8 @@ const customStyles2 = {
     boxShadow: "none",
     padding: "5px 10px",
     cursor: "pointer",
-    backgroundColor: "#ffffff",
-    overflowX: "auto",
+    backgroundColor: "#f0f0f0",
+    overflowX: "scroll",
   }),
   "&:hover": {},
   menu: (provided) => ({
@@ -901,7 +903,7 @@ const Dashboard = () => {
     if (!sourceData) {
       return [];
     }
-    console.log("SourceData:", sourceData);
+    //console.log("SourceData:", sourceData);
     const sortedEntries = Object.entries(sourceData).sort(
       (a, b) => b[1] - a[1]
     );
@@ -918,7 +920,7 @@ const Dashboard = () => {
     if (!deviceData) {
       return [];
     }
-    console.log("DeviceData:", deviceData);
+    //console.log("DeviceData:", deviceData);
     const sortedEntries = Object.entries(deviceData).sort(
       (a, b) => b[1] - a[1]
     );
@@ -935,7 +937,7 @@ const Dashboard = () => {
     if (!areaData) {
       return [];
     }
-    console.log("AreaData:", areaData);
+    //console.log("AreaData:", areaData);
     const sortedEntries = Object.entries(areaData).sort((a, b) => b[1] - a[1]);
     //const top5Entries = sortedEntries.slice(0, 5);
 
@@ -1011,7 +1013,12 @@ const Dashboard = () => {
               value={selectedUrl}
               onChange={handleUrlChange}
               options={urlOptions}
-              placeholder="URL選択"
+              placeholder={
+                <div>
+                  <FaSearch style={{ marginRight: "2vw" }} />
+                  <span>URL選択</span>
+                </div>
+              }
               onCreateOption={handleUrl}
             />
           </form>
@@ -1064,7 +1071,12 @@ const Dashboard = () => {
               value={selectedOption}
               onChange={handleDateRangeChange}
               options={options}
-              placeholder="ページパス選択"
+              placeholder={
+                <div>
+                  <FaSearch style={{ marginRight: "2vw" }} />
+                  <span>ページパス選択</span>
+                </div>
+              }
             />
           </div>
           <div className="dashboard-header-right">
@@ -1208,7 +1220,7 @@ const Dashboard = () => {
           </div>
         </div>
       </main>
-      {<Sidebar className="sidebar" />}
+      {/*<Sidebar className="sidebar" />*/}
     </div>
   );
 };
