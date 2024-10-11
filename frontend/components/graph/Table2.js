@@ -48,8 +48,34 @@ const Table = ({ data }) => {
 
   // `date`列と`dataKey`で指定された列を表示
   const columns = [
-    { name: "number", label: "No" },
-    { name: "query", label: "カテゴリ" },
+    {
+      name: "number",
+      label: "No",
+      options: {
+        setCellProps: () => ({
+          style: {
+            width: "2vw",
+            "@media (max-width: 768px)": {
+              width: "10vw",
+            },
+          },
+        }),
+      },
+    },
+    {
+      name: "query",
+      label: "カテゴリ",
+      options: {
+        setCellProps: () => ({
+          style: {
+            width: "3vw",
+            "@media (max-width: 768px)": {
+              width: "10vw",
+            },
+          },
+        }),
+      },
+    },
     {
       name: "count",
       label: "流入数",
@@ -63,7 +89,9 @@ const Table = ({ data }) => {
               width: "100%",
             }}
           >
-            <span style={{ marginRight: "8px" }}>{value.toLocaleString()}</span>
+            <span style={{ marginRight: "16px" }}>
+              {value.toLocaleString()}
+            </span>
             <div
               style={{
                 width: "100%",
@@ -82,6 +110,16 @@ const Table = ({ data }) => {
             </div>
           </div>
         ),
+        options: {
+          setCellProps: () => ({
+            style: {
+              width: "10vw",
+              "@media (max-width: 768px)": {
+                width: "20vw",
+              },
+            },
+          }),
+        },
       },
     }, // 2列目は`dataKey`で指定された列
   ];

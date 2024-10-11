@@ -318,7 +318,7 @@
   gap: 2vw;
 }
 
-.dashboard-bottom-content {
+.dashboard-bottom-center {
   width: 33%;
   height: 30vw;
   background-color: #ffffff;
@@ -482,7 +482,7 @@
     position: fixed;
     bottom: 0;
     width: 100%;
-    height: 10%;
+    height: 8%;
     z-index: 9999;
     background-color: #ffffff;
     border-top: 2px solid #7272722f;
@@ -536,7 +536,7 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 130vw;
+    height: 160vw;
     margin-bottom: 2vw;
     gap: 2vw;
     border-radius: 15px;
@@ -553,7 +553,8 @@
 
   .dashboard-top-right {
     width: 100%;
-    padding: 30px;
+    padding: 3vw;
+    height: 50vw;
     background-color: #ffffff;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 
@@ -584,7 +585,7 @@
     border: 1px solid #7272722f;
     border-radius: 5px;
     height: 25vw;
-    padding: 1vw;
+    padding: 2vw;
     transition: 0.5s;
     align-items: center;
   }
@@ -695,7 +696,7 @@
 
   .dashboard-middle-content {
     width: 100%;
-    height: 25vw;
+    height: 50vw;
     padding: 0 3vw 3vw 3vw;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     background-color: #ffffff;
@@ -737,34 +738,36 @@
   .dashboard-bottom {
     display: flex;
     flex-direction: column;
-    height: 40vw;
+    height: 150vw;
     margin-bottom: 1vw;
     gap: 2vw;
   }
 
-  .dashboard-bottom-content {
+  .dashboard-bottom-center {
     width: 100%;
     height: 50vw;
     background-color: #ffffff;
     border-radius: 15px;
-    padding: 0 2vw 2vw 2vw;
+    padding: 0 3vw 3vw 3vw;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
 
   .dashboard-bottom-left {
     width: 100%;
     height: 50vw;
-    padding: 0 2vw 2vw 2vw;
+    padding: 0 3vw 3vw 3vw;
     background-color: #ffffff;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
 
   .dashboard-bottom-right {
-    width: 30%;
+    width: 100%;
     height: 50vw;
-    padding: 0 2vw 2vw 2vw;
+    padding: 0 3vw 3vw 3vw;
     background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
 
   .bottom-content-text {
