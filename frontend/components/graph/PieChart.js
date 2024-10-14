@@ -2,7 +2,6 @@ import React from "react";
 import { Pie } from "react-chartjs-2";
 
 const PieChart = ({ data }) => {
-  console.log("PieData:", data);
   if (!data || data.length === 0) {
     return null;
   }
@@ -25,7 +24,7 @@ const PieChart = ({ data }) => {
   const totalValue = values.reduce((acc, value) => acc + value, 0);
 
   const chartData = {
-    labels: labels, 
+    labels: labels,
     datasets: [
       {
         data: values,
@@ -52,26 +51,35 @@ const PieChart = ({ data }) => {
   // カスタムHTML凡例を生成
   const customLegend = () => {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: "flex", flexDirection: "column" }}>
         {data.map((item, index) => {
           const percentage = ((item[1] / totalValue) * 100).toFixed(1);
           return (
-            <div key={index} style={{ marginBottom: '10px', display: 'flex', alignItems: 'center' }}>
+            <div
+              key={index}
+              style={{
+                marginBottom: "10px",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
               {/* カスタムの色付き丸アイコン */}
               <div
                 style={{
-                  width: '10px',
-                  height: '10px',
+                  width: "10px",
+                  height: "10px",
                   backgroundColor: chartData.datasets[0].backgroundColor[index],
-                  borderRadius: '50%',
-                  marginRight: '10px',
+                  borderRadius: "50%",
+                  marginRight: "10px",
                 }}
               ></div>
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: "flex", flexDirection: "column" }}>
                 {/* ラベル */}
                 <span>{labels[index]}</span>
                 {/* パーセンテージ（大きく、グレーに） */}
-                <span style={{ fontSize: '1.5vw', color: 'gray' }}>{percentage}%</span>
+                <span style={{ fontSize: "1.5vw", color: "gray" }}>
+                  {percentage}%
+                </span>
               </div>
             </div>
           );
@@ -81,15 +89,19 @@ const PieChart = ({ data }) => {
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
       {/* 円グラフのコンテナ */}
-      <div style={{ width: '7vw', height: '7vw' }}>
+      <div style={{ width: "7vw", height: "7vw" }}>
         <Pie data={chartData} options={options} />
       </div>
       {/* カスタム凡例を右側に表示 */}
-      <div style={{ marginLeft: '2vw' }}>
-        {customLegend()}
-      </div>
+      <div style={{ marginLeft: "2vw" }}>{customLegend()}</div>
     </div>
   );
 };

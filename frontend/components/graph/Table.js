@@ -43,6 +43,7 @@ const getMuiTheme = () =>
       },
     },
   });
+
 const Table = ({ data }) => {
   if (!Array.isArray(data) || data.length === 0) {
     return null;
@@ -64,12 +65,13 @@ const Table = ({ data }) => {
     const row = {
       number: index + 1,
       query: item[0],
-      count: 1024,
+      count: item[2],
       click: item[1],
     };
-    console.log(row);
     return row;
   });
+
+  console.log("tableData:", tableData);
 
   // options 設定（必要に応じてカスタマイズ可能）
   const options = {
