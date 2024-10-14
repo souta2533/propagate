@@ -197,6 +197,10 @@ const Dashboard = () => {
   const [urlOptions, setUrlOptions] = useState([]);
   const [selectedUrl, setSelectedUrl] = useState(null);
   const [sanitizedUrl, setSanitizedUrl] = useState(null);
+  const [pagePath, setPagePath] = useState(null);
+  const [selectedPagePath, setSelectedPagePath] = useState("/");
+  const [pagePathOptions, setPagePathOptions] = useState([]);
+  const [pagePathList, setPagePathList] = useState([]);
   const [metrics, setMetrics] = useState(sampleMetrics); // メトリクスのstate
   const [selectedMetrics, setSelectedMetrics] = useState([]); // 選択中のメトリクス
   const [inputValue, setInputValue] = useState(""); // ここで useState を使って定義
@@ -377,7 +381,7 @@ const Dashboard = () => {
       console.log("Aggregated Data: ", fetchedAggregatedData);
       setAggregatedData(fetchedAggregatedData);
       fetchAggregatedData7();
-      console.log("Aggregated Data:", aggregatedData);
+      console.log("Aggregated Data7:", aggregatedData7);
     }
   }, [
     session,
@@ -1068,9 +1072,9 @@ const Dashboard = () => {
             <Select
               className="custom-select"
               styles={customStyles2}
-              value={selectedOption}
-              onChange={handleDateRangeChange}
-              options={options}
+              value={selectedPagePath}
+              onChange={handleUrlChange}
+              options={pagePathOptions}
               placeholder={
                 <div>
                   <FaSearch style={{ marginRight: "2vw" }} />
