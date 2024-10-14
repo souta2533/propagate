@@ -55,14 +55,7 @@ const PieChart = ({ data }) => {
         {data.map((item, index) => {
           const percentage = ((item[1] / totalValue) * 100).toFixed(1);
           return (
-            <div
-              key={index}
-              style={{
-                marginBottom: "10px",
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
+            <div key={index} style={{ marginBottom: "10px", display: "flex" }}>
               {/* カスタムの色付き丸アイコン */}
               <div
                 style={{
@@ -75,9 +68,9 @@ const PieChart = ({ data }) => {
               ></div>
               <div style={{ display: "flex", flexDirection: "column" }}>
                 {/* ラベル */}
-                <span>{labels[index]}</span>
+                <span style={{ fontSize: "12px" }}>{labels[index]}</span>
                 {/* パーセンテージ（大きく、グレーに） */}
-                <span style={{ fontSize: "1.5vw", color: "gray" }}>
+                <span style={{ fontSize: "20px", color: "gray" }}>
                   {percentage}%
                 </span>
               </div>
@@ -96,12 +89,31 @@ const PieChart = ({ data }) => {
         alignItems: "center",
       }}
     >
-      {/* 円グラフのコンテナ */}
-      <div style={{ width: "7vw", height: "7vw" }}>
-        <Pie data={chartData} options={options} />
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        {/* 円グラフのコンテナ */}
+        <div
+          style={{
+            width: "130px",
+            height: "130px",
+          }}
+        >
+          <Pie data={chartData} options={options} />
+        </div>
+        {/* カスタム凡例を右側に表示 */}
+        <div
+          style={{
+            marginLeft: "10px",
+          }}
+        >
+          {customLegend()}
+        </div>
       </div>
-      {/* カスタム凡例を右側に表示 */}
-      <div style={{ marginLeft: "2vw" }}>{customLegend()}</div>
     </div>
   );
 };

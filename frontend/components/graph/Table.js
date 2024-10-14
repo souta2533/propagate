@@ -25,6 +25,11 @@ const getMuiTheme = () =>
           root: {
             padding: "8px",
             fontSize: "15px",
+            "@media (max-width: 768px)": {
+              fontSize: "12px",
+              padding: "6px",
+              maxWidth: "40vw", // 小さい画面での列幅を調整
+            },
           },
         },
       },
@@ -32,12 +37,17 @@ const getMuiTheme = () =>
         styleOverrides: {
           root: {
             fontWeight: "bold",
-            fontSize: "15px",
+            fontSize: "10px",
             padding: "10px",
             backgroundColor: "#f9f9f9",
             position: "sticky",
             top: 0,
-            zIndex: 100,
+            zIndex: 50,
+            whiteSpace: "nowrap",
+            "@media (max-width: 768px)": {
+              fontSize: "12px",
+              padding: "6px",
+            },
           },
         },
       },
@@ -51,13 +61,62 @@ const Table = ({ data }) => {
 
   // `date`列と`dataKey`で指定された列を表示
   const columns = [
-    { name: "number", label: "No" },
-    { name: "query", label: "キーワード" },
+    {
+      name: "number",
+      label: "No",
+      options: {
+        setCellProps: () => ({
+          style: {
+            width: "10%",
+            "@media (max-width: 768px)": {
+              width: "10%",
+            },
+          },
+        }),
+      },
+    },
+    {
+      name: "query",
+      label: "キーワード",
+      options: {
+        setCellProps: () => ({
+          style: {
+            width: "50%",
+            "@media (max-width: 768px)": {
+              width: "60%",
+            },
+          },
+        }),
+      },
+    },
     {
       name: "count",
       label: "表示回数",
+      options: {
+        setCellProps: () => ({
+          style: {
+            width: "20%",
+            "@media (max-width: 768px)": {
+              width: "15%",
+            },
+          },
+        }),
+      },
     }, // 2列目は`dataKey`で指定された列
-    { name: "click", label: "クリック数" },
+    {
+      name: "click",
+      label: "クリック数",
+      options: {
+        setCellProps: () => ({
+          style: {
+            width: "20%",
+            "@media (max-width: 768px)": {
+              width: "15%",
+            },
+          },
+        }),
+      },
+    },
   ];
 
   // データをテーブル用に整形
@@ -77,7 +136,7 @@ const Table = ({ data }) => {
   const options = {
     filterType: "dropdown",
     selectableRows: "none", // 行の選択を無効にする
-    responsive: "vertical", // scrollMaxHeightの代わりにstandardを使用
+    responsive: "standard", // scrollMaxHeightの代わりにstandardを使用
     download: false,
     print: false,
     search: false,
@@ -97,9 +156,11 @@ const Table = ({ data }) => {
   };
 
   return (
-    <ThemeProvider theme={getMuiTheme()}>
-      <MUIDataTable data={tableData} columns={columns} options={options} />
-    </ThemeProvider>
+    <div style={{ overflowX: "auto", maxWidth: "100%" }}>
+      <ThemeProvider theme={getMuiTheme()}>
+        <MUIDataTable data={tableData} columns={columns} options={options} />
+      </ThemeProvider>
+    </div>
   );
 };
 
