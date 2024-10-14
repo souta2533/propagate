@@ -65,21 +65,12 @@ async def get_aggregated_data_from_dashboard(
     
     try:
         # DBからデータを取得
-        # analytics_table = AnalyticsData(supabase)
-        # analytics_data = await analytics_table.fetch_data(propertyId, startDate, endDate, token)
-
-        # search_console_table = SearchConsoleDataTable(supabase)
-        # search_console_data = await search_console_table.fetch_data(propertyId, startDate, endDate, token)
         analytics_data_table = AnalyticsDataTable(supabase)
         data_by_date = await analytics_data_table.fetch_data(propertyId, startDate, endDate, jwt_token)
 
 
         # データを集計
         aggregated_data = aggregate_by_path(data_by_date)
-        # aggregated_data = aggregate_data(analytics_data, search_console_data)
-        # aggregated_data_by_url = aggregate_by_url(aggregated_data)
-
-        # logging.info(f"Aggregated data: {aggregated_data_by_url}")
 
         return {"status": "success", "data": aggregated_data}
     except Exception as e:

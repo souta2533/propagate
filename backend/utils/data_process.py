@@ -9,13 +9,42 @@ from logging import getLogger
 logger = getLogger(__name__)
 
 
-NUM = 30
-def get_top_n(data_dict, n=NUM):
-        """
-        ソートして上位n件を返す関数
-        """
-        logger.info(f"Data dict: {data_dict}")
-        return dict(sorted(data_dict.items(), key=lambda x: x[1], reverse=True)[:n])
+# def get_top_n(data_dict, n=30):
+#     """
+#     ソートして上位n件を返す関数
+#     """
+#     try:
+#         # defaultdict なら通常の dict に変換
+#         if isinstance(data_dict, defaultdict):
+#             data_dict = dict(data_dict)
+#         logger.info(f"Data dict: {data_dict}")
+#         # ソートして上位n件を返す
+#         sorted_items = sorted(data_dict.items(), key=lambda x: x[1], reverse=True)[:n]
+#         return dict(sorted_items)
+
+#     except Exception as e:
+#         logger.error(f"Error in get_top_n: {e}")
+#         return {}
+
+def get_top_n(data_dict, n=30):
+    """
+    ソートして上位n件を返す関数
+    """
+    try:
+        # defaultdict なら通常の dict に変換
+        if isinstance(data_dict, defaultdict):
+            data_dict = dict(data_dict)
+        
+        # ソートして上位n件を返す
+        sorted_items = sorted(data_dict.items(), key=lambda x: x[1], reverse=True)[:n]
+        
+        # dict を defaultdict に変換して返す
+        return defaultdict(int, sorted_items)
+
+    except Exception as e:
+        logger.error(f"Error in get_top_n: {e}")
+        return defaultdict(int)
+
 
 def transform_data_by_date(data_by_date, source='dashboard'):
     """
@@ -997,12 +1026,12 @@ def aggregate_by_path(data):
             data_by_path[url]['ctr'] = round((data_by_path[url]['click'] / data_by_path[url]['impression']) * 100, 3)
 
         # city, country, queryは上位30件のみ渡す
-        # if 'city' in data_by_path[url]:
-        #     data_by_path[url]['city'] = get_top_n(data_by_path[url]['city'])
-        # if 'country' in data_by_path[url]:
-        #     data_by_path[url]['country'] = get_top_n(data_by_path[url]['country'])
-        # if 'query' in data_by_path[url]:
-        #     data_by_path[url]['query'] = get_top_n(data_by_path[url]['query'])
+        if 'city' in data_by_path[url]:
+            data_by_path[url]['city'] = get_top_n(data_by_path[url]['city'])
+        if 'country' in data_by_path[url]:
+            data_by_path[url]['country'] = get_top_n(data_by_path[url]['country'])
+        if 'query' in data_by_path[url]:
+            data_by_path[url]['query'] = get_top_n(data_by_path[url]['query'])
         
     return data_by_path
 
