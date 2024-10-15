@@ -3,7 +3,7 @@ from logging import getLogger
 import pandas as pd
 
 from db.supabase_client import supabase
-from db.db_operations import AnalyticsData, SearchConsoleDataTable
+from db.db_operations import AnalyticsData, SearchConsoleDataTable, AnalyticsDataTable
 from utils.data_process import data_by_date, transform_for_statistic_analysis
 from AI.statistics_analysis.correlation_analysis import CorrelationAnalysis
 from AI.statistics_analysis.regression_analysis import RegressionAnalysis
@@ -25,13 +25,10 @@ class StatisticsAnalysisData:
         self.search_console_data = None
         self.data_by_day = None
 
-    def add_data(self, property_id, start_date, end_date, jwt_token):
+    async def add_data(self, property_id, start_date, end_date, jwt_token):
         # データを取得
-        analytics_table = AnalyticsData(self.supabase)
-        self.analytics_data = analytics_table.fetch_data(property_id, start_date, end_date, jwt_token)
-
-        search_console_table = SearchConsoleDataTable(self.supabase)
-        self.search_console_data = search_console_table.fetch_data(property_id, start_date, end_date, jwt_token)
+        analytics_data_table = AnalyticsDataTable(self.supabase)
+        self.data_by_date = await analytics_data_table.fetch_data(property_id, start_date, end_date, jwt_token)
 
     def calc_data_by_day(self):
         """

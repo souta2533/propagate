@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useSession, signIn, signOut, getSession } from "next-auth/react";
 import { useRouter } from 'next/router';  // useRouterをインポート
 import dynamic from 'next/dynamic';
 require('dotenv').config({ path: '.env.local' });
@@ -23,7 +23,7 @@ const LoadingSpinner = () => (
 );
 
 export default function Home() {
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
   const [ token, setToken ] = useState("");     // JWTトークンを格納(Supabase)
   const [analyticsData, setAnalyticsData] = useState(null);
   const [analyticsProperties, setAnalyticsProperties] = useState([]);
@@ -551,6 +551,30 @@ export default function Home() {
     // 2. 未登録のEmailからaccountIDがあるかを確認
     checkUnregisteredCustomer();
   }, [unregisteredCustomers]);
+
+  useEffect(() => {
+    const refreshSession = async () => {
+      // Sessionが無効であるかを確認
+      if (!session) {
+        // まず，Refresh TokenでSessionを再取得を試みる
+        try {
+          const refreshedSession = await getSession();
+          console.log("Refreshed Session: ", refreshedSession);
+          if (refreshedSession) {
+            update();
+          } else {
+            console.error("Failed to refresh session"); 
+          }
+        } catch (error) {
+          console.error("Failed to refresh session:", error);
+        }
+      } else {
+        console.log("Session i valid");
+      }
+    };
+
+    refreshSession();
+  }, [session, update]);
 
   if (!session) {
     return (

@@ -9,23 +9,6 @@ from logging import getLogger
 logger = getLogger(__name__)
 
 
-# def get_top_n(data_dict, n=30):
-#     """
-#     ソートして上位n件を返す関数
-#     """
-#     try:
-#         # defaultdict なら通常の dict に変換
-#         if isinstance(data_dict, defaultdict):
-#             data_dict = dict(data_dict)
-#         logger.info(f"Data dict: {data_dict}")
-#         # ソートして上位n件を返す
-#         sorted_items = sorted(data_dict.items(), key=lambda x: x[1], reverse=True)[:n]
-#         return dict(sorted_items)
-
-#     except Exception as e:
-#         logger.error(f"Error in get_top_n: {e}")
-#         return {}
-
 def get_top_n(data_dict, n=30):
     """
     ソートして上位n件を返す関数
@@ -111,67 +94,6 @@ def transform_data_by_date(data_by_date, source='dashboard'):
                     flattened_data[base_url][page_path].append(flattened_entry)
         return flattened_data
 
-
-# def fill_missing_date(data, source='dashboard'):
-#     """
-#         日付が存在しないデータを初期化する関数
-#     """
-#     def daterange(start, end):
-#         for n in range(int((end - start).days) + 1):
-#             yield start + timedelta(n)
-
-#     # 初期値
-#     data_by_date = {
-#                 "PV": 0,
-#                 "CV": 0,
-#                 "CVR": 0.0,
-#                 "active_users": 0,
-#                 "UU": 0,
-#                 "engaged_sessions": 0,
-#                 "city": defaultdict(int),       # Analytics Dataから取得
-#                 "device_category": defaultdict(int),
-#                 "query": defaultdict(int),
-#                 "click": 0,                    
-#                 "impression": 0,
-#                 "ctr": 0,
-#                 "position": 0,
-#                 "country": defaultdict(int),
-#                 "source": defaultdict(int),
-#             }
-    
-#     # データのもっとの古い日付と最新の日付を取得
-#     all_dates = []
-#     if source == 'dashboard':
-#         for base_url, entries in data.items():
-#             for entry in entries:
-#                 all_dates.append(entry['date'], "%Y-%m-%d")
-            
-#     elif source == 'details':
-#         for base_url, page_paths in data.items():
-#             for page_path, entries in page_paths.items():
-#                 for entry in entries:
-#                     all_dates.append(entry['date'], "%Y-%m-%d") 
-
-#     if not all_dates:
-#         return data
-    
-#     start_date = min(all_dates) 
-#     end_date = max(all_dates)
-
-#     filled_data = {}
-
-#     if source == 'dashboard':
-#         for base_url, entries in data.items():
-#             filled_data[base_url] = []
-#             for date in daterange(start_date, end_date):
-#                 date_str = date.strftime("%Y-%m-%d")
-#                 if date_str in entries:
-#                     filled_data[base_url].append(entries[date_str])
-#                 else:
-#                     filled_data[base_url].append(data_by_date)
-
-#     if source == 'dashboard':
-
 def data_by_date(analytics_data, search_console_data, url_depth=1):
     """
         DBに保存する前に実行
@@ -188,7 +110,7 @@ def data_by_date(analytics_data, search_console_data, url_depth=1):
 
     # Analytics Dataの処理
     for entry in analytics_data:
-        page_location = entry.get("page_location")
+        page_location = entry.get("page_location", None)
         if not page_location:
             continue
 
@@ -1016,6 +938,11 @@ def aggregate_by_path(data):
         if countries is not None:
             for country, v in countries.items():
                 data_by_path[url]['country'][country] += 1
+
+        sources = record.get('source') if record.get('source') is not None else {}  
+        if sources is not None:
+            for source, v in sources.items():
+                data_by_path[url]['source'][source] += 1
 
         # Conversion Rateの計算
         if data_by_path[url]['UU'] > 0:

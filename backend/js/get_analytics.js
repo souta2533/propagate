@@ -1,5 +1,5 @@
-// pages/api/get-analytics.js
-// import { google } from 'googleapis';
+import { refreshAccessToken } from './utils.js';
+
 const { fstat } = require('fs');
 const { google } = require('googleapis');
 const { json } = require('stream/consumers');
@@ -27,6 +27,8 @@ function initialDateMapForNewPagePath(dateMap, allDates, newPagePath) {
         sessions: 0,
         engaged_sessions: 0,
         total_users: 0,
+        // gender: '',
+        // age: '',
       };
     }
   });
@@ -93,6 +95,8 @@ async function handler(req, res) {
         sessions: 0,
         engaged_sessions: 0,
         total_users: 0,
+        // gender: '',
+        // age: '',
       };
       return acc;
     }, {});
@@ -129,6 +133,8 @@ async function handler(req, res) {
             { name: 'sessions' },
             { name: 'engagedSessions' },
             { name: 'totalUsers' },
+            // { name: 'userGender'},
+            // { name: 'userAgeBracket'},
           ],
           limit: 1000,   // 1回のリクエストで取得する行数
           offset: startRow,   // 取得する行の開始位置
@@ -179,6 +185,8 @@ async function handler(req, res) {
           sessions: metrics[3],
           engaged_sessions: metrics[4],
           total_users: metrics[5],
+          // gender: metrics[6],
+          // age: metrics[7],
         };
       });
     } else {
@@ -199,6 +207,10 @@ async function handler(req, res) {
     // res.status(200).json(Object.values(json_data));
   
   } catch (error) {
+    // if (error.response && error.response.status === 401) {
+    //   // アクセストークン切れの場合，トークンをリフレッシュして再試行
+    //   const newToken = await refreshAccessToken({ refreshToken: auth.credentials.regresh_token });
+    // }
     console.error('Error fetching analytics data:', error);
   }
 }
