@@ -314,7 +314,7 @@
 .dashboard-bottom {
   display: flex;
   flex-direction: row;
-  height: 40vw;
+  height: 30vw;
   margin-bottom: 1vw;
   gap: 2vw;
 }
