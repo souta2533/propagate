@@ -20,9 +20,9 @@
   width: 100%;
   color: #ffffff;
   background-color: #000000;
-  padding: 0.8vw;
+  padding: 0.5vw;
   margin: 0;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
   z-index: 1500;
   font-family: "Noto Sans JP", sans-serif;
   font-size: 100%;
@@ -88,7 +88,7 @@
 
 /* メインコンテンツ */
 .dashboard-main {
-  padding: 1vw 7vw;
+  padding: 1vw 5vw;
   display: flex;
   flex-direction: column;
   justify-content: space-between; /* 子要素間のスペースを均等に配置 */
@@ -107,7 +107,7 @@
   display: flex;
   flex-direction: row;
   width: 100%;
-  height: 40vw;
+  height: 45vw;
   margin-bottom: 2vw;
   gap: 2vw;
   border-radius: 15px;
@@ -119,7 +119,7 @@
   padding: 1vw;
   background-color: #ffffff;
   border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
 }
 
 .dashboard-top-right {
@@ -127,7 +127,7 @@
   height: 100%;
   padding: 30px;
   background-color: #ffffff;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
 
   border-radius: 10px;
 }
@@ -147,7 +147,7 @@
   background-color: #ffffff;
   border: 1px solid #7272722f;
   border-radius: 5px;
-  padding: 1vw;
+  padding: 1.5vw;
   transition: 0.5s;
   display: grid;
   flex-direction: column;
@@ -164,6 +164,7 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1vw;
+  margin-bottom: 1.5vw;
 }
 
 .metric-card:hover {
@@ -274,7 +275,7 @@
   width: 50%;
   height: 25vw;
   padding: 0 2vw 2vw 2vw;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
   background-color: #ffffff;
   border-radius: 15px;
   overflow-y: auto;
@@ -293,10 +294,10 @@
 }
 
 .middle-title {
-  font-size: 1.25vw;
+  font-size: 1.5vw;
   font-weight: 500;
-  color: #444444;
-  margin-bottom: 0.25vw;
+  color: #222222;
+  margin-bottom: 0.5vw;
 }
 
 .middle-subtitle {
@@ -304,7 +305,7 @@
   font-size: 1vw;
   font-weight: 400;
   color: #6b7280;
-  margin-bottom: 0.5vw;
+  margin-bottom: 1vw;
 }
 
 .middle-chart {
@@ -325,7 +326,7 @@
   background-color: #ffffff;
   border-radius: 15px;
   padding: 0 2vw 2vw 2vw;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
 }
 
@@ -346,7 +347,7 @@
   padding: 0 2vw 2vw 2vw;
   background-color: #ffffff;
   border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
 }
 
 .dashboard-bottom-right {
@@ -366,18 +367,18 @@
 }
 
 .bottom-title {
-  font-size: 1.25vw;
+  font-size: 1.5vw;
   font-weight: 500;
   color: #444444;
   padding-top: 2vw;
-  margin-bottom: 0.25vw;
+  margin-bottom: 0.5vw;
 }
 
 .bottom-subtitle {
   font-size: 1vw;
   font-weight: 400;
   color: #6b7280;
-  margin-bottom: 0.5vw;
+  margin-bottom: 1vw;
 }
 
 .overlay {
@@ -493,7 +494,7 @@
     background-color: #000000;
     padding: 2vw;
     margin: 0;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
     z-index: 1500;
     font-family: "Noto Sans JP", sans-serif;
     font-size: 100%;
@@ -624,7 +625,7 @@
     padding: 2vw;
     background-color: #ffffff;
     border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
   }
 
   .dashboard-top-right {
@@ -632,8 +633,7 @@
     padding: 3vw;
     height: 50vw;
     background-color: #ffffff;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
   }
 
@@ -774,7 +774,7 @@
     width: 100%;
     height: 50vw;
     padding: 0 3vw 3vw 3vw;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
     background-color: #ffffff;
     border-radius: 15px;
     overflow-y: auto;
@@ -811,6 +811,14 @@
     height: 20vw;
   }
 
+  .middle-content-bottom {
+    position: sticky;
+    bottom: 0;
+    width: 100%;
+    height: 2vw;
+    background-color: #ffffff;
+  }
+
   .dashboard-bottom {
     display: flex;
     flex-direction: column;
@@ -825,7 +833,7 @@
     background-color: #ffffff;
     border-radius: 15px;
     padding: 0 3vw 3vw 3vw;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
   }
 
   .dashboard-bottom-left {
@@ -834,7 +842,7 @@
     padding: 0 3vw 3vw 3vw;
     background-color: #ffffff;
     border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
   }
 
   .dashboard-bottom-right {
@@ -843,7 +851,7 @@
     padding: 0 3vw 3vw 3vw;
     background-color: #ffffff;
     border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
   }
 
   .bottom-content-text {

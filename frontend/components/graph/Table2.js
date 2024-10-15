@@ -61,7 +61,7 @@ const Table2 = ({ data }) => {
   if (!Array.isArray(data) || data.length === 0) {
     return null;
   }
-  
+
   const totalCount = data.reduce((sum, item) => sum + item[1], 0);
 
   const columns = [
@@ -104,6 +104,7 @@ const Table2 = ({ data }) => {
               flexDirection: "row",
               alignItems: "center",
               width: "100%",
+              height: "0.5vw",
             }}
           >
             <span style={{ marginRight: "16px" }}>
@@ -112,7 +113,6 @@ const Table2 = ({ data }) => {
             <div
               style={{
                 width: "100%",
-                height: "0.5vh",
                 backgroundColor: "#e0e0e0",
                 position: "relative",
               }}
@@ -121,7 +121,8 @@ const Table2 = ({ data }) => {
                 style={{
                   width: `${(value / totalCount) * 100}%`,
                   backgroundColor: "#25DFBB",
-                  height: "100%",
+                  height: "0.5vw",
+                  borderRadius: "10vw",
                 }}
               ></div>
             </div>
@@ -175,7 +176,6 @@ const Table2 = ({ data }) => {
 };
 
 export default Table2;
-
 
 /*
  // options 設定

@@ -71,6 +71,9 @@ const CustomLineChart = ({ data = [], dataKeys = [] }) => {
         type: "linear",
         position: "left",
         beginAtZero: true, //Y軸を０に設定
+        grid: {
+          drawOnChartArea: true,
+        },
       },
       "y-axis-1": {
         type: "linear",
@@ -84,6 +87,16 @@ const CustomLineChart = ({ data = [], dataKeys = [] }) => {
     plugins: {
       tooltip: {
         enabled: true, //ツールチップを有効にする
+        padding: 50,
+        backgroundColor: "rgba(0, 0, 0, 0.8)",
+        color: "white",
+        font: {
+          size: 12,
+          weight: "bold",
+          family: "sans-serif",
+          lineHeight: 1.5,
+          gap: 10,
+        },
         callbacks: {
           label: function (context) {
             const label = context.dataset.label || "";

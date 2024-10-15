@@ -59,8 +59,8 @@ const PieChart = ({ data }) => {
               {/* カスタムの色付き丸アイコン */}
               <div
                 style={{
-                  width: "15px",
-                  height: "20px",
+                  width: "10px",
+                  height: "10px",
                   backgroundColor: chartData.datasets[0].backgroundColor[index],
                   borderRadius: "50%",
                   marginRight: "10px",
@@ -99,8 +99,12 @@ const PieChart = ({ data }) => {
         {/* 円グラフのコンテナ */}
         <div
           style={{
-            width: "130px",
-            height: "130px",
+            width: "200px",
+            height: "200px",
+            "@media (max-width: 768px)": {
+              width: "150px",
+              height: "150px",
+            },
           }}
         >
           <Pie data={chartData} options={options} />

@@ -25,20 +25,25 @@ import "../styles/dashboard.css";
 const styles1 = {
   control: (provided) => ({
     ...provided,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: "#000000",
     color: "#ffffff",
     border: "2px solid #ffffff",
     borderRadius: "10vw",
     boxShadow: "none",
-    padding: "0.5vw",
+    padding: "0vw",
     cursor: "pointer",
     width: "20vw",
+    height: "0.5vw",
     overflowX: "scroll",
+    overflowY: "hidden",
     alignItems: "center",
 
     "@media (max-width: 768px)": {
       width: "40vw",
-      padding: "1vw",
+      padding: "0 1vw",
       overflowX: "scroll",
       alignItems: "center",
     },
@@ -65,17 +70,22 @@ const styles1 = {
 const styles2 = {
   control: (provided) => ({
     ...provided,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
     border: "none",
     boxShadow: "none",
-    padding: "5px 10px",
-    width: "15vw",
+    padding: "0 7px",
+    width: "20vw",
+    height: "0.5vw",
     cursor: "pointer",
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "#e5e5e5",
     overflowX: "scroll",
+    overflowY: "hidden",
 
     "@media (max-width: 768px)": {
-      width: "40vw",
-      padding: "1vw",
+      width: "50vw",
+      padding: "0 1vw",
       overflowX: "scroll",
       alignItems: "center",
     },
@@ -1202,6 +1212,7 @@ const Dashboard = () => {
             <div className="middle-chart">
               <Table2 data={sourceData} dataKeys="流入数" />
             </div>
+            <div className="middle-content-bottom"></div>
           </div>
           <div className="dashboard-middle-content">
             <div className="middle-content-text">
@@ -1209,10 +1220,12 @@ const Dashboard = () => {
               <p className="middle-subtitle">
                 Google検索で、Webサイトが検索一覧に表示された回数とクリックされた回数
               </p>
+              <div className="middle-content-button"></div>
             </div>
             <div className="search-keywords">
               <Table data={topQueries} viewData={topQueries.viewData} />
             </div>
+            <div className="middle-content-bottom"></div>
           </div>
         </div>
         <div className="dashboard-bottom">
