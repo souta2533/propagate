@@ -130,8 +130,6 @@ const Table = ({ data }) => {
     return row;
   });
 
-  console.log("tableData:", tableData);
-
   // options 設定（必要に応じてカスタマイズ可能）
   const options = {
     filterType: "dropdown",

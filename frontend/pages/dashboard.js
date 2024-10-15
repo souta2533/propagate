@@ -22,7 +22,7 @@ import Table from "../components/graph/Table";
 import Table2 from "../components/graph/Table2";
 import "../styles/dashboard.css";
 
-const customStyles1 = {
+const styles1 = {
   control: (provided) => ({
     ...provided,
     backgroundColor: "#000000",
@@ -62,7 +62,7 @@ const customStyles1 = {
   }),
 };
 
-const customStyles2 = {
+const styles2 = {
   control: (provided) => ({
     ...provided,
     border: "none",
@@ -124,16 +124,15 @@ const Dashboard = () => {
   const [startDate, setStartDate] = useState(() => {
     const date = new Date();
     date.setMonth(date.getMonth() - 1); // 今日から1ヶ月前の日付を設定
-    return date.toISOString().split("T")[0]; // YYYY-MM-DD 形式で取得
+    return date.toISOString().split("T")[0].replace(/-/g, "/"); // YYYY-MM-DD 形式で取得
   });
   const [endDate, setEndDate] = useState(
-    new Date().toISOString().split("T")[0]
+    new Date().toISOString().split("T")[0].replace(/-/g, "/")
   );
   const [startDate7, setStartDate7] = useState(() => {
     const date7 = new Date();
     date7.setDate(date7.getDate() - 7);
-    console.log("SDate7:", date7.toISOString().split("T")[0]);
-    const formattedDate = date7.toISOString().split("T")[0];
+    const formattedDate = date7.toISOString().split("T")[0].replace(/-/g, "/");
     console.log("Formatted Date:", formattedDate);
     return formattedDate;
   });
@@ -155,7 +154,7 @@ const Dashboard = () => {
   const [pagePathOptions, setPagePathOptions] = useState([]);
   const [pagePathList, setPagePathList] = useState([]);
   const [metrics, setMetrics] = useState(sampleMetrics); // メトリクスのstate
-  const [selectedMetrics, setSelectedMetrics] = useState([]); // 選択中のメトリクス
+  const [selectedMetrics, setSelectedMetrics] = useState(["PV", "UU"]); // 選択中のメトリクス
   const [inputValue, setInputValue] = useState(""); // ここで useState を使って定義
 
   const [dataForDateRange, setDataForDateRange] = useState([]);
@@ -169,6 +168,44 @@ const Dashboard = () => {
   if (loading) {
     return <div>Loading...</div>;
   }
+
+  //defaultでグラフデータをセット
+  useEffect(() => {
+    if (!router.isReady) return;
+
+    const { url, path } = router.query;
+
+    if (url) setUrl(url);
+    if (path) setPagePath(path);
+
+    if (!path) {
+      const defaultPath = "/";
+      setPagePath(defaultPath);
+
+      router.push(
+        {
+          pathname: router.pathname,
+          query: { ...router.query, path: defaultPath },
+        },
+        undefined,
+        { shallow: true }
+      );
+    }
+  }, [router.isReady, router.query]);
+
+  //reloardした時に値を保持する
+  useEffect(() => {
+    if (router.isReady) {
+      const { url: queryUrl, pagePath: queryPagePath } = router.query;
+
+      if (queryUrl) {
+        setUrl(queryUrl);
+      }
+      if (queryPagePath) {
+        setPagePath(queryPagePath);
+      }
+    }
+  }, [router.isReady, router.query]);
 
   //localStorageからURLリストを取得
   useEffect(() => {
@@ -195,10 +232,23 @@ const Dashboard = () => {
 
   //URL選択時の処理
   const handleUrlChange = (selectedOption) => {
+    if (!selectedOption) {
+      alert("URLを選択してください");
+      return;
+    }
+
     setSelectedUrl(selectedOption);
     setUrl(selectedOption.value);
     console.log("SelectedURL:", selectedOption.value);
     const url = selectedOption.value;
+
+    const foundPropertyId = findPropertyIdByUrl(url);
+    if (foundPropertyId) {
+      setPropertyId(foundPropertyId);
+    } else {
+      console.error("該当するプロパティが見つかりません");
+    }
+
     const saniUrl = url.replace(/\/+$/, "");
     setSanitizedUrl(saniUrl);
   };
@@ -347,10 +397,25 @@ const Dashboard = () => {
     }
   }, [dataByDay, propertyId, url]);
 
-  const pagePaths = pagePathList.map((path) => ({
-    value: path,
-    label: path,
-  }));
+  let pagePaths = [];
+
+  if (dataByDay && dataByDay[propertyId] && url) {
+    const sanitizedUrl = url.replace(/\/+$/, ""); // URLの末尾のスラッシュを削除
+    const urlLength = sanitizedUrl.length; // URLの文字数を取得
+
+    pagePaths = Object.keys(dataByDay[propertyId])
+      .map((path) => {
+        // URLの長さ分だけフィルターをかける
+        const filteredPath = path.substring(urlLength); // URLの長さ分だけ切り取る
+        const match = filteredPath.match(/^\/?([^/]+)?$/); // 1階層下のパスを考慮
+        if (match) {
+          const pagePath = match[1] ? `/${match[1]}` : "/";
+          return { value: path, label: pagePath }; // 元のpathと新しいlabelを返す
+        }
+        return null;
+      })
+      .filter((path) => path !== null);
+  }
 
   useEffect(() => {
     setPagePathOptions(pagePaths);
@@ -359,10 +424,19 @@ const Dashboard = () => {
   const handlePagePathChange = (selectedOption) => {
     setSelectedPagePath(selectedOption);
     setPagePath(selectedOption.value);
+    router.push(
+      {
+        pathname: router.pathname,
+        query: { ...router.query, pagePath: selectedOption.value },
+      },
+      undefined,
+      { shallow: true } // パスを変更せずにデータを更新
+    );
     console.log("Selected Page Path:", selectedOption);
     const chartData = dataByDay[propertyId][selectedOption.value];
     console.log("Chart Data:", chartData);
-    setChartData(chartData);
+    const filteredData = filterDataByDateRange(chartData, dateRange);
+    setChartData(filteredData);
   };
 
   // 集計データを取得
@@ -598,7 +672,7 @@ const Dashboard = () => {
       d >= new Date(startDate);
       d.setDate(d.getDate() - 1)
     ) {
-      const formattedDate = d.toISOString().split("T")[0]; // YYYY-MM-DD形式で日付をフォーマット
+      const formattedDate = d.toISOString().split("T")[0].replace(/-/g, "/"); // YYYY-MM-DD形式で日付をフォーマット
 
       // Mapに該当日付のデータがあれば、それをresultに追加、なければ0データを追加
       result.push(
@@ -618,7 +692,7 @@ const Dashboard = () => {
   const generateZeroData = () => {
     return [
       {
-        date: new Date().toISOString().split("T")[0], // デフォルトで現在の日付,
+        date: new Date().toISOString().split("T")[0].replace(/-/g, "/"), // デフォルトで現在の日付,
         PV: 0,
         CV: 0,
         CVR: 0,
@@ -631,6 +705,9 @@ const Dashboard = () => {
   const handleDateRangeChange = (e) => {
     setDateRange(e.target.value); // 選択されたオプションを状態に保存
     setSelectedOption(e.target.value);
+    const filteredData = filterDataByDateRange(chartData, e.target.value);
+    setChartData(filteredData);
+    console.log("filteredData:", filteredData);
     console.log("selectedOption:", e.target.value);
   };
 
@@ -826,6 +903,7 @@ const Dashboard = () => {
       .filter((key) => key !== ""); // 空のキーを除外
 
     console.log("Data Keys:", dataKeys); // デバッグ用ログ
+    console.log("ChartData:", chartData);
 
     return <LineChart data={chartData} dataKeys={dataKeys} />;
   };
@@ -846,8 +924,6 @@ const Dashboard = () => {
   }
 
   const topQueries = getQuery(aggregatedData, propertyId);
-  console.log("TopQuery:", topQueries);
-  console.log("ViewData:", topQueries.viewData);
 
   function getSourceData(data, id) {
     const sourceData = data[id]?.[pagePath]?.source;
@@ -934,22 +1010,28 @@ const Dashboard = () => {
           <h1 className="header-title">Propagate Analytics</h1>
         </div>
         <div className="header-right">
-          <form onSubmit={handleSubmit}>
-            <CreatableSelect
-              className="url-select"
-              styles={customStyles1}
-              value={selectedUrl}
-              onChange={handleUrlChange}
-              options={urlOptions}
-              placeholder={
-                <div>
-                  <FaSearch style={{ marginRight: "2vw" }} />
-                  <span>URL選択</span>
-                </div>
+          <CreatableSelect
+            className="url-select"
+            styles={styles1}
+            value={selectedUrl}
+            onChange={(selectedOption) => {
+              handleUrlChange(selectedOption);
+              const foundPropertyId = findPropertyIdByUrl(selectedOption.value);
+              if (foundPropertyId) {
+                setPropertyId(foundPropertyId);
+              } else {
+                console.error("該当するプロパティIDが見つかりませんs");
               }
-              onCreateOption={handleUrl}
-            />
-          </form>
+            }}
+            options={urlOptions}
+            placeholder={
+              <div>
+                <FaSearch style={{ marginRight: "2vw" }} />
+                <span>URL選択</span>
+              </div>
+            }
+            onCreateOption={handleUrl}
+          />
           {/*設定ボタン
             <Button
             variant="ghost"
@@ -995,7 +1077,7 @@ const Dashboard = () => {
           <div className="dashboard-header-left">
             <Select
               className="custom-select"
-              styles={customStyles2}
+              styles={styles2}
               value={selectedPagePath}
               onChange={handlePagePathChange}
               options={pagePathOptions}

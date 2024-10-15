@@ -33,9 +33,16 @@ export default function Login() {
 
     if (error) {
       console.error("ログインエラー: ", error.message);
+      alert("ログインに失敗しました。");
     } else {
       localStorage.setItem("supabaseSession", JSON.stringify(data.session));
-      router.push("/dashboard");
+      const property = data.session.user.user_metadata.property;
+      const pagePath = "/";
+
+      router.push({
+        pathname: "/dashboard",
+        query: { property },
+      });
     }
 
     // if (res.ok) {

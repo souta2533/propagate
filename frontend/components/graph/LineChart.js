@@ -16,19 +16,17 @@ const sortDataByDate = (data) => {
 const CustomLineChart = ({ data = [], dataKeys = [] }) => {
   if (!data || data.length === 0) {
     console.warn("Data is empty or null");
-    return (
-      <dev>
-        <h1>Please set your URL & PagePath!</h1>
-      </dev>
-    );
+    return <div>No data</div>;
   }
+
+  const sortedData = sortDataByDate(data);
 
   // データの形式を確認
   console.log("Data:", data);
   console.log("Data Keys:", dataKeys);
 
   const graphData = {
-    labels: data.map((item) => item.date),
+    labels: sortedData.map((item) => item.date),
     datasets: dataKeys.map((key, index) => {
       let borderColor;
 
@@ -37,17 +35,17 @@ const CustomLineChart = ({ data = [], dataKeys = [] }) => {
       } else if (key === "UU") {
         borderColor = "#ff8800";
       } else if (key === "CVR") {
-        borderColor = "#ff0000";
-      } else if (key === "CV") {
         borderColor = "#ee00ff";
+      } else if (key === "CV") {
+        borderColor = "#ff0000";
       }
 
       return {
         label: key,
-        data: data.map((item) => item[key]),
+        data: sortedData.map((item) => item[key]),
         borderColor: borderColor,
         fill: false,
-        tension: 0.1,
+        tension: 0.3,
         borderWidth: 2,
         pointRadius: 0,
         pointHitRadius: 20,
@@ -111,7 +109,7 @@ const CustomLineChart = ({ data = [], dataKeys = [] }) => {
   const divStyle = {
     height: "27vw",
     "@media (max-width: 768px)": {
-      height: "400vw",
+      height: "1000vw",
     },
   };
 
