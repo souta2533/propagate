@@ -106,15 +106,15 @@ const CustomLineChart = ({ data = [], dataKeys = [] }) => {
     },
   };
 
-  const divStyle = {
-    height: "27vw",
-    "@media (max-width: 768px)": {
-      height: "1000vw",
-    },
-  };
+  //const divStyle = css`
+  //  height: 27vw;
+  //  @media (max-width: 768px) {
+  //    height: "50vw",
+  //  },
+  //`;
 
   return (
-    <div className="line-chart" style={divStyle}>
+    <div className="line-chart">
       <Line data={graphData} options={options} />
     </div>
   );

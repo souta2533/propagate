@@ -68,9 +68,17 @@ const styles2 = {
     border: "none",
     boxShadow: "none",
     padding: "5px 10px",
+    width: "15vw",
     cursor: "pointer",
     backgroundColor: "#f0f0f0",
     overflowX: "scroll",
+
+    "@media (max-width: 768px)": {
+      width: "40vw",
+      padding: "1vw",
+      overflowX: "scroll",
+      alignItems: "center",
+    },
   }),
   "&:hover": {},
   menu: (provided) => ({
@@ -117,17 +125,17 @@ const Dashboard = () => {
   ];
 
   const [session, setSession] = useState(null);
-  const [loading, setLoading] = useState(false); // ローディング中かどうかの状態を管理
+  const [loading, setLoading] = useState(true); // ローディング中かどうかの状態を管理
   const [accountIds, setAccountIds] = useState([]);
   const [selectedAccountId, setSelectedAccountId] = useState(null);
   const [filteredProperties, setFilteredProperties] = useState([]);
   const [startDate, setStartDate] = useState(() => {
     const date = new Date();
     date.setMonth(date.getMonth() - 1); // 今日から1ヶ月前の日付を設定
-    return date.toISOString().split("T")[0].replace(/-/g, "/"); // YYYY-MM-DD 形式で取得
+    return date.toISOString().split("T")[0]; // YYYY-MM-DD 形式で取得
   });
   const [endDate, setEndDate] = useState(
-    new Date().toISOString().split("T")[0].replace(/-/g, "/")
+    new Date().toISOString().split("T")[0]
   );
   const [startDate7, setStartDate7] = useState(() => {
     const date7 = new Date();
@@ -164,10 +172,14 @@ const Dashboard = () => {
   const router = useRouter();
 
   const [sourceChartData, setSourceChartData] = useState([]);
-  //Loadingの設定
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 8000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   //defaultでグラフデータをセット
   useEffect(() => {
@@ -1005,6 +1017,16 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard-container">
+      <div>
+        {loading ? (
+          <div className="loader-content">
+            <div className="loader">Loading...</div>
+          </div>
+        ) : (
+          <></>
+        )}
+      </div>
+
       <header className="header">
         <div className="header-left">
           <h1 className="header-title">Propagate Analytics</h1>
@@ -1026,7 +1048,7 @@ const Dashboard = () => {
             options={urlOptions}
             placeholder={
               <div>
-                <FaSearch style={{ marginRight: "2vw" }} />
+                <FaSearch style={{ marginRight: "1vw" }} />
                 <span>URL選択</span>
               </div>
             }
@@ -1083,7 +1105,7 @@ const Dashboard = () => {
               options={pagePathOptions}
               placeholder={
                 <div>
-                  <FaSearch style={{ marginRight: "2vw" }} />
+                  <FaSearch style={{ marginRight: "1vw" }} />
                   <span>ページパス選択</span>
                 </div>
               }
@@ -1212,7 +1234,7 @@ const Dashboard = () => {
                 ユーザーがWebサイトにアクセスした地域別の割合
               </p>
             </div>
-            <div className="bottom-chart">
+            <div className="bottom-graph">
               <PercentageTable data={areaData} className="Percentage-graph" />
             </div>
           </div>

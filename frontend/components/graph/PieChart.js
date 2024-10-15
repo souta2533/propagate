@@ -55,12 +55,12 @@ const PieChart = ({ data }) => {
         {data.map((item, index) => {
           const percentage = ((item[1] / totalValue) * 100).toFixed(1);
           return (
-            <div key={index} style={{ marginBottom: "10px", display: "flex" }}>
+            <div key={index} style={{ marginBottom: "5px", display: "flex" }}>
               {/* カスタムの色付き丸アイコン */}
               <div
                 style={{
-                  width: "10px",
-                  height: "10px",
+                  width: "15px",
+                  height: "20px",
                   backgroundColor: chartData.datasets[0].backgroundColor[index],
                   borderRadius: "50%",
                   marginRight: "10px",
