@@ -469,7 +469,6 @@
   body,
   #__next {
     height: auto;
-    padding-bottom: 6vw;
   }
 
   .dashboard-container {
@@ -852,7 +851,7 @@
     top: 0;
     color: #333333;
     background-color: #ffffff;
-    font-size: 3vw;
+    font-size: 4vw;
     font-weight: 600;
     text-align: left;
     z-index: 10;
