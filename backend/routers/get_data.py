@@ -68,7 +68,6 @@ async def get_aggregated_data_from_dashboard(
         analytics_data_table = AnalyticsDataTable(supabase)
         data_by_date = await analytics_data_table.fetch_data(propertyId, startDate, endDate, jwt_token)
 
-
         # データを集計
         aggregated_data = aggregate_by_path(data_by_date)
 

@@ -139,12 +139,13 @@ export default function Home() {
           const startDate = matchedCustomer
             ? new Date(matchedCustomer.updated_at).toISOString().split('T')[0]
             : new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().split('T')[0];
-
+          console.log("RefreshToken: ", session.refreshToken);
           const response = await fetch(`${apiUrl}/get-analytics`, {
             method: "POST",
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               accessToken: session.accessToken,
+              refreshToken: session.refreshToken,
               accountId: property.accountId,
               propertyId: property.propertyId,
               startDate: startDate,
@@ -307,6 +308,7 @@ export default function Home() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                   accessToken: session.accessToken,
+                  refreshToken: session.refreshToken,
                   url: urlObj.url,
                   startDate: startDate,
                   endDate: new Date().toISOString().split('T')[0]
@@ -568,8 +570,6 @@ export default function Home() {
         } catch (error) {
           console.error("Failed to refresh session:", error);
         }
-      } else {
-        console.log("Session i valid");
       }
     };
 
