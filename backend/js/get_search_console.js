@@ -1,10 +1,11 @@
 const { google } = require('googleapis');
 const fs = require('fs');
+const { refreshAccessToken } = require('./utils');
 
 
 // Goolge Search Console APIからデータを取得する関数
 async function getSearchConsoleData(auth, siteURL, startDate, endDate) {
-    const webmasters = google.webmasters({
+    let webmasters = google.webmasters({
         version: 'v3',
         auth
     });
@@ -15,27 +16,46 @@ async function getSearchConsoleData(auth, siteURL, startDate, endDate) {
 
     try {
         while(hasMoreData){
-            const response = await webmasters.searchanalytics.query({
-                siteUrl: siteURL,
-                requestBody: {
-                    startDate: startDate,
-                    endDate: endDate,
-                    dimensions: ['date', 'query', 'page', 'country', 'device'],
-                    rowLimit: 1000,
-                    startRow: startRow
-                }
-            });
-        
-            if (response && response.data && response.data.rows && Array.isArray(response.data.rows)) {
-                allRows = allRows.concat(response.data.rows);
-
-                if (response.data.rows.length < 1000) {
-                    hasMoreData = false;
+            try {
+                const response = await webmasters.searchanalytics.query({
+                    siteUrl: siteURL,
+                    requestBody: {
+                        startDate: startDate,
+                        endDate: endDate,
+                        dimensions: ['date', 'query', 'page', 'country', 'device'],
+                        rowLimit: 1000,
+                        startRow: startRow
+                    }
+                });
+            
+                if (response && response.data && response.data.rows && Array.isArray(response.data.rows)) {
+                    allRows = allRows.concat(response.data.rows);
+    
+                    if (response.data.rows.length < 1000) {
+                        hasMoreData = false;
+                    } else {
+                        startRow += 1000;
+                    }
                 } else {
-                    startRow += 1000;
+                    hasMoreData = false;
                 }
-            } else {
-                hasMoreData = false;
+            } catch (error) {
+                if (error.code == 401 || (error.response && error.response.status === 401)) {
+                    try {
+                        // アクセストークン切れの場合，トークンをリフレッシュして再試行
+                        const newToken = await refreshAccessToken(auth.refreshToken);
+                        auth.setCredentials({ access_token: newToken.accessToken });
+                        webmasters = google.webmasters({
+                            version: 'v3',
+                            auth
+                        });
+
+                        continue;
+                    } catch (error) {
+                        console.error('Error refreshing access token:', error);
+                        throw error;
+                    }
+                }
             }
         }
         return allRows;
@@ -63,8 +83,8 @@ function flattenData(dataMap) {
 
 // メインの関数
 async function handler(req, res) {
-    const { accessToken, url, startDate, endDate } = req.body;
-    if (!accessToken || !url) {
+    const { accessToken, refreshToken, url, startDate, endDate } = req.body;
+    if (!accessToken || !refreshToken || !url) {
         console.log('AccesToken: ', accessToken, '\nSiteURL: ', url);
         console.error('Access token and site URL are required');
         return;
@@ -73,7 +93,7 @@ async function handler(req, res) {
     try {
         // OAuth2クライアントを初期化
         const auth = new google.auth.OAuth2();
-        auth.setCredentials({ access_token: accessToken });
+        auth.setCredentials({ access_token: accessToken, refresh_token: refreshToken });
 
         // Google Search Consoleからデータを取得
         const rows = await getSearchConsoleData(auth, url, startDate, endDate);

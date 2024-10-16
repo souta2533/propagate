@@ -1,4 +1,4 @@
-import { refreshAccessToken } from './utils.js';
+const { refreshAccessToken } = require('./utils.js');
 
 const { fstat } = require('fs');
 const { google } = require('googleapis');
@@ -54,17 +54,17 @@ function flattenDateMap(initialDateMap) {
 async function handler(req, res) {
 //   console.log("handler");
   // accountId: 各WebサイトのGoogle AnalyticsのアカウントID（Googleアカウントの1つ下位層），propertyId: 各WebサイトのGoogle AnalyticsのプロパティID（各Webサイト）
-  const { accessToken, accountId, propertyId, startDate, endDate } = req.body;
+  const { accessToken, refreshToken, accountId, propertyId, startDate, endDate } = req.body;
 
-  if (!accessToken || !accountId || !propertyId) {
-    console.error('Access token, accountID, and propertyID are required');
+  if (!accessToken || !refreshToken || !accountId || !propertyId) {
+    console.error('Access token, accountID, refreshToken and propertyID are required');
     return;
   }
 
   try {
     // Initialize the OAuth2 client with the access token
     const auth = new google.auth.OAuth2();
-    auth.setCredentials({ access_token: accessToken });
+    auth.setCredentials({ access_token: accessToken, refresh_token: refreshToken });
 
     // Create an instance of the Google Analytics Data API
     const analyticsData = google.analyticsdata({
@@ -107,54 +107,74 @@ async function handler(req, res) {
     let hasMoreData = true;
 
     while (hasMoreData) {
-      // Analytics APIのリクエストを作成
-      const response = await analyticsData.properties.runReport({
-        property: `properties/${propertyId}`, // properties/452842721
-        requestBody: {
-          dateRanges: [
-            {
-              startDate: startDate,
-              endDate: endDate,
-            },
-          ],
-          dimensions: [
-            { name: 'pageLocation' },
-            { name: 'pagePath' },
-            { name: 'date' },
-            { name: 'deviceCategory' },
-            { name: 'sessionSource' },  
-            { name: 'city' },
-            { name: 'firstUserSourceMedium' },
-          ],
-          metrics: [
-            { name: 'screenPageViews' },
-            { name: 'conversions' },
-            { name: 'activeUsers' },
-            { name: 'sessions' },
-            { name: 'engagedSessions' },
-            { name: 'totalUsers' },
-            // { name: 'userGender'},
-            // { name: 'userAgeBracket'},
-          ],
-          limit: 1000,   // 1回のリクエストで取得する行数
-          offset: startRow,   // 取得する行の開始位置
-        },
-      });
+      try {
+        // Analytics APIのリクエストを作成
+        const response = await analyticsData.properties.runReport({
+          property: `properties/${propertyId}`, // properties/452842721
+          requestBody: {
+            dateRanges: [
+              {
+                startDate: startDate,
+                endDate: endDate,
+              },
+            ],
+            dimensions: [
+              { name: 'pageLocation' },
+              { name: 'pagePath' },
+              { name: 'date' },
+              { name: 'deviceCategory' },
+              { name: 'sessionSource' },  
+              { name: 'city' },
+              { name: 'firstUserSourceMedium' },
+            ],
+            metrics: [
+              { name: 'screenPageViews' },
+              { name: 'conversions' },
+              { name: 'activeUsers' },
+              { name: 'sessions' },
+              { name: 'engagedSessions' },
+              { name: 'totalUsers' },
+              // { name: 'userGender'},
+              // { name: 'userAgeBracket'},
+            ],
+            limit: 1000,   // 1回のリクエストで取得する行数
+            offset: startRow,   // 取得する行の開始位置
+          },
+        });
 
-      // レスポンスの確認
-      if (response && response.data && response.data.rows && Array.isArray(response.data.rows)) {
-        allRows = allRows.concat(response.data.rows);
+        // レスポンスの確認
+        if (response && response.data && response.data.rows && Array.isArray(response.data.rows)) {
+          allRows = allRows.concat(response.data.rows);
 
-        // データが1000行未満の場合は，これ以上データがないことを確認
-        if (response.data.rows.length < 1000) {
-          hasMoreData = false;
+          // データが1000行未満の場合は，これ以上データがないことを確認
+          if (response.data.rows.length < 1000) {
+            hasMoreData = false;
+          } else {
+            // データが1000行以上ある場合，次の1000行を取得するためにstartRowを更新
+            startRow += 1000;
+          }
         } else {
-          // データが1000行以上ある場合，次の1000行を取得するためにstartRowを更新
-          startRow += 1000;
+          // データが取得できていない場合はループを終了
+          hasMoreData = false;
         }
-      } else {
-        // データが取得できていない場合はループを終了
-        hasMoreData = false;
+      } catch (error) {
+        if (error.code === 401 || (error.response && error.response.status === 401)) {
+          try {
+            // アクセストークン切れの場合，トークンをリフレッシュして再試行
+            const newToken = await refreshAccessToken(refreshToken);
+            auth.setCredentials({ access_token: newToken.accessToken, refresh_token: newToken.refreshToken });
+            accessToken = newToken.accessToken;
+    
+            // 再試行
+            continue;
+          } catch (refreshError) {
+            console.error('Error refreshing access token:', refreshError);
+            throw refreshError;
+          }
+        } else {
+          console.error('Error fetching analytics data:', error);
+          throw error;
+        }
       }
     }    
 
@@ -207,10 +227,6 @@ async function handler(req, res) {
     // res.status(200).json(Object.values(json_data));
   
   } catch (error) {
-    // if (error.response && error.response.status === 401) {
-    //   // アクセストークン切れの場合，トークンをリフレッシュして再試行
-    //   const newToken = await refreshAccessToken({ refreshToken: auth.credentials.regresh_token });
-    // }
     console.error('Error fetching analytics data:', error);
   }
 }

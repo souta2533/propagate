@@ -4,6 +4,7 @@ from typing import List, Optional
 
 class AnalyticsRequest(BaseModel):
     accessToken: str
+    refreshToken: str
     accountId: str = None
     propertyId: str = None
     startDate: str 
@@ -42,6 +43,7 @@ class AnalyticsDataRequest(BaseModel):
 
 class SearchConsoleRequest(BaseModel):
     accessToken: str
+    refreshToken: str
     url: str
     startDate: str
     endDate: str

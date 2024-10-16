@@ -31,7 +31,7 @@ async def get_search_console(data: SearchConsoleRequest):
         raise HTTPException(status_code=400, detail="URL is missing or invalid")
     
     try:
-        logger.info(data.model_dump())
+        # logger.info(data.model_dump())
         result = run_js_script("./js/get_search_console.js", data.model_dump())
 
         if result == "NoData" or result == "" or result is None:
