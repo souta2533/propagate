@@ -414,8 +414,6 @@ const Dashboard = () => {
     if (fetchedAggregatedData) {
       console.log("Aggregated Data: ", fetchedAggregatedData);
       setAggregatedData(fetchedAggregatedData);
-      fetchAggregatedData7();
-      console.log("Aggregated Data7:", aggregatedData7);
     }
   }, [
     session,
@@ -425,6 +423,42 @@ const Dashboard = () => {
     aggregatedError,
     aggregatedLoading,
     refetchAggregatedData,
+  ]);
+
+  // 集計データを取得
+  const {
+    data: fetchedAggregatedData7,
+    error: aggregatedError7,
+    isLoading: aggregatedLoading7,
+    refetch: refetchAggregatedData7,
+  } = useAggregatedData(session, propertyIds, startDate7, endDate);
+
+  useEffect(() => {
+    if (
+      !session ||
+      !propertyIds.length ||
+      !startDate7 ||
+      !endDate ||
+      aggregatedLoading7
+    )
+      return; // session, propertyIds, startDate
+    if (aggregatedError7) {
+      console.error("Error fetching aggregated data:", aggregatedError7);
+      refetchAggregatedData7(session, propertyIds, startDate7, endDate); // エラー時にリフェッチ
+    }
+
+    if (fetchedAggregatedData7) {
+      console.log("Aggregated Data7: ", fetchedAggregatedData7);
+      setAggregatedData7(fetchedAggregatedData7);
+    }
+  }, [
+    session,
+    propertyIds,
+    startDate7,
+    endDate,
+    aggregatedError7,
+    aggregatedLoading7,
+    refetchAggregatedData7,
   ]);
 
   useEffect(() => {
@@ -475,40 +509,6 @@ const Dashboard = () => {
     console.log("Chart Data:", chartData);
     const filteredData = filterDataByDateRange(chartData, dateRange);
     setChartData(filteredData);
-  };
-
-  // 集計データを取得
-  const {
-    data: fetchedAggregatedData7,
-    error: aggregatedError7,
-    isLoading: aggregatedLoading7,
-    refetch: refetchAggregatedData7,
-  } = useAggregatedData(session, propertyIds, startDate7, endDate);
-
-  const fetchAggregatedData7 = () => {
-    //console.log("session:", session);
-    //console.log("propertyIds:", propertyIds);
-    //console.log("startDate7:", startDate7);
-    //console.log("endDate:", endDate);
-    if (
-      !session ||
-      !propertyIds.length ||
-      !startDate7 ||
-      !endDate ||
-      aggregatedLoading7
-    )
-      return; // session, propertyIds, startDate
-    if (aggregatedError7) {
-      console.error("Error fetching aggregated data:", aggregatedError7);
-      refetchAggregatedData7(session, propertyIds, startDate7, endDate); // エラー時にリフェッチ
-    }
-
-    if (fetchedAggregatedData7) {
-      //console.log("Aggregated Data7: ", fetchedAggregatedData7);
-      //console.log("SDate7:", startDate7);
-      //console.log("EDate7:", endDate);
-      setAggregatedData7(fetchedAggregatedData7);
-    }
   };
 
   // フォーム送信時の処理
