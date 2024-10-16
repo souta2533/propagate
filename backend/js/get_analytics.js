@@ -179,35 +179,85 @@ async function handler(req, res) {
     }    
 
     let json_data = []; // JSON形式で整形するための変数
+    const dataMap = {};
     if(allRows && Array.isArray(allRows)){
       allRows.forEach(row => {
         const dimensions = row.dimensionValues.map(dim => dim.value);
         const metrics = row.metricValues.map(metric => Number(metric.value));
+
+        // const pagePath = dimensions[1];
+        // const date = dimensions[2];
+        
+        const page_location = dimensions[0];
         const pagePath = dimensions[1];
         const date = dimensions[2];
+        const device_category = dimensions[3];
+        const session_source = dimensions[4];
+        const city = dimensions[5];
+        const first_user_source_medium = dimensions[6];
         
-        // 初見のpagePathだった場合，初期データを反映
-        if (!initialDateMap[date][pagePath]) {
-          initialDateMap = initialDateMapForNewPagePath(initialDateMap, allDates, pagePath);
+        const screen_page_views = metrics[0];
+        const conversions = metrics[1];
+        const active_users = metrics[2];
+        const sessions = metrics[3];
+        const engaged_sessions = metrics[4];
+        const total_users = metrics[5];
+
+        const key = `${date}-${page_location}-${device_category}-${session_source}-${city}-${first_user_source_medium}`;
+        if (!dataMap[key]) {
+          dataMap[key] = {
+            page_location: page_location,
+            pagePath: pagePath,
+            date: date,
+            device_category: device_category,
+            session_source: session_source,
+            city: city,
+            first_user_source_medium: first_user_source_medium,
+            screen_page_views: 0,
+            conversions: 0,
+            active_users: 0,
+            sessions: 0,
+            engaged_sessions: 0,
+            total_users: 0,
+          }
         }
 
-        initialDateMap[date][pagePath] = {
-          page_location: dimensions[0],
-          page_path: dimensions[1],
-          date: date,  
-          device_category: dimensions[3],
-          session_source: dimensions[4],
-          city: dimensions[5],
-          first_user_source_medium: dimensions[6],
-          screen_page_views: metrics[0],
-          conversions: metrics[1],
-          active_users: metrics[2],
-          sessions: metrics[3],
-          engaged_sessions: metrics[4],
-          total_users: metrics[5],
-          // gender: metrics[6],
-          // age: metrics[7],
-        };
+        // データの更新
+        dataMap[key].screen_page_views += screen_page_views;
+        dataMap[key].conversions += conversions;
+        dataMap[key].active_users += active_users;
+        dataMap[key].sessions += sessions;
+        dataMap[key].engaged_sessions += engaged_sessions;
+        dataMap[key].total_users += total_users;
+
+
+        // // 初見のpagePathだった場合，初期データを反映
+        // if (!initialDateMap[date][pagePath]) {
+        //   initialDateMap = initialDateMapForNewPagePath(initialDateMap, allDates, pagePath);
+        // }
+
+        // // すでにデータが存在する場合，データをかさん
+        // const existingData = initialDateMap[date][pagePath];
+        
+        // if (existingData){
+        //   initialDateMap[date][pagePath] = {
+        //     page_location: dimensions[0],
+        //     page_path: dimensions[1],
+        //     date: date,  
+        //     device_category: dimensions[3],
+        //     session_source: dimensions[4],
+        //     city: dimensions[5],
+        //     first_user_source_medium: dimensions[6],
+        //     screen_page_views: existingData.screen_page_views + metrics[0],
+        //     conversions: existingData.conversions + metrics[1], 
+        //     active_users: existingData.active_users + metrics[2], 
+        //     sessions: existingData.sessions + metrics[3], 
+        //     engaged_sessions: existingData.engaged_sessions + metrics[4], 
+        //     total_users: existingData.total_users + metrics[5],
+        //     // gender: metrics[6],
+        //     // age: metrics[7],
+        //   };
+        // }
       });
     } else {
         // データがない場合，全て初期化されたデータが戻り値
@@ -219,7 +269,8 @@ async function handler(req, res) {
     }
 
     // Json形式で整形
-    json_data = flattenDateMap(initialDateMap);
+    // json_data = flattenDateMap(initialDateMap);
+    json_data = Object.values(dataMap);
 
     // const data = Object.values(initialDateMap);
     // return json_data;

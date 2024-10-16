@@ -922,27 +922,27 @@ def aggregate_by_path(data):
         cities = record.get('city') if record.get('city') is not None else {}
         if cities is not None:
             for city, v in cities.items():
-                data_by_path[url]['city'][city] += 1
+                data_by_path[url]['city'][city] += v
         
         device_categories = record.get('device_category') if record.get('device_category') is not None else {}
         if device_categories is not None:
             for device_category, v in device_categories.items():
-                data_by_path[url]['device_category'][device_category] += 1
+                data_by_path[url]['device_category'][device_category] += v
 
         queries = record.get('query') if record.get('query') is not None else {}
         if queries is not None:
             for query, v in queries.items():
-                data_by_path[url]['query'][query] += 1
+                data_by_path[url]['query'][query] += v
 
         countries = record.get('country') if record.get('country') is not None else {}
         if countries is not None:
             for country, v in countries.items():
-                data_by_path[url]['country'][country] += 1
+                data_by_path[url]['country'][country] += v
 
         sources = record.get('source') if record.get('source') is not None else {}  
         if sources is not None:
             for source, v in sources.items():
-                data_by_path[url]['source'][source] += 1
+                data_by_path[url]['source'][source] += v
 
         # Conversion Rateの計算
         if data_by_path[url]['UU'] > 0:
@@ -959,6 +959,8 @@ def aggregate_by_path(data):
             data_by_path[url]['country'] = get_top_n(data_by_path[url]['country'])
         if 'query' in data_by_path[url]:
             data_by_path[url]['query'] = get_top_n(data_by_path[url]['query'])
+        if 'source' in data_by_path[url]:
+            data_by_path[url]['source'] = get_top_n(data_by_path[url]['source'])
         
     return data_by_path
 

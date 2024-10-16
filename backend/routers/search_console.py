@@ -52,7 +52,7 @@ async def get_search_console(data: SearchConsoleRequest):
             # Search ConsoleのデータをDBに保存
             analytics_data_table = AnalyticsDataTable(supabase)
             search_console_data = data_by_date(analytics_data=None, search_console_data=result, url_depth=2)
-            # await analytics_data_table.insert_search_console_data(property_id, search_console_data)
+            await analytics_data_table.insert_search_console_data(property_id, search_console_data)
         return HTTPException(status_code=200, detail="Success to get Search Console data")
     
     except HTTPException as e:

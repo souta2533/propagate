@@ -27,6 +27,6 @@ async def get_analytics(data: AnalyticsRequest):
 
         # Google AnalyticsのデータをDBに保存
         analytics_data_table = AnalyticsDataTable(supabase)
-        # await analytics_data_table.insert_analytics_data(property_id, analytics_by_date)
+        await analytics_data_table.insert_analytics_data(property_id, analytics_by_date)
 
     return HTTPException(status_code=200, detail="Success to get analytics data")
