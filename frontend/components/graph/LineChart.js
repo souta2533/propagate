@@ -1,6 +1,7 @@
 import React from "react";
 import { Line } from "react-chartjs-2";
 import { Chart, registerables } from "chart.js";
+import { title } from "process";
 
 Chart.register(...registerables);
 
@@ -88,44 +89,63 @@ const CustomLineChart = ({ data = [], dataKeys = [] }) => {
       tooltip: {
         mode: "index",
         intersect: false,
-        enabled: true, //ツールチップを有効にする
-        padding: 20,
+        enabled: true, // ツールチップを有効にする
+        padding: {
+          top: 20,
+          bottom: 10,
+          right: 20,
+          left: 20,
+        },
         backgroundColor: "rgba(0, 0, 0, 0.8)",
         color: "white",
         titleFont: {
-          size: 16,
-          weight: "bold",
+          size: 14,
+          weight: "normal",
           family: "sans-serif",
         },
         bodyFont: {
-          size: 16,
+          size: 14,
           weight: "bold",
           family: "sans-serif",
         },
-        boxPadding: 20,
+        boxPadding: 15,
         usePointStyle: true,
         pointStyle: "circle",
+        titleMarginBottom: 20,
         callbacks: {
+          labelPointStyle: function(context) {
+            return {
+              pointStyle: 'circle',
+              rotation: 0,
+              radius: 6,
+              backgroundColor: context.dataset.borderColor,
+              borderColor: 'gray',
+              borderWidth: 2
+            };
+          },
           label: function (context) {
             const label = context.dataset.label || "";
             const value = context.raw;
-
+    
             if (label === "PV") {
-              return `ページ閲覧数\n${value}`;
+              return [`ページ閲覧数`, `${value}`];
             } else if (label === "UU") {
-              return `セッション数\n${value}`;
+              return [`セッション数`, `${value}`];
             } else if (label === "CVR") {
-              return `問い合わせ率\n${value}`;
+              return [`問い合わせ率`, `${value}`];
             } else if (label === "CV") {
-              return `問い合わせ数\n${value}`;
+              return [`問い合わせ数`, `${value}`];
             }
-
-            return `${label}\n${value}`;
+    
+            return [label, `${value}`];
           },
+          afterLabel: function() {
+            return ' '; // ラベル間に空白を入れる
+          }
         },
       },
       legend: {
-        display: true, //凡例
+        display: true, // 凡例
         align: "end",
         labels: {
           usePointStyle: true,
@@ -135,7 +155,7 @@ const CustomLineChart = ({ data = [], dataKeys = [] }) => {
           },
         },
       },
-    },
+    },    
   };
 
   //const divStyle = css`
