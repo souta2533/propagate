@@ -203,6 +203,8 @@ const Dashboard = () => {
     if (!path) {
       const defaultPath = "/";
       setPagePath(defaultPath);
+      const prevPagePath = { label: defaultPath, value: url };
+      setSelectedPagePath(prevPagePath);
 
       router.push(
         {
@@ -222,9 +224,13 @@ const Dashboard = () => {
 
       if (queryUrl) {
         setUrl(queryUrl);
+        const prevUrl = { label: queryUrl, value: queryUrl };
+        setSelectedUrl(prevUrl);
       }
       if (queryPagePath) {
         setPagePath(queryPagePath);
+        const prevPagePath = { label: queryPagePath, value: queryPagePath };
+        setSelectedPagePath(prevPagePath);
       }
     }
   }, [router.isReady, router.query]);
@@ -934,8 +940,8 @@ const Dashboard = () => {
       })
       .filter((key) => key !== ""); // 空のキーを除外
 
-    console.log("Data Keys:", dataKeys); // デバッグ用ログ
-    console.log("ChartData:", chartData);
+    //console.log("Data Keys:", dataKeys); // デバッグ用ログ
+    //console.log("ChartData:", chartData);
 
     return <LineChart data={chartData} dataKeys={dataKeys} />;
   };

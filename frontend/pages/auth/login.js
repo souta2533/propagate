@@ -14,19 +14,18 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault(); // フォームが送信されたときにページがリロードされるのを防ぐ
 
-    // ログインリクエストをサーバーに送信
-    // const res = await fetch("/api/auth/login", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({ email, password }),
-    // });
-
-    // const data = await res.json();
+    //ログインリクエストをサーバーに送信;
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
 
     // Supabaseのクライアントを直接使用してログイン
-    const { error, data } = await supabase.auth.signInWithPassword({
+    const { error, supdata } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -39,25 +38,23 @@ export default function Login() {
       const property = data.session.user.user_metadata.property;
       const pagePath = "/";
 
-      router.push({
-        pathname: "/dashboard",
-        query: { property },
-      });
+      //router.push({
+      //  pathname: "/dashboard",
+      //  query: { property },
+      //});
     }
 
-    // if (res.ok) {
-    //   // session情報をlocalStorageに保存
-    // //   localStorage.setItem("supabaseSession", JSON.stringify(data.session));
-
-    //   // ログイン成功時，ダッシュボードへリダイレクト
-    //   console.log("Session: ", data.session);
-    // //   await router.push("/dashboard");
-
-    //   // console.log("Data: ", data);
-    // } else {
-    //   // ログイン失敗時，エラーメッセージを表示
-    //   setError(data.message);
-    // }
+    if (res.ok) {
+      // session情報をlocalStorageに保存
+      //   localStorage.setItem("supabaseSession", JSON.stringify(data.session))
+      // ログイン成功時，ダッシュボードへリダイレクト
+      console.log("Session: ", data.session);
+      //   await router.push("/dashboard")
+      // console.log("Data: ", data);
+    } else {
+      // ログイン失敗時，エラーメッセージを表示
+      setError(data.message);
+    }
   };
 
   return (

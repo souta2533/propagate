@@ -22,8 +22,8 @@ const CustomLineChart = ({ data = [], dataKeys = [] }) => {
   const sortedData = sortDataByDate(data);
 
   // データの形式を確認
-  console.log("Data:", data);
-  console.log("Data Keys:", dataKeys);
+  //console.log("Data:", data);
+  //console.log("Data Keys:", dataKeys);
 
   const graphData = {
     labels: sortedData.map((item) => item.date),
