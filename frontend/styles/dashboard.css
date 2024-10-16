@@ -192,9 +192,10 @@
 }
 
 .metric-card-header {
-  font-size: 1vw;
+  font-size: 1.1vw;
   color: #555555;
-  font-weight: 400;
+  font-weight: 600;
+  margin-bottom: 0.5vw;
 }
 
 .metric-value {
@@ -617,7 +618,6 @@
     margin-bottom: 2vw;
     gap: 2vw;
     border-radius: 15px;
-    background-color: #ffffff;
   }
 
   .dashboard-top-left {
@@ -793,7 +793,7 @@
   }
 
   .middle-title {
-    font-size: 3vw;
+    font-size: 3.5vw;
     font-weight: 500;
     color: #444444;
     margin-bottom: 0.25vw;
@@ -801,7 +801,7 @@
 
   .middle-subtitle {
     position: relative;
-    font-size: 2vw;
+    font-size: 2.4vw;
     font-weight: 400;
     color: #6b7280;
     margin-bottom: 0.5vw;
@@ -871,7 +871,7 @@
   }
 
   .bottom-title {
-    font-size: 3vw;
+    font-size: 3.5vw;
     font-weight: 500;
     color: #444444;
     padding-top: 2vw;
@@ -879,7 +879,7 @@
   }
 
   .bottom-subtitle {
-    font-size: 2vw;
+    font-size: 2.4vw;
     font-weight: 400;
     color: #6b7280;
     margin-bottom: 0.5vw;

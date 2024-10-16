@@ -932,7 +932,7 @@ const Dashboard = () => {
 
   function getQuery(searchData, searchId) {
     const queryData = searchData[searchId]?.[pagePath]?.query;
-    const viewData = searchData[searchId]?.[pagePath]?.click;
+    const viewData = searchData[searchId]?.[pagePath]?.impression;
     //console.log("QueryData: ", queryData);
 
     if (!queryData) {

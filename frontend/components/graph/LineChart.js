@@ -86,22 +86,41 @@ const CustomLineChart = ({ data = [], dataKeys = [] }) => {
     },
     plugins: {
       tooltip: {
+        mode: "index",
+        intersect: false,
         enabled: true, //ツールチップを有効にする
-        padding: 50,
+        padding: 20,
         backgroundColor: "rgba(0, 0, 0, 0.8)",
         color: "white",
-        font: {
-          size: 12,
+        titleFont: {
+          size: 16,
           weight: "bold",
           family: "sans-serif",
-          lineHeight: 1.5,
-          gap: 10,
         },
+        bodyFont: {
+          size: 16,
+          weight: "bold",
+          family: "sans-serif",
+        },
+        boxPadding: 20,
+        usePointStyle: true,
+        pointStyle: "circle",
         callbacks: {
           label: function (context) {
             const label = context.dataset.label || "";
             const value = context.raw;
-            return `${label}: ${value}`;
+
+            if (label === "PV") {
+              return `ページ閲覧数\n${value}`;
+            } else if (label === "UU") {
+              return `セッション数\n${value}`;
+            } else if (label === "CVR") {
+              return `問い合わせ率\n${value}`;
+            } else if (label === "CV") {
+              return `問い合わせ数\n${value}`;
+            }
+
+            return `${label}\n${value}`;
           },
         },
       },
@@ -112,7 +131,7 @@ const CustomLineChart = ({ data = [], dataKeys = [] }) => {
           usePointStyle: true,
           pointStyle: "line",
           font: {
-            size: 12,
+            size: 14,
           },
         },
       },
