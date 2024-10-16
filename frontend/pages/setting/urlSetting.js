@@ -8,6 +8,7 @@ import styles from "../../styles/setting/urlSetting.css";
 
 export default function UrlSetting() {
   const [url, setUrl] = useState("");
+  const [urlList, setUrlList] = useState([]);
   const router = useRouter();
   const [session, setSession] = useState(null);
   const [email, setEmail] = useState("");
@@ -71,7 +72,7 @@ useEffect(() => {
 
   return (
     <div className="urlsetting-container">
-      <div className="urlsetting-form">
+      <div className="urlsetting-form" onSubmit={handleUrl}>
         <h1 className="url-text">URL設定ページ</h1>
         <form className="main-form" onSubmit={handleUrl}>
           <div className="url-form">

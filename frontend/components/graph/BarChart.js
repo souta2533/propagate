@@ -28,11 +28,11 @@ const BarChart = ({ data }) => {
 
   // dataをchart.jsが必要とする形式に変換
   const chartData = {
-    labels: Object.keys(data), // X軸のラベル
+    labels: data.map((item) => item[0]), // X軸のラベル
     datasets: [
       {
         label: "Value", // データセット名
-        data: Object.values(data), // Y軸のデータ
+        data: data.map((item) => item[1]), // Y軸のデータ
         backgroundColor: "#8884d8", // 棒グラフの色
         borderColor: "#8884d8", // 境界線の色
         borderWidth: 1, // 境界線の幅

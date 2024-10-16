@@ -16,19 +16,17 @@ const sortDataByDate = (data) => {
 const CustomLineChart = ({ data = [], dataKeys = [] }) => {
   if (!data || data.length === 0) {
     console.warn("Data is empty or null");
-    return (
-      <dev>
-        <h1>Please set your URL & PagePath!</h1>
-      </dev>
-    );
+    return <div>No data</div>;
   }
 
+  const sortedData = sortDataByDate(data);
+
   // データの形式を確認
-  console.log("Data:", data);
-  console.log("Data Keys:", dataKeys);
+  //console.log("Data:", data);
+  //console.log("Data Keys:", dataKeys);
 
   const graphData = {
-    labels: data.map((item) => item.date),
+    labels: sortedData.map((item) => item.date),
     datasets: dataKeys.map((key, index) => {
       let borderColor;
 
@@ -37,17 +35,17 @@ const CustomLineChart = ({ data = [], dataKeys = [] }) => {
       } else if (key === "UU") {
         borderColor = "#ff8800";
       } else if (key === "CVR") {
-        borderColor = "#ff0000";
-      } else if (key === "CV") {
         borderColor = "#ee00ff";
+      } else if (key === "CV") {
+        borderColor = "#ff0000";
       }
 
       return {
         label: key,
-        data: data.map((item) => item[key]),
+        data: sortedData.map((item) => item[key]),
         borderColor: borderColor,
         fill: false,
-        tension: 0.1,
+        tension: 0.3,
         borderWidth: 2,
         pointRadius: 0,
         pointHitRadius: 20,
@@ -63,7 +61,7 @@ const CustomLineChart = ({ data = [], dataKeys = [] }) => {
       x: {
         ticks: {
           autoSkip: true,
-          maxTicksLimit: 20, //X軸のラベル表示
+          maxTicksLimit: 7, //X軸のラベル表示
         },
         grid: {
           display: false,
@@ -73,6 +71,9 @@ const CustomLineChart = ({ data = [], dataKeys = [] }) => {
         type: "linear",
         position: "left",
         beginAtZero: true, //Y軸を０に設定
+        grid: {
+          drawOnChartArea: true,
+        },
       },
       "y-axis-1": {
         type: "linear",
@@ -85,12 +86,41 @@ const CustomLineChart = ({ data = [], dataKeys = [] }) => {
     },
     plugins: {
       tooltip: {
+        mode: "index",
+        intersect: false,
         enabled: true, //ツールチップを有効にする
+        padding: 20,
+        backgroundColor: "rgba(0, 0, 0, 0.8)",
+        color: "white",
+        titleFont: {
+          size: 16,
+          weight: "bold",
+          family: "sans-serif",
+        },
+        bodyFont: {
+          size: 16,
+          weight: "bold",
+          family: "sans-serif",
+        },
+        boxPadding: 20,
+        usePointStyle: true,
+        pointStyle: "circle",
         callbacks: {
           label: function (context) {
             const label = context.dataset.label || "";
             const value = context.raw;
-            return `${label}: ${value}`;
+
+            if (label === "PV") {
+              return `ページ閲覧数\n${value}`;
+            } else if (label === "UU") {
+              return `セッション数\n${value}`;
+            } else if (label === "CVR") {
+              return `問い合わせ率\n${value}`;
+            } else if (label === "CV") {
+              return `問い合わせ数\n${value}`;
+            }
+
+            return `${label}\n${value}`;
           },
         },
       },
@@ -101,19 +131,22 @@ const CustomLineChart = ({ data = [], dataKeys = [] }) => {
           usePointStyle: true,
           pointStyle: "line",
           font: {
-            size: 12,
+            size: 14,
           },
         },
       },
     },
   };
 
-  const divStyle = {
-    height: "350px",
-  };
+  //const divStyle = css`
+  //  height: 27vw;
+  //  @media (max-width: 768px) {
+  //    height: "50vw",
+  //  },
+  //`;
 
   return (
-    <div className="line-chart" style={divStyle}>
+    <div className="line-chart">
       <Line data={graphData} options={options} />
     </div>
   );

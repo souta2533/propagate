@@ -17,7 +17,6 @@ import PieChart from "../../components/graph/PieChart";
 import Table from "../../components/graph/Table";
 import Table2 from "../../components/graph/Table2";
 import PercentageTable from "../../components/graph/PercentageTable";
-import ParrialDataChart from "../../components/graph/ParrialDataChart";
 import { Grid, Paper, Typography, Box } from "@mui/material";
 
 import "../../styles/details.css";
@@ -579,8 +578,8 @@ export default function Details() {
       );
     } else if (selectedMetric === "SD") {
       return (
-      <div>
-        <MultiLineChart data={filteredData} dataKey="device_category" />
+        <div>
+          <MultiLineChart data={filteredData} dataKey="device_category" />
           <PercentageTable
             data={device}
             title="流入元デバイス"
@@ -588,7 +587,6 @@ export default function Details() {
             className="Percentage-graph"
           />
           <Table2 data={device} dataKey="流入元デバイス" />
-
         </div>
       ); //流入元デバイス
     } else if (selectedMetric === "VR") {
@@ -600,7 +598,7 @@ export default function Details() {
             subtitle="上位7項目"
             className="Percentage-graph"
           />
-          
+
           <Table2 data={city} dataKey="流入者属性" />
           {/*<PercentageTable
             data={country}
@@ -750,9 +748,9 @@ export default function Details() {
           total_users: 0,
           UU: 0,
           CVR: 0,
-          device_category: {desktop:0, mobile:0, tablet:0},
+          device_category: { desktop: 0, mobile: 0, tablet: 0 },
           city: {},
-          country: {jpn:0},
+          country: { jpn: 0 },
           query: {},
           click: 0,
         }
@@ -771,10 +769,10 @@ export default function Details() {
         total_users: 0,
         UU: 0,
         CVR: 0,
-        device_category: {desktop:0, mobile:0, tablet:0},
-        city: {shibuya:0},
-        country: {jpn:0},
-        query: {ホームページ:0},
+        device_category: { desktop: 0, mobile: 0, tablet: 0 },
+        city: { shibuya: 0 },
+        country: { jpn: 0 },
+        query: { ホームページ: 0 },
         click: 0,
       },
     ];
@@ -880,8 +878,8 @@ console.log(JSON.stringify(aggregatedResult, null, 2));
           </Button>
         </div>
       </div>
-      
-        <div className="graph-control">
+
+      <div className="graph-control">
         <div className="filter-section">
           <div className="date-range">
             <Select
@@ -978,7 +976,7 @@ console.log(JSON.stringify(aggregatedResult, null, 2));
         </div>
       </div>
       <div className="details-bottom">
-      {<div className="chart">{selectChart()}</div>}
+        {<div className="chart">{selectChart()}</div>}
       </div>
     </div>
   );

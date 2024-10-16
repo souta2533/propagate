@@ -25,6 +25,15 @@ const getMuiTheme = () =>
           root: {
             padding: "8px",
             fontSize: "15px",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            maxWidth: "15vw",
+            "@media (max-width: 768px)": {
+              fontSize: "12px",
+              padding: "6px",
+              maxWidth: "40vw", // 小さい画面での列幅を調整
+            },
           },
         },
       },
@@ -34,20 +43,56 @@ const getMuiTheme = () =>
             fontWeight: "bold",
             fontSize: "15px",
             padding: "10px",
+            backgroundColor: "#f9f9f9",
+            position: "sticky",
+            top: 0,
+            zIndex: 50,
+            "@media (max-width: 768px)": {
+              fontSize: "12px",
+              padding: "6px",
+            },
           },
         },
       },
     },
   });
-const Table = ({ data }) => {
+
+const Table2 = ({ data }) => {
   if (!Array.isArray(data) || data.length === 0) {
     return null;
   }
 
-  // `date`列と`dataKey`で指定された列を表示
+  const totalCount = data.reduce((sum, item) => sum + item[1], 0);
+
   const columns = [
-    { name: "number", label: "No" },
-    { name: "query", label: "カテゴリ" },
+    {
+      name: "number",
+      label: "No",
+      options: {
+        setCellProps: () => ({
+          style: {
+            width: "5%",
+            "@media (max-width: 768px)": {
+              width: "10%",
+            },
+          },
+        }),
+      },
+    },
+    {
+      name: "query",
+      label: "カテゴリ",
+      options: {
+        setCellProps: () => ({
+          style: {
+            width: "15%",
+            "@media (max-width: 768px)": {
+              width: "40%",
+            },
+          },
+        }),
+      },
+    },
     {
       name: "count",
       label: "流入数",
@@ -59,47 +104,52 @@ const Table = ({ data }) => {
               flexDirection: "row",
               alignItems: "center",
               width: "100%",
+              height: "0.5vw",
             }}
           >
-            <span style={{ marginRight: "8px" }}>{value.toLocaleString()}</span>
+            <span style={{ marginRight: "16px" }}>
+              {value.toLocaleString()}
+            </span>
             <div
               style={{
                 width: "100%",
-                height: "0.5vh",
                 backgroundColor: "#e0e0e0",
                 position: "relative",
               }}
             >
               <div
                 style={{
-                  width: `${(value / data[0][1]) * 100}%`,
+                  width: `${(value / totalCount) * 100}%`,
                   backgroundColor: "#25DFBB",
-                  height: "100%",
+                  height: "0.5vw",
+                  borderRadius: "10vw",
                 }}
               ></div>
             </div>
           </div>
         ),
+        setCellProps: () => ({
+          style: {
+            width: "80%",
+            "@media (max-width: 768px)": {
+              width: "50%",
+            },
+          },
+        }),
       },
-    }, // 2列目は`dataKey`で指定された列
+    },
   ];
 
-  // データをテーブル用に整形
-  const tableData = data.map((item, index) => {
-    const row = {
-      number: index + 1,
-      query: item[0],
-      count: item[1],
-    };
-    console.log(row);
-    return row;
-  });
+  const tableData = data.map((item, index) => ({
+    number: index + 1,
+    query: item[0],
+    count: item[1],
+  }));
 
-  // options 設定（必要に応じてカスタマイズ可能）
   const options = {
     filterType: "dropdown",
-    selectableRows: "none", // 行の選択を無効にする
-    responsive: "vertical", // scrollMaxHeightの代わりにstandardを使用
+    selectableRows: "none",
+    responsive: "standard",
     download: false,
     print: false,
     search: false,
@@ -108,6 +158,9 @@ const Table = ({ data }) => {
     rowsPerPageOptions: [data.length],
     sort: true,
     pagination: false,
+    fixedHeader: true, // ヘッダー行を固定
+    fixedSelectColumn: true, // 固定する列がある場合に使用
+    tableBodyMaxHeight: "300px", // テーブル本体の最大高さを指定
     textLabels: {
       body: {
         noMatch: "データが見つかりません",
@@ -122,10 +175,9 @@ const Table = ({ data }) => {
   );
 };
 
-export default Table;
+export default Table2;
 
-{
-  /*
+/*
  // options 設定
  オプションの詳細
 download: trueにすると、CSV形式でデータをダウンロードするためのボタンが表示されます。
@@ -153,4 +205,3 @@ rowsPerPageOptions: 1ページに表示する行数の選択肢を設定しま�
 
 例: rowsPerPageOptions: [5, 10, 20]で、5、10、20行から選択できるようになります。
 */
-}

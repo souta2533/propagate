@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/router";
-import { FaSearch, FaTrash } from "react-icons/fa";
+import { FaSearch } from "react-icons/fa";
 import { Settings, UserRoundPen, Mail, LogOut } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import { useSessionData } from "../hooks/useSessionData";
@@ -14,56 +14,86 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { Card, CardContent } from "../components/ui/Card";
 import Select from "react-select";
 import CreatableSelect from "react-select/creatable";
-import Sidebar from "../components/ui/Sidebar";
 import MetricCard from "../components/ui/MetricCard";
 import LineChart from "../components/graph/LineChart";
-import BarChart from "../components/graph/BarChart";
 import PieChart from "../components/graph/PieChart";
 import PercentageTable from "../components/graph/PercentageTable";
 import Table from "../components/graph/Table";
 import Table2 from "../components/graph/Table2";
-import WebMetricsChart from "../components/graph/WebMetricsChart";
-import TriangleChart from "../components/graph/TriangleChart";
 import "../styles/dashboard.css";
 
-//Selectのカスタム
-const CustomOption = (props) => {
-  const { data, innerRef, innerProps } = props;
-
-  return (
-    <div
-      ref={innerRef}
-      {...innerProps}
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        fontSize: "1vw",
-      }}
-    >
-      <span>{data.label}</span>
-      <FaTrash
-        onClick={(e) => {
-          e.stopPropagation(); // オプションの選択を防ぐ
-          props.onDelete(data); // 削除機能を呼び出す
-        }}
-        style={{ cursor: "pointer", color: "black" }}
-      />
-    </div>
-  );
-};
-const customStyles = {
+const styles1 = {
   control: (provided) => ({
     ...provided,
-    border: "none",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#000000",
+    color: "#ffffff",
+    border: "2px solid #ffffff",
+    borderRadius: "10vw",
     boxShadow: "none",
-    padding: "5px 10px",
+    padding: "0vw",
     cursor: "pointer",
+    width: "20vw",
+    height: "0.5vw",
+    overflowX: "scroll",
+    overflowY: "hidden",
+    alignItems: "center",
+
+    "@media (max-width: 768px)": {
+      width: "40vw",
+      padding: "0 1vw",
+      overflowX: "scroll",
+      alignItems: "center",
+    },
   }),
   "&:hover": {},
   menu: (provided) => ({
     ...provided,
-    backgroundColor: "#fff", // メニュー背景色
+    backgroundColor: "#ffffff", // メニュー背景色
+    zIndex: 9999, // メニューが他の要素の上に表示されるように
+  }),
+  "&:hover": {},
+  option: (provided, state) => ({
+    ...provided,
+    backgroundColor: state.isFocused ? "#f0f0f0" : "#fff", // フォーカスされたときのオプションの背景色
+    color: state.isFocused ? "#333" : "#000", // フォーカスされたときのオプションの文字色
+    padding: 10,
+  }),
+  singleValue: (provided) => ({
+    ...provided,
+    color: "#ffffff", // 選択されたオプションのテキスト色
+  }),
+};
+
+const styles2 = {
+  control: (provided) => ({
+    ...provided,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    border: "none",
+    boxShadow: "none",
+    padding: "0 7px",
+    width: "20vw",
+    height: "0.5vw",
+    cursor: "pointer",
+    backgroundColor: "#e5e5e5",
+    overflowX: "scroll",
+    overflowY: "hidden",
+
+    "@media (max-width: 768px)": {
+      width: "50vw",
+      padding: "0 1vw",
+      overflowX: "scroll",
+      alignItems: "center",
+    },
+  }),
+  "&:hover": {},
+  menu: (provided) => ({
+    ...provided,
+    backgroundColor: "#ffffff", // メニュー背景色
     zIndex: 9999, // メニューが他の要素の上に表示されるように
   }),
   "&:hover": {},
@@ -80,39 +110,6 @@ const customStyles = {
 };
 
 const Dashboard = () => {
-  const sampledata2 = [
-    { date: "2024-09-01", PV: 0, CV: 102, CVR: 6.42, UU: 1321 },
-    { date: "2024-09-02", PV: 1498, CV: 76, CVR: 5.07, UU: 1210 },
-    { date: "2024-09-03", PV: 1678, CV: 123, CVR: 7.33, UU: 1456 },
-    { date: "2024-09-04", PV: 1543, CV: 110, CVR: 7.13, UU: 1345 },
-    { date: "2024-09-05", PV: 1398, CV: 134, CVR: 9.59, UU: 1234 },
-    { date: "2024-09-06", PV: 1487, CV: 89, CVR: 5.98, UU: 1123 },
-    { date: "2024-09-07", PV: 1734, CV: 145, CVR: 8.36, UU: 1432 },
-    { date: "2024-09-08", PV: 1599, CV: 102, CVR: 6.38, UU: 1321 },
-    { date: "2024-09-09", PV: 1478, CV: 76, CVR: 5.14, UU: 1210 },
-    { date: "2024-09-10", PV: 1345, CV: 123, CVR: 9.14, UU: 1456 },
-    { date: "2024-09-11", PV: 1689, CV: 110, CVR: 6.51, UU: 1345 },
-    { date: "2024-09-12", PV: 1534, CV: 134, CVR: 8.74, UU: 1234 },
-    { date: "2024-09-13", PV: 1456, CV: 89, CVR: 6.11, UU: 1123 },
-    { date: "2024-09-14", PV: 1723, CV: 145, CVR: 8.41, UU: 1432 },
-    { date: "2024-09-15", PV: 1589, CV: 102, CVR: 6.42, UU: 1321 },
-    { date: "2024-09-16", PV: 1498, CV: 76, CVR: 5.07, UU: 1210 },
-    { date: "2024-09-17", PV: 1678, CV: 123, CVR: 7.33, UU: 1456 },
-    { date: "2024-09-18", PV: 1543, CV: 110, CVR: 7.13, UU: 1345 },
-    { date: "2024-09-19", PV: 1398, CV: 134, CVR: 9.59, UU: 1234 },
-    { date: "2024-09-20", PV: 1487, CV: 89, CVR: 5.98, UU: 1123 },
-    { date: "2024-09-21", PV: 1734, CV: 145, CVR: 8.36, UU: 1432 },
-    { date: "2024-09-22", PV: 1599, CV: 102, CVR: 6.38, UU: 1321 },
-    { date: "2024-09-23", PV: 1478, CV: 76, CVR: 5.14, UU: 1210 },
-    { date: "2024-09-24", PV: 1345, CV: 123, CVR: 9.14, UU: 1456 },
-    { date: "2024-09-25", PV: 1689, CV: 110, CVR: 6.51, UU: 1345 },
-    { date: "2024-09-26", PV: 1534, CV: 134, CVR: 8.74, UU: 1234 },
-    { date: "2024-09-27", PV: 1456, CV: 89, CVR: 6.11, UU: 1123 },
-    { date: "2024-09-28", PV: 1723, CV: 145, CVR: 8.41, UU: 1432 },
-    { date: "2024-09-29", PV: 1589, CV: 102, CVR: 6.42, UU: 1321 },
-    { date: "2024-09-30", PV: 1498, CV: 76, CVR: 5.07, UU: 1210 },
-  ];
-
   // サンプルメトリクスデータ
   const sampleMetrics = [
     {
@@ -137,18 +134,8 @@ const Dashboard = () => {
     },
   ];
 
-  const options = [
-    { value: "過去7日間", label: "過去7日間" },
-    { value: "過去28日間", label: "過去28日間" },
-    { value: "過去90日間", label: "過去90日間" },
-    { value: "先月", label: "先月" },
-    { value: "先々月", label: "先々月" },
-    { value: "1年間", label: "1年間" },
-    { value: "全期間", label: "全期間" },
-  ];
-
   const [session, setSession] = useState(null);
-  const [loading, setLoading] = useState(false); // ローディング中かどうかの状態を管理
+  const [loading, setLoading] = useState(true); // ローディング中かどうかの状態を管理
   const [accountIds, setAccountIds] = useState([]);
   const [selectedAccountId, setSelectedAccountId] = useState(null);
   const [filteredProperties, setFilteredProperties] = useState([]);
@@ -163,8 +150,7 @@ const Dashboard = () => {
   const [startDate7, setStartDate7] = useState(() => {
     const date7 = new Date();
     date7.setDate(date7.getDate() - 7);
-    console.log("SDate7:", date7.toISOString().split("T")[0]);
-    const formattedDate = date7.toISOString().split("T")[0];
+    const formattedDate = date7.toISOString().split("T")[0].replace(/-/g, "/");
     console.log("Formatted Date:", formattedDate);
     return formattedDate;
   });
@@ -181,20 +167,73 @@ const Dashboard = () => {
   const [urlOptions, setUrlOptions] = useState([]);
   const [selectedUrl, setSelectedUrl] = useState(null);
   const [sanitizedUrl, setSanitizedUrl] = useState(null);
+  const [pagePath, setPagePath] = useState(null);
+  const [selectedPagePath, setSelectedPagePath] = useState("/");
+  const [pagePathOptions, setPagePathOptions] = useState([]);
+  const [pagePathList, setPagePathList] = useState([]);
   const [metrics, setMetrics] = useState(sampleMetrics); // メトリクスのstate
-  const [selectedMetrics, setSelectedMetrics] = useState([]); // 選択中のメトリクス
+  const [selectedMetrics, setSelectedMetrics] = useState(["PV", "UU"]); // 選択中のメトリクス
   const [inputValue, setInputValue] = useState(""); // ここで useState を使って定義
 
   const [dataForDateRange, setDataForDateRange] = useState([]);
   const [formattedAnalytics, setFormattedAnalytics] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
+  const [registeredUrl, setRegisteredUrl] = useState(""); //URL追加ページで登録したURLを保持
   const router = useRouter();
 
   const [sourceChartData, setSourceChartData] = useState([]);
-  //Loadingの設定
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 8000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  //defaultでグラフデータをセット
+  useEffect(() => {
+    if (!router.isReady) return;
+
+    const { url, path } = router.query;
+
+    if (url) setUrl(url);
+    if (path) setPagePath(path);
+
+    if (!path) {
+      const defaultPath = "/";
+      setPagePath(defaultPath);
+      const prevPagePath = { label: defaultPath, value: url };
+      setSelectedPagePath(prevPagePath);
+
+      router.push(
+        {
+          pathname: router.pathname,
+          query: { ...router.query, path: defaultPath },
+        },
+        undefined,
+        { shallow: true }
+      );
+    }
+  }, [router.isReady, router.query]);
+
+  //reloardした時に値を保持する
+  useEffect(() => {
+    if (router.isReady) {
+      const { url: queryUrl, pagePath: queryPagePath } = router.query;
+
+      if (queryUrl) {
+        setUrl(queryUrl);
+        const prevUrl = { label: queryUrl, value: queryUrl };
+        setSelectedUrl(prevUrl);
+      }
+      if (queryPagePath) {
+        setPagePath(queryPagePath);
+        const prevPagePath = { label: queryPagePath, value: queryPagePath };
+        setSelectedPagePath(prevPagePath);
+      }
+    }
+  }, [router.isReady, router.query]);
 
   //localStorageからURLリストを取得
   useEffect(() => {
@@ -221,10 +260,23 @@ const Dashboard = () => {
 
   //URL選択時の処理
   const handleUrlChange = (selectedOption) => {
+    if (!selectedOption) {
+      alert("URLを選択してください");
+      return;
+    }
+
     setSelectedUrl(selectedOption);
     setUrl(selectedOption.value);
     console.log("SelectedURL:", selectedOption.value);
     const url = selectedOption.value;
+
+    const foundPropertyId = findPropertyIdByUrl(url);
+    if (foundPropertyId) {
+      setPropertyId(foundPropertyId);
+    } else {
+      console.error("該当するプロパティが見つかりません");
+    }
+
     const saniUrl = url.replace(/\/+$/, "");
     setSanitizedUrl(saniUrl);
   };
@@ -273,6 +325,16 @@ const Dashboard = () => {
     }
   }, [session, analyticsError, analyticsLoading, refetchAnalyticsData]);
 
+  useEffect(() => {
+    if (propertyIds.length > 0) {
+      const firstUrl = propertyIds[2].url;
+      console.log("firstUrl:", firstUrl);
+      setUrl(firstUrl);
+      const firstSelectedUrl = { label: firstUrl, value: firstUrl };
+      setSelectedUrl(firstSelectedUrl);
+    }
+  }, [analyticsData]);
+
   // Search Consoleデータの取得
   const {
     data: fetchedSearchConsoleData,
@@ -306,14 +368,7 @@ const Dashboard = () => {
     refetch: refetchDataByDay,
   } = useDataByDay(session, propertyIds, startDate, endDate);
 
-  console.log("Data By Day: ", fetchedDataByDay); //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.
-  if (dataByDay && dataByDay[propertyId]) {
-    console.log("DDBP:", dataByDay[propertyId]);
-    console.log("SNURL:", sanitizedUrl);
-    console.log("DD:", dataByDay[propertyId][sanitizedUrl]);
-  } else {
-    console.log("dataByDay または url が存在しないか無効です");
-  }
+  console.log("Data By Day: ", fetchedDataByDay);
 
   useEffect(() => {
     if (!session || !propertyIds || !startDate || !endDate) return;
@@ -360,7 +415,7 @@ const Dashboard = () => {
       console.log("Aggregated Data: ", fetchedAggregatedData);
       setAggregatedData(fetchedAggregatedData);
       fetchAggregatedData7();
-      console.log("Aggregated Data:", aggregatedData);
+      console.log("Aggregated Data7:", aggregatedData7);
     }
   }, [
     session,
@@ -372,6 +427,56 @@ const Dashboard = () => {
     refetchAggregatedData,
   ]);
 
+  useEffect(() => {
+    if (dataByDay && dataByDay[propertyId] && url) {
+      const list = Object.keys(dataByDay[propertyId]);
+      console.log("PathList", list);
+      setPagePathList(list);
+    }
+  }, [dataByDay, propertyId, url]);
+
+  let pagePaths = [];
+
+  if (dataByDay && dataByDay[propertyId] && url) {
+    const sanitizedUrl = url.replace(/\/+$/, ""); // URLの末尾のスラッシュを削除
+    const urlLength = sanitizedUrl.length; // URLの文字数を取得
+
+    pagePaths = Object.keys(dataByDay[propertyId])
+      .map((path) => {
+        // URLの長さ分だけフィルターをかける
+        const filteredPath = path.substring(urlLength); // URLの長さ分だけ切り取る
+        const match = filteredPath.match(/^\/?([^/]+)?$/); // 1階層下のパスを考慮
+        if (match) {
+          const pagePath = match[1] ? `/${match[1]}` : "/";
+          return { value: path, label: pagePath }; // 元のpathと新しいlabelを返す
+        }
+        return null;
+      })
+      .filter((path) => path !== null);
+  }
+
+  useEffect(() => {
+    setPagePathOptions(pagePaths);
+  }, [pagePathList]);
+
+  const handlePagePathChange = (selectedOption) => {
+    setSelectedPagePath(selectedOption);
+    setPagePath(selectedOption.value);
+    router.push(
+      {
+        pathname: router.pathname,
+        query: { ...router.query, pagePath: selectedOption.value },
+      },
+      undefined,
+      { shallow: true } // パスを変更せずにデータを更新
+    );
+    console.log("Selected Page Path:", selectedOption);
+    const chartData = dataByDay[propertyId][selectedOption.value];
+    console.log("Chart Data:", chartData);
+    const filteredData = filterDataByDateRange(chartData, dateRange);
+    setChartData(filteredData);
+  };
+
   // 集計データを取得
   const {
     data: fetchedAggregatedData7,
@@ -381,10 +486,10 @@ const Dashboard = () => {
   } = useAggregatedData(session, propertyIds, startDate7, endDate);
 
   const fetchAggregatedData7 = () => {
-    console.log("session:", session);
-    console.log("propertyIds:", propertyIds);
-    console.log("startDate7:", startDate7);
-    console.log("endDate:", endDate);
+    //console.log("session:", session);
+    //console.log("propertyIds:", propertyIds);
+    //console.log("startDate7:", startDate7);
+    //console.log("endDate:", endDate);
     if (
       !session ||
       !propertyIds.length ||
@@ -399,27 +504,12 @@ const Dashboard = () => {
     }
 
     if (fetchedAggregatedData7) {
-      console.log("Aggregated Data7: ", fetchedAggregatedData7);
-      console.log("SDate7:", startDate7);
-      console.log("EDate7:", endDate);
+      //console.log("Aggregated Data7: ", fetchedAggregatedData7);
+      //console.log("SDate7:", startDate7);
+      //console.log("EDate7:", endDate);
       setAggregatedData7(fetchedAggregatedData7);
     }
   };
-
-  {
-    /*const handleAggregatedChange = () => {
-    if (!session || !propertyIds || !startDate || !endDate) return;
-
-    const data = refetchAggregatedData(
-      session,
-      propertyIds,
-      startDate,
-      endDate
-    );
-    console.log("Aggregated Data 7:", data);
-    setAggregatedData7(data);
-  };*/
-  }
 
   // フォーム送信時の処理
   const handleSubmit = (e) => {
@@ -455,6 +545,65 @@ const Dashboard = () => {
     return propertyId;
   };
 
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////ここから
+  // 指定された日付範囲のデータを0で初期化して作成
+  const generateEmptyDataForDateRange = (startDate, endDate) => {
+    const data = [];
+    let currentDate = new Date(startDate);
+
+    while (currentDate <= endDate) {
+      data.push({
+        date: currentDate.toISOString().split("T")[0], // YYYY-MM-DD形式で日付を保持
+        PV: 0,
+        CV: 0,
+        CVR: 0,
+        UU: 0,
+      });
+      currentDate.setDate(currentDate.getDate() + 1); // 次の日付に進む
+    }
+
+    return data;
+  };
+
+  const ensureDataForDateRange = (data, startDate, endDate) => {
+    if (!Array.isArray(data) || data.length === 0) {
+      // データが存在しない場合、指定された範囲の日付のデータを0で初期化して作成
+      console.warn("Data is empty, generating empty data for the date range.");
+      return generateEmptyDataForDateRange(startDate, endDate);
+    }
+
+    // データが存在する場合も、存在しない日付のデータを0で埋める
+    const filledData = [];
+    let currentDate = new Date(startDate);
+
+    while (currentDate <= endDate) {
+      const formattedDate =
+        currentDate.getFullYear().toString() +
+        (currentDate.getMonth() + 1).toString().padStart(2, "0") +
+        currentDate.getDate().toString().padStart(2, "0");
+
+      // 該当する日付のデータがあるか確認
+      const existingData = data.find((item) => item.date === formattedDate);
+
+      if (existingData) {
+        filledData.push(existingData);
+      } else {
+        // データがなければ0で初期化されたデータを追加
+        filledData.push({
+          date: formattedDate,
+          PV: 0,
+          CV: 0,
+          CVR: 0,
+          UU: 0,
+        });
+      }
+
+      currentDate.setDate(currentDate.getDate() + 1); // 次の日付に進む
+    }
+
+    return filledData;
+  };
+
   //Dachboardに表示するための加工したデータをformattedAnalyticsに格納
   useEffect(() => {
     if (!analyticsData || analyticsData.length === 0) {
@@ -480,8 +629,6 @@ const Dashboard = () => {
     setFormattedAnalytics(formattedAnalyticsData);
     console.log("Formatted Analytics:", formattedAnalyticsData);
   }, [analyticsData]); // analyticsDataが変更された時に実行
-
-  /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   const parseDate = (dateStr) => new Date(dateStr);
 
@@ -563,7 +710,7 @@ const Dashboard = () => {
       d >= new Date(startDate);
       d.setDate(d.getDate() - 1)
     ) {
-      const formattedDate = d.toISOString().split("T")[0]; // YYYY-MM-DD形式で日付をフォーマット
+      const formattedDate = d.toISOString().split("T")[0].replace(/-/g, "/"); // YYYY-MM-DD形式で日付をフォーマット
 
       // Mapに該当日付のデータがあれば、それをresultに追加、なければ0データを追加
       result.push(
@@ -583,7 +730,7 @@ const Dashboard = () => {
   const generateZeroData = () => {
     return [
       {
-        date: new Date().toISOString().split("T")[0], // デフォルトで現在の日付,
+        date: new Date().toISOString().split("T")[0].replace(/-/g, "/"), // デフォルトで現在の日付,
         PV: 0,
         CV: 0,
         CVR: 0,
@@ -596,6 +743,9 @@ const Dashboard = () => {
   const handleDateRangeChange = (e) => {
     setDateRange(e.target.value); // 選択されたオプションを状態に保存
     setSelectedOption(e.target.value);
+    const filteredData = filterDataByDateRange(chartData, e.target.value);
+    setChartData(filteredData);
+    console.log("filteredData:", filteredData);
     console.log("selectedOption:", e.target.value);
   };
 
@@ -681,82 +831,77 @@ const Dashboard = () => {
       prePV = 0,
       preCV = 0,
       preUU = 0;
+
     // ループ処理でPV, CV, UUを集計
-    filteredData.forEach((data) => {
-      totalPV += data.PV || 0;
-      totalCV += data.CV || 0;
-      totalUU += data.UU || 0;
-    });
+    if (Array.isArray(filteredData)) {
+      filteredData.forEach((data) => {
+        totalPV += data.PV || 0;
+        totalCV += data.CV || 0;
+        totalUU += data.UU || 0;
+      });
+      previousData.forEach((data) => {
+        prePV += data.PV || 0;
+        preCV += data.CV || 0;
+        preUU += data.SS || 0;
+      });
+    }
 
-    previousData.forEach((data) => {
-      prePV += data.PV || 0;
-      preCV += data.CV || 0;
-      preUU += data.SS || 0;
-    });
+    console.log("PagePath:", pagePath);
 
-    const currentData = {
-      PV: totalPV,
-      CV: totalCV,
-      UU: totalUU,
+    const nowData = {
+      PV: aggregatedData[propertyId]?.[pagePath]?.PV || 0,
+      CV: aggregatedData[propertyId]?.[pagePath]?.CV || 0,
+      UU: aggregatedData[propertyId]?.[pagePath]?.UU || 0,
     };
 
-    const preData = {
-      PV: prePV,
-      CV: preCV,
-      UU: preUU,
+    const prevData = {
+      PV: prePV || 0,
+      CV: preCV || 0,
+      UU: preUU || 0,
     };
 
-    console.log("Current Data:", currentData); // デバッグ用ログ
-    console.log("Previous Data:", preData); // デバッグ用ログ
-    //setChartData(dataForDateRange);
     // サンプルメトリクスの設定
     setMetrics([
       {
         title: "ページ閲覧数(PV)",
-        value: currentData.PV || 0,
-        previousValue: preData.PV,
+        value: nowData.PV || 0,
+        previousValue: prevData.PV,
       },
       {
         title: "セッション数(UU)",
-        value: currentData.UU || 0,
-        previousValue: preData.UU,
+        value: nowData.UU || 0,
+        previousValue: prevData.UU,
+      },
+      {
+        title: "問い合わせ数(CV)",
+        value: nowData.CV || 0,
+        previousValue: prevData.CV,
       },
       {
         title: "問い合わせ率(CVR)",
         value:
-          currentData.UU > 0
-            ? ((currentData.CV / currentData.UU) * 100).toFixed(2) + "%"
+          nowData.UU > 0
+            ? ((nowData.CV / nowData.UU) * 100).toFixed(2) + "%"
             : "0%", // UU が 0 の場合は "0%" を表示
         previousValue:
-          preData.UU > 0
-            ? ((preData.CV / preData.UU) * 100).toFixed(2) + "%"
+          prevData.UU > 0
+            ? ((prevData.CV / prevData.UU) * 100).toFixed(2) + "%"
             : "0%", // 前月の UU が 0 の場合も "0%" を表示
-      },
-      {
-        title: "問い合わせ数(CV)",
-        value: currentData.CV || 0,
-        previousValue: preData.CV,
       },
     ]);
   };
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////ここまで基本消さない
 
   useEffect(() => {
     if (propertyId) {
       console.log("PROID:", propertyId);
-      //const data = getAnalyticsData(propertyId);
-      //console.log("data:", data);
       const data = dataByDay[propertyId]?.[sanitizedUrl] || [];
-      //console.log("DateByDAY for PRO:", data);
       const filtered = filterDataByDateRange(data, dateRange); //>>>>>>>>>>>>>>>>>>>>>>>>>>>>-300
       const prefiltered = preFilterDataByDateRange(data, dateRange); //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>603
-      //console.log("PreData:", prefiltered);
-      //console.log("dateRange", dateRange);
-      //console.log("Fetched Data for Property:", data); // デバッグ用ログ
-      //console.log("filtered data:", filtered);
       setFilteredData(filtered); //>>>>>>>>>-300
       calculateCurrentAndPreviousData(filtered, prefiltered); //>>>>>>>>>>>>>>>646
     }
-  }, [sanitizedUrl, dateRange]);
+  }, [url, pagePath, dateRange]);
 
   const handleMetricChange = (metricTitle) => {
     setSelectedMetrics((prevSelectedMetrics) => {
@@ -795,94 +940,70 @@ const Dashboard = () => {
       })
       .filter((key) => key !== ""); // 空のキーを除外
 
-    console.log("Data Keys:", dataKeys); // デバッグ用ログ
+    //console.log("Data Keys:", dataKeys); // デバッグ用ログ
+    //console.log("ChartData:", chartData);
 
-    return <LineChart data={filteredData} dataKeys={dataKeys} />;
+    return <LineChart data={chartData} dataKeys={dataKeys} />;
   };
 
   function getQuery(searchData, searchId) {
-    // 最後の / を削除
-
-    console.log(sanitizedUrl); // "https://www.propagateinc.com"
-
-    const queryData = searchData[searchId]?.[sanitizedUrl]?.query;
+    const queryData = searchData[searchId]?.[pagePath]?.query;
+    const viewData = searchData[searchId]?.[pagePath]?.impression;
+    //console.log("QueryData: ", queryData);
 
     if (!queryData) {
       return [];
     }
 
     const topQueries = Object.entries(queryData).sort((a, b) => b[1] - a[1]);
-    console.log("TopQuery:", topQueries);
-    return topQueries;
+    //console.log("TopQuery:", topQueries);
+    const Queries = topQueries.map((item) => [item[0], item[1], viewData]);
+    return Queries;
   }
 
   const topQueries = getQuery(aggregatedData, propertyId);
 
   function getSourceData(data, id) {
-    const sourceData = data[id]?.[sanitizedUrl]?.source;
+    const sourceData = data[id]?.[pagePath]?.source;
+    //console.log("SourceData:", sourceData);
 
     if (!sourceData) {
       return [];
     }
-    console.log("SourceData:", sourceData);
+
     const sortedEntries = Object.entries(sourceData).sort(
       (a, b) => b[1] - a[1]
     );
-    //const top5Entries = sortedEntries.slice(0, 5);
-
-    //const top5SourceData = Object.fromEntries(top5Entries);
     return sortedEntries;
   }
 
   const sourceData = getSourceData(aggregatedData, propertyId);
 
   function getDeviceData(data, id) {
-    const deviceData = data[id]?.[sanitizedUrl]?.device_category;
+    const deviceData = data[id]?.[pagePath]?.device_category;
     if (!deviceData) {
       return [];
     }
-    console.log("DeviceData:", deviceData);
+
     const sortedEntries = Object.entries(deviceData).sort(
       (a, b) => b[1] - a[1]
     );
-    //const top5Entries = sortedEntries.slice(0, 5);
-
-    //const top5SourceData = Object.fromEntries(top5Entries);
     return sortedEntries;
   }
 
   const deviceData = getDeviceData(aggregatedData, propertyId);
 
   function getAreaData(data, id) {
-    const areaData = data[id]?.[sanitizedUrl]?.city;
+    const areaData = data[id]?.[pagePath]?.city;
     if (!areaData) {
       return [];
     }
-    console.log("AreaData:", areaData);
-    const sortedEntries = Object.entries(areaData).sort((a, b) => b[1] - a[1]);
-    //const top5Entries = sortedEntries.slice(0, 5);
 
-    //const top5SourceData = Object.fromEntries(top5Entries);
+    const sortedEntries = Object.entries(areaData).sort((a, b) => b[1] - a[1]);
     return sortedEntries;
   }
 
   const areaData = getAreaData(aggregatedData, propertyId);
-
-  const SearchKeyword = ({ keyword, count }) => {
-    // キーワードが空のときは何も表示しない
-    if (!keyword) {
-      return null;
-    }
-    return (
-      <div className="search-keyword">
-        <FaSearch className="search-icon" />
-        <div className="search-info">
-          <p className="search-keyword-text">{keyword}</p>
-          <p className="search-count-text">{count}回の検索結果</p>
-        </div>
-      </div>
-    );
-  };
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -922,22 +1043,43 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard-container">
+      <div>
+        {loading ? (
+          <div className="loader-content">
+            <div className="loader">Loading...</div>
+          </div>
+        ) : (
+          <></>
+        )}
+      </div>
+
       <header className="header">
         <div className="header-left">
           <h1 className="header-title">Propagate Analytics</h1>
         </div>
         <div className="header-right">
-          <form onSubmit={handleSubmit}>
-            <CreatableSelect
-              className="url-select"
-              styles={customStyles}
-              value={selectedUrl}
-              onChange={handleUrlChange}
-              options={urlOptions}
-              placeholder="URLを追加してください"
-              onCreateOption={handleUrl}
-            />
-          </form>
+          <CreatableSelect
+            className="url-select"
+            styles={styles1}
+            value={selectedUrl}
+            onChange={(selectedOption) => {
+              handleUrlChange(selectedOption);
+              const foundPropertyId = findPropertyIdByUrl(selectedOption.value);
+              if (foundPropertyId) {
+                setPropertyId(foundPropertyId);
+              } else {
+                console.error("該当するプロパティIDが見つかりませんs");
+              }
+            }}
+            options={urlOptions}
+            placeholder={
+              <div>
+                <FaSearch style={{ marginRight: "1vw" }} />
+                <span>URL選択</span>
+              </div>
+            }
+            onCreateOption={handleUrl}
+          />
           {/*設定ボタン
             <Button
             variant="ghost"
@@ -979,16 +1121,20 @@ const Dashboard = () => {
         </div>
       </header>
       <main className="dashboard-main">
-        {<Sidebar className="sidebar" />}
         <div className="dashboard-header">
           <div className="dashboard-header-left">
             <Select
               className="custom-select"
-              styles={customStyles}
-              value={selectedOption}
-              onChange={handleDateRangeChange}
-              options={options}
-              placeholder="ページパス選択"
+              styles={styles2}
+              value={selectedPagePath}
+              onChange={handlePagePathChange}
+              options={pagePathOptions}
+              placeholder={
+                <div>
+                  <FaSearch style={{ marginRight: "1vw" }} />
+                  <span>ページパス選択</span>
+                </div>
+              }
             />
           </div>
           <div className="dashboard-header-right">
@@ -1067,71 +1213,72 @@ const Dashboard = () => {
               </div>*/}
             </div>
           </div>
-          <div className="dashboard-top-right"></div>
+          <div className="dashboard-top-right">
+            <p className="dashboard-top-right-title">サイトの分析・提案</p>
+          </div>
         </div>
         <div className="dashboard-middle">
           <div className="dashboard-middle-content">
             <div className="middle-content-text">
-              <h2 className="middle-title">流入経路</h2>
-              <h5 className="middle-subtitle">
+              <p className="middle-title">流入経路</p>
+              <p className="middle-subtitle">
                 ユーザーがどのような手段や経路を通じてWebサイトを訪れたかを示す数
-              </h5>
+              </p>
             </div>
             <div className="middle-chart">
               <Table2 data={sourceData} dataKeys="流入数" />
             </div>
+            <div className="middle-content-bottom"></div>
           </div>
           <div className="dashboard-middle-content">
             <div className="middle-content-text">
-              <h2 className="middle-title">
-                検索数とクリック数の多いキーワード
-              </h2>
-              <h5 className="middle-subtitle">
+              <p className="middle-title">検索数とクリック数の多いキーワード</p>
+              <p className="middle-subtitle">
                 Google検索で、Webサイトが検索一覧に表示された回数とクリックされた回数
-              </h5>
+              </p>
+              <div className="middle-content-button"></div>
             </div>
             <div className="search-keywords">
-              {/*topQueries.map((Item, index) => (
-                <SearchKeyword key={index} keyword={Item[0]} count={Item[1]} />
-              ))}*/}
-              <Table data={topQueries} />
+              <Table data={topQueries} viewData={topQueries.viewData} />
             </div>
+            <div className="middle-content-bottom"></div>
           </div>
         </div>
         <div className="dashboard-bottom">
-          <div className="dashboard-bottom-content">
+          <div className="dashboard-bottom-left">
             <div className="bottom-content-text">
-              <h2 className="bottom-title">ディバイス</h2>
-              <h5 className="bottom-subtitle">
+              <p className="bottom-title">ディバイス</p>
+              <p className="bottom-subtitle">
                 ユーザーがWebサイトにアクセスする際に使用した機器の割合
-              </h5>
+              </p>
             </div>
             <div className="bottom-chart">
               <PieChart data={deviceData} />
             </div>
           </div>
-          <div className="dashboard-bottom-content">
+          <div className="dashboard-bottom-center">
             <div className="bottom-content-text">
-              <h2 className="bottom-title">地域</h2>
-              <h5 className="bottom-subtitle">
+              <p className="bottom-title">地域</p>
+              <p className="bottom-subtitle">
                 ユーザーがWebサイトにアクセスした地域別の割合
-              </h5>
+              </p>
             </div>
-            <div className="bottom-chart">
+            <div className="bottom-graph">
               <PercentageTable data={areaData} className="Percentage-graph" />
             </div>
           </div>
-          <div className="dashboard-bottom-content">
+          <div className="dashboard-bottom-right">
             <div className="bottom-content-text">
-              <h2 className="bottom-title">性別・男女</h2>
-              <h5 className="bottom-subtitle">
+              <p className="bottom-title">性別・男女</p>
+              <p className="bottom-subtitle">
                 Webサイトにアクセスしたユーザ情報
-              </h5>
+              </p>
             </div>
             <div className="bottom-chart"></div>
           </div>
         </div>
       </main>
+      {/*<Sidebar className="sidebar" />*/}
     </div>
   );
 };
