@@ -319,6 +319,16 @@ const Dashboard = () => {
     }
   }, [session, analyticsError, analyticsLoading, refetchAnalyticsData]);
 
+  useEffect(() => {
+    if (propertyIds.length > 0) {
+      const firstUrl = propertyIds[2].url;
+      console.log("firstUrl:", firstUrl);
+      setUrl(firstUrl);
+      const firstSelectedUrl = { label: firstUrl, value: firstUrl };
+      setSelectedUrl(firstSelectedUrl);
+    }
+  }, [analyticsData]);
+
   // Search Consoleデータの取得
   const {
     data: fetchedSearchConsoleData,
