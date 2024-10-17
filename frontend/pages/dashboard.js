@@ -8,6 +8,11 @@ import { useDataByDay } from "../hooks/useGetDataByDay";
 import { useAnalyticsData } from "../hooks/useAnalyticsData";
 import { useSearchConsoleData } from "../hooks/useSearchConsoleData";
 import { useAggregatedData } from "../hooks/useAggregatedData";
+import { useAggregatedData7 } from "../hooks/useAggregatedData7";
+import { useAggregatedData90 } from "../hooks/useAggregatedData90";
+import { usePreAggregatedData } from "../hooks/usePreAggregatedData";
+import { usePreAggregatedData7 } from "../hooks/usePreAggregatedData7";
+import { usePreAggregatedData90 } from "../hooks/usePreAggregatedData90";
 import Button from "@mui/material/Button";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
@@ -150,18 +155,55 @@ const Dashboard = () => {
   const [startDate7, setStartDate7] = useState(() => {
     const date7 = new Date();
     date7.setDate(date7.getDate() - 7);
-    const formattedDate = date7.toISOString().split("T")[0].replace(/-/g, "/");
-    console.log("Formatted Date:", formattedDate);
-    return formattedDate;
+    return date7.toISOString().split("T")[0];
+  });
+  const [startDate90, setStartDate28] = useState(() => {
+    const date90 = new Date();
+    date90.setMonth(date90.getMonth() - 3); // 今日から1ヶ月前の日付を設定
+    return date90.toISOString().split("T")[0]; // YYYY-MM-DD 形式で取得
+  });
+  const [preStartDate, setPreStartDate] = useState(() => {
+    const preDate = new Date();
+    preDate.setMonth(preDate.getMonth() - 2); // 今日から2ヶ月前の日付を設定
+    return preDate.toISOString().split("T")[0]; // YYYY-MM-DD 形式で取得
+  });
+  const [preEndDate, setPreEndDate] = useState(() => {
+    const preEndDate = new Date();
+    preEndDate.setMonth(preEndDate.getMonth() - 1); // 今日から1ヶ月前の日付を設定
+    return preEndDate.toISOString().split("T")[0]; // YYYY-MM-DD 形式で取得
+  });
+  const [preStartDate7, setPreStartDate7] = useState(() => {
+    const preDate7 = new Date();
+    preDate7.setDate(preDate7.getDate() - 14);
+    return preDate7.toISOString().split("T")[0];
+  });
+  const [preEndDate7, setPreEndDate7] = useState(() => {
+    const preEndDate7 = new Date();
+    preEndDate7.setDate(preEndDate7.getDate() - 7);
+    return preEndDate7.toISOString().split("T")[0];
+  });
+  const [preStartDate90, setPreStartDate90] = useState(() => {
+    const preDate90 = new Date();
+    preDate90.setMonth(preDate90.getMonth() - 6); // 今日から1ヶ月前の日付を設定
+    return preDate90.toISOString().split("T")[0]; // YYYY-MM-DD 形式で取得
+  });
+  const [preEndDate90, setPreEndDate90] = useState(() => {
+    const preEndDate90 = new Date();
+    preEndDate90.setMonth(preEndDate90.getMonth() - 3); // 今日から1ヶ月前の日付を設定
+    return preEndDate90.toISOString().split("T")[0]; // YYYY-MM-DD 形式で取得
   });
   const [aggregatedData, setAggregatedData] = useState({});
   const [aggregatedData7, setAggregatedData7] = useState({});
-  const [aggregatedData28, setAggregatedData28] = useState({});
   const [aggregatedData90, setAggregatedData90] = useState({});
+  const [totalData, setTotalData] = useState({});
+  const [preAggregatedData, setPreAggregatedData] = useState({});
+  const [preAggregatedData7, setPreAggregatedData7] = useState({});
+  const [preAggregatedData90, setPreAggregatedData90] = useState({});
+  const [preTotalData, setPreTotalData] = useState({});
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////
   const [propertyId, setPropertyId] = useState(null);
   const [chartData, setChartData] = useState([]);
-  const [dateRange, setDateRange] = useState("過去7日間");
+  const [dateRange, setDateRange] = useState("過去28日間");
   const [selectedOption, setSelectedOption] = useState(null);
   const [url, setUrl] = useState(""); // URL用のstate
   const [urlOptions, setUrlOptions] = useState([]);
@@ -172,7 +214,10 @@ const Dashboard = () => {
   const [pagePathOptions, setPagePathOptions] = useState([]);
   const [pagePathList, setPagePathList] = useState([]);
   const [metrics, setMetrics] = useState(sampleMetrics); // メトリクスのstate
-  const [selectedMetrics, setSelectedMetrics] = useState(["PV", "UU"]); // 選択中のメトリクス
+  const [selectedMetrics, setSelectedMetrics] = useState([
+    "ページ閲覧数(PV)",
+    "セッション数(UU)",
+  ]); // 選択中のメトリクス
   const [inputValue, setInputValue] = useState(""); // ここで useState を使って定義
 
   const [dataForDateRange, setDataForDateRange] = useState([]);
@@ -183,13 +228,14 @@ const Dashboard = () => {
 
   const [sourceChartData, setSourceChartData] = useState([]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 8000);
-
-    return () => clearTimeout(timer);
-  }, []);
+  //
+  //  useEffect(() => {
+  //    const timer = setTimeout(() => {
+  //      setLoading(false);
+  //    }, 8000);
+  //
+  //    return () => clearTimeout(timer);
+  //  }, []);
 
   ////defaultでグラフデータをセット
   //useEffect(() => {
@@ -235,11 +281,11 @@ const Dashboard = () => {
   //  }
   //}, [router.isReady, router.query]);
 
-  //localStorageからURLリストを取得
-  useEffect(() => {
-    const storedUrls = JSON.parse(localStorage.getItem("urlOptions")) || [];
-    setUrlOptions(storedUrls);
-  }, []);
+  ////localStorageからURLリストを取得
+  //useEffect(() => {
+  //  const storedUrls = JSON.parse(localStorage.getItem("urlOptions")) || [];
+  //  setUrlOptions(storedUrls);
+  //}, []);
 
   const handleUrl = (inputValue) => {
     if (!inputValue) {
@@ -281,6 +327,24 @@ const Dashboard = () => {
     setSanitizedUrl(saniUrl);
   };
 
+  const handlePagePathChange = (selectedOption) => {
+    setSelectedPagePath(selectedOption);
+    setPagePath(selectedOption.value);
+    router.push(
+      {
+        pathname: router.pathname,
+        query: { ...router.query, pagePath: selectedOption.value },
+      },
+      undefined,
+      { shallow: true } // パスを変更せずにデータを更新
+    );
+    console.log("Selected Page Path:", selectedOption);
+    const chartData = dataByDay[propertyId][selectedOption.value];
+    console.log("Chart Data:", chartData);
+    const filteredData = filterDataByDateRange(chartData, dateRange);
+    setChartData(filteredData);
+  };
+
   // Sessionの取得
   const { fetchedSession, loading: sessionLoading } = useSessionData();
   useEffect(() => {
@@ -310,22 +374,6 @@ const Dashboard = () => {
     isLoading: analyticsLoading,
     refetch: refetchAnalyticsData,
   } = useAnalyticsData(session, setPropertyIds);
-
-  // Analyticsデータの処理
-  useEffect(() => {
-    if (!session || analyticsLoading) return; // sessionがないかロード中の場合は何もしない
-
-    if (analyticsError) {
-      console.error("Error fetching analytics data:", analyticsError);
-      refetchAnalyticsData(session); // エラー時にリフェッチ
-    } else if (fetchedAnalyticsData) {
-      console.log("Fetched Analytics Data: ", fetchedAnalyticsData);
-      setAnalyticsData(fetchedAnalyticsData.allAnalytics);
-      setPropertyIds(fetchedAnalyticsData.allProperties);
-      //setUrl(fetchedAggregatedData.initialFilteredProperties);
-      //console.log("FIRSTURL:", fetchedAggregatedData.initialFilteredProperties);
-    }
-  }, [session, analyticsError, analyticsLoading, refetchAnalyticsData]);
 
   // Search Consoleデータの取得
   const {
@@ -360,7 +408,7 @@ const Dashboard = () => {
     refetch: refetchDataByDay,
   } = useDataByDay(session, propertyIds, startDate, endDate);
 
-  console.log("Data By Day: ", fetchedDataByDay);
+  //console.log("Data By Day: ", fetchedDataByDay);
 
   useEffect(() => {
     if (!session || !propertyIds || !startDate || !endDate) return;
@@ -406,16 +454,9 @@ const Dashboard = () => {
     if (fetchedAggregatedData) {
       console.log("Aggregated Data: ", fetchedAggregatedData);
       setAggregatedData(fetchedAggregatedData);
+      setTotalData(fetchedAggregatedData);
     }
-  }, [
-    session,
-    propertyIds,
-    startDate,
-    endDate,
-    aggregatedError,
-    aggregatedLoading,
-    refetchAggregatedData,
-  ]);
+  }, [aggregatedError, aggregatedLoading, refetchAggregatedData]);
 
   // 集計データを取得
   const {
@@ -423,7 +464,7 @@ const Dashboard = () => {
     error: aggregatedError7,
     isLoading: aggregatedLoading7,
     refetch: refetchAggregatedData7,
-  } = useAggregatedData(session, propertyIds, startDate7, endDate);
+  } = useAggregatedData7(session, propertyIds, startDate7, endDate);
 
   useEffect(() => {
     if (
@@ -443,6 +484,7 @@ const Dashboard = () => {
       console.log("Aggregated Data7: ", fetchedAggregatedData7);
       setAggregatedData7(fetchedAggregatedData7);
     }
+    console.log("deback");
   }, [
     session,
     propertyIds,
@@ -451,6 +493,207 @@ const Dashboard = () => {
     aggregatedError7,
     aggregatedLoading7,
     refetchAggregatedData7,
+  ]);
+
+  // 集計データを取得
+  const {
+    data: fetchedAggregatedData90,
+    error: aggregatedError90,
+    isLoading: aggregatedLoading90,
+    refetch: refetchAggregatedData90,
+  } = useAggregatedData90(session, propertyIds, startDate90, endDate);
+
+  useEffect(() => {
+    if (
+      !session ||
+      !propertyIds.length ||
+      !startDate90 ||
+      !endDate ||
+      aggregatedLoading90
+    )
+      return; // session, propertyIds, startDate
+    if (aggregatedError90) {
+      console.error("Error fetching aggregated data:", aggregatedError90);
+      refetchAggregatedData90(session, propertyIds, startDate90, endDate); // エラー時にリフェッチ
+    }
+
+    if (fetchedAggregatedData90) {
+      console.log("Aggregated Data90: ", fetchedAggregatedData90);
+      setAggregatedData90(fetchedAggregatedData90);
+    }
+    console.log("deback");
+  }, [
+    session,
+    propertyIds,
+    startDate90,
+    endDate,
+    aggregatedError90,
+    aggregatedLoading90,
+    refetchAggregatedData90,
+  ]);
+
+  // 集計データを取得
+  const {
+    data: fetchedPreAggregatedData,
+    error: preAggregatedError,
+    isLoading: preAggregatedLoading,
+    refetch: refetchPreAggregatedData,
+  } = usePreAggregatedData(session, propertyIds, preStartDate, preEndDate);
+
+  useEffect(() => {
+    if (
+      !session ||
+      !propertyIds.length ||
+      !preStartDate ||
+      !preEndDate ||
+      preAggregatedLoading
+    )
+      return; // session, propertyIds, startDate
+    if (preAggregatedError) {
+      console.error("Error fetching aggregated data:", preAggregatedError);
+      refetchPreAggregatedData(session, propertyIds, preStartDate, preEndDate); // エラー時にリフェッチ
+    }
+
+    if (fetchedPreAggregatedData) {
+      console.log("PreAggregated Data: ", fetchedPreAggregatedData);
+      setPreAggregatedData(fetchedPreAggregatedData);
+      setPreTotalData(fetchedPreAggregatedData);
+    }
+  }, [
+    session,
+    propertyIds,
+    preStartDate,
+    preEndDate,
+    preAggregatedError,
+    preAggregatedLoading,
+    refetchPreAggregatedData,
+  ]);
+
+  // 集計データを取得
+  const {
+    data: fetchedPreAggregatedData7,
+    error: preAggregatedError7,
+    isLoading: preAggregatedLoading7,
+    refetch: refetchPreAggregatedData7,
+  } = usePreAggregatedData7(session, propertyIds, preStartDate7, preEndDate7);
+
+  useEffect(() => {
+    if (
+      !session ||
+      !propertyIds.length ||
+      !preStartDate7 ||
+      !preEndDate7 ||
+      preAggregatedLoading7
+    )
+      return; // session, propertyIds, startDate
+    if (preAggregatedError7) {
+      console.error("Error fetching aggregated data:", preAggregatedError7);
+      refetchPreAggregatedData7(
+        session,
+        propertyIds,
+        preStartDate7,
+        preEndDate7
+      ); // エラー時にリフェッチ
+    }
+
+    if (fetchedPreAggregatedData7) {
+      console.log("PreAggregated Data7: ", fetchedPreAggregatedData7);
+      setPreAggregatedData7(fetchedPreAggregatedData7);
+    }
+  }, [
+    session,
+    propertyIds,
+    preStartDate7,
+    preEndDate7,
+    preAggregatedError7,
+    preAggregatedLoading7,
+    refetchPreAggregatedData7,
+  ]);
+
+  // 集計データを取得
+  const {
+    data: fetchedPreAggregatedData90,
+    error: preAggregatedError90,
+    isLoading: preAggregatedLoading90,
+    refetch: refetchPreAggregatedData90,
+  } = usePreAggregatedData90(
+    session,
+    propertyIds,
+    preStartDate90,
+    preEndDate90
+  );
+
+  useEffect(() => {
+    if (
+      !session ||
+      !propertyIds.length ||
+      !preStartDate90 ||
+      !preEndDate90 ||
+      preAggregatedLoading90
+    )
+      return; // session, propertyIds, startDate
+    if (preAggregatedError90) {
+      console.error("Error fetching aggregated data:", preAggregatedError90);
+      refetchPreAggregatedData90(
+        session,
+        propertyIds,
+        preStartDate90,
+        preEndDate90
+      ); // エラー時にリフェッチ
+    }
+
+    if (fetchedPreAggregatedData90) {
+      console.log("PreAggregated Data90: ", fetchedPreAggregatedData90);
+      setPreAggregatedData90(fetchedPreAggregatedData90);
+    }
+  }, [
+    session,
+    propertyIds,
+    preStartDate90,
+    preEndDate90,
+    preAggregatedError90,
+    preAggregatedLoading90,
+    refetchPreAggregatedData90,
+  ]);
+
+  // Analyticsデータの処理
+  useEffect(() => {
+    if (!session || analyticsLoading) return; // sessionがないかロード中の場合は何もしない
+
+    if (analyticsError) {
+      console.error("Error fetching analytics data:", analyticsError);
+      //refetchAnalyticsData(session); // エラー時にリフェッチ
+    } else if (fetchedAnalyticsData) {
+      console.log("Fetched Analytics Data: ", fetchedAnalyticsData);
+      setAnalyticsData(fetchedAnalyticsData.allAnalytics);
+      setPropertyIds(fetchedAnalyticsData.allProperties);
+
+      if (fetchedAnalyticsData.initialFilteredProperties) {
+        console.log(
+          "FIRSTURL:",
+          fetchedAnalyticsData.initialFilteredProperties
+        );
+        const initialUrls = fetchedAnalyticsData.initialFilteredProperties
+          .map((item) => item.url)
+          .filter((url) => url !== "");
+        console.log("URLS:", initialUrls);
+        const initialUrlsList = initialUrls.map((url) => ({
+          label: url,
+          value: url,
+        }));
+        setUrlOptions(initialUrlsList);
+        //setSelectedUrl(initialUrlsList[0]);
+        handleUrlChange(initialUrlsList[0]);
+      } else {
+        console.warn("initialFilteredProperties is undefined or null");
+      }
+    }
+  }, [
+    session,
+    analyticsError,
+    analyticsLoading,
+    refetchAnalyticsData,
+    dataByDay,
   ]);
 
   useEffect(() => {
@@ -483,24 +726,31 @@ const Dashboard = () => {
 
   useEffect(() => {
     setPagePathOptions(pagePaths);
-  }, [pagePathList]);
+    handleFirstPagePath();
+  }, [pagePathList, preAggregatedData90]);
 
-  const handlePagePathChange = (selectedOption) => {
-    setSelectedPagePath(selectedOption);
-    setPagePath(selectedOption.value);
-    router.push(
-      {
-        pathname: router.pathname,
-        query: { ...router.query, pagePath: selectedOption.value },
-      },
-      undefined,
-      { shallow: true } // パスを変更せずにデータを更新
-    );
-    console.log("Selected Page Path:", selectedOption);
-    const chartData = dataByDay[propertyId][selectedOption.value];
-    console.log("Chart Data:", chartData);
-    const filteredData = filterDataByDateRange(chartData, dateRange);
-    setChartData(filteredData);
+  const handleFirstPagePath = () => {
+    if (
+      pagePathList &&
+      Array.isArray(pagePathList) &&
+      pagePathList.length > 0 &&
+      preAggregatedData90 &&
+      areaData &&
+      sanitizedUrl
+    ) {
+      const shortestUrl = pagePathList.reduce((shortest, current) => {
+        return current.length < shortest.length ? current : shortest;
+      }, pagePathList[0]);
+      console.log("Shortest:", shortestUrl);
+      const shortestUrlOption = { value: shortestUrl, label: "/" };
+      console.log("ShotestOptions:", shortestUrlOption);
+
+      handlePagePathChange(shortestUrlOption);
+
+      setLoading(false);
+    } else {
+      console.warn("pagePathOptions is empty or undefined");
+    }
   };
 
   // フォーム送信時の処理
@@ -620,7 +870,7 @@ const Dashboard = () => {
 
     setFormattedAnalytics(formattedAnalyticsData);
     console.log("Formatted Analytics:", formattedAnalyticsData);
-  }, [analyticsData]); // analyticsDataが変更された時に実行
+  }, [analyticsData, totalData]); // analyticsDataが変更された時に実行
 
   const parseDate = (dateStr) => new Date(dateStr);
 
@@ -633,37 +883,37 @@ const Dashboard = () => {
         startDate = new Date(now);
         startDate.setDate(now.getDate() - 7);
         setStartDate(startDate);
-        console.log("StartDate:", startDate);
+        //console.log("StartDate:", startDate);
         break;
       case "過去28日間":
         startDate = new Date(now);
         startDate.setDate(now.getDate() - 28);
         setStartDate(startDate);
-        console.log("StartDate:", startDate);
+        //console.log("StartDate:", startDate);
         break;
       case "過去90日間":
         startDate = new Date(now);
         startDate.setDate(now.getDate() - 90);
         setStartDate(startDate);
-        console.log("StartDate:", startDate);
+        //console.log("StartDate:", startDate);
         break;
       case "先月":
         startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
         setStartDate(startDate);
-        console.log("StartDate:", startDate);
+        //console.log("StartDate:", startDate);
         now.setMonth(now.getMonth(), 0); // 先月の最後の日
         break;
       case "先々月":
         startDate = new Date(now.getFullYear(), now.getMonth() - 2, 1);
         setStartDate(startDate);
-        console.log("StartDate:", startDate);
+        //console.log("StartDate:", startDate);
         now.setMonth(now.getMonth() - 1, 0); // 先々月の最後の日
         break;
       case "1年間":
         startDate = new Date(now);
         startDate.setFullYear(now.getFullYear() - 1);
         setStartDate(startDate);
-        console.log("StartDate:", startDate);
+        //console.log("StartDate:", startDate);
         break;
       case "全期間":
         //startDate = parseDate(data[data.length - 1].date); // データの最古の日付
@@ -740,6 +990,46 @@ const Dashboard = () => {
     console.log("filteredData:", filteredData);
     console.log("selectedOption:", e.target.value);
   };
+
+  useEffect(() => {
+    let totalDateData;
+
+    if (dateRange === "過去7日間") {
+      totalDateData = aggregatedData7;
+    } else if (dateRange === "過去28日間") {
+      totalDateData = aggregatedData;
+    } else if (dateRange === "過去90日間") {
+      totalDateData = aggregatedData90;
+    } else if (dateRange === "カスタム") {
+      totalDateData = aggregatedData;
+    } else {
+      console.error("No Total Data");
+      totalDateData = aggregatedData;
+    }
+
+    setTotalData(totalDateData);
+    console.log("TOTAL DATA: ", totalDateData);
+  }, [dateRange]);
+
+  useEffect(() => {
+    let totalPreDateData;
+
+    if (dateRange === "過去7日間") {
+      totalPreDateData = preAggregatedData7;
+    } else if (dateRange === "過去28日間") {
+      totalPreDateData = preAggregatedData;
+    } else if (dateRange === "過去90日間") {
+      totalPreDateData = preAggregatedData90;
+    } else if (dateRange === "カスタム") {
+      totalPreDateData = preAggregatedData;
+    } else {
+      console.error("No Total Data");
+      totalPreDateData = preAggregatedData;
+    }
+
+    setPreTotalData(totalPreDateData);
+    console.log("TOTAL DATA: ", totalPreDateData);
+  }, [dateRange]);
 
   const preFilterDataByDateRange = (data, dateRange) => {
     const now = new Date();
@@ -841,15 +1131,15 @@ const Dashboard = () => {
     console.log("PagePath:", pagePath);
 
     const nowData = {
-      PV: aggregatedData[propertyId]?.[pagePath]?.PV || 0,
-      CV: aggregatedData[propertyId]?.[pagePath]?.CV || 0,
-      UU: aggregatedData[propertyId]?.[pagePath]?.UU || 0,
+      PV: totalData[propertyId]?.[pagePath]?.PV || 0,
+      CV: totalData[propertyId]?.[pagePath]?.CV || 0,
+      UU: totalData[propertyId]?.[pagePath]?.UU || 0,
     };
 
     const prevData = {
-      PV: prePV || 0,
-      CV: preCV || 0,
-      UU: preUU || 0,
+      PV: preTotalData[propertyId]?.[pagePath]?.PV || 0,
+      CV: preTotalData[propertyId]?.[pagePath]?.CV || 0,
+      UU: preTotalData[propertyId]?.[pagePath]?.UU || 0,
     };
 
     // サンプルメトリクスの設定
@@ -893,7 +1183,7 @@ const Dashboard = () => {
       setFilteredData(filtered); //>>>>>>>>>-300
       calculateCurrentAndPreviousData(filtered, prefiltered); //>>>>>>>>>>>>>>>646
     }
-  }, [url, pagePath, dateRange]);
+  }, [url, pagePath, dateRange, totalData]);
 
   const handleMetricChange = (metricTitle) => {
     setSelectedMetrics((prevSelectedMetrics) => {
@@ -953,7 +1243,7 @@ const Dashboard = () => {
     return Queries;
   }
 
-  const topQueries = getQuery(aggregatedData, propertyId);
+  const topQueries = getQuery(totalData, propertyId);
 
   function getSourceData(data, id) {
     const sourceData = data[id]?.[pagePath]?.source;
@@ -969,7 +1259,7 @@ const Dashboard = () => {
     return sortedEntries;
   }
 
-  const sourceData = getSourceData(aggregatedData, propertyId);
+  const sourceData = getSourceData(totalData, propertyId);
 
   function getDeviceData(data, id) {
     const deviceData = data[id]?.[pagePath]?.device_category;
@@ -983,7 +1273,7 @@ const Dashboard = () => {
     return sortedEntries;
   }
 
-  const deviceData = getDeviceData(aggregatedData, propertyId);
+  const deviceData = getDeviceData(totalData, propertyId);
 
   function getAreaData(data, id) {
     const areaData = data[id]?.[pagePath]?.city;
@@ -995,7 +1285,7 @@ const Dashboard = () => {
     return sortedEntries;
   }
 
-  const areaData = getAreaData(aggregatedData, propertyId);
+  const areaData = getAreaData(totalData, propertyId);
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);

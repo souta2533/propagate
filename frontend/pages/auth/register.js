@@ -6,6 +6,7 @@ import "../../styles/auth/register.css";
 
 const Register = () => {
   const [email, setEmail] = useState("");
+  const [url, setUrl] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -17,6 +18,7 @@ const Register = () => {
     // SupabaseでUser登録
     const { data, error } = await supabase.auth.signUp({
       email,
+      url,
       password,
     });
 
@@ -27,6 +29,7 @@ const Register = () => {
         "Registration successful! Please check your email for verification."
       );
       setEmail("");
+      setUrl("");
       setPassword("");
 
       // 登録したユーザー情報をバックエンドに送信(auth.uid(user.id))
@@ -39,6 +42,7 @@ const Register = () => {
         },
         body: JSON.stringify({
           email: email,
+          url: url,
           userId: userId,
         }),
       });
@@ -70,6 +74,19 @@ const Register = () => {
               className="input-group"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="url" className="text-group">
+              URL登録
+            </label>
+            <input
+              type="url"
+              id="url"
+              className="input-group"
+              value={url}
+              onChange={(e) => setPassword(e.target.value)}
               required
             />
           </div>
