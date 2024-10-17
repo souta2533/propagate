@@ -123,3 +123,4 @@ bert-score
 scikit-learn
 accelerate>=0.26.0
 aiocache
+openai

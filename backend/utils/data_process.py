@@ -835,6 +835,7 @@ def arrange_by_url(data, type="default"):
             base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
 
             arranged_data['base_url'] = base_url
+            logger.info(f"Record: {record}")    
 
             # 数値項目の計算
             arranged_data['PV'] += record.get('PV') if record.get('PV') is not None else 0
@@ -845,7 +846,7 @@ def arrange_by_url(data, type="default"):
 
             # device_category, query, sourceを統計分析可能な形に変換
             top_device_category = max(record['device_category'], key=record['device_category'].get) if record['device_category'] else None
-            top_query = max(record['query']['click'], key=record['query'].get) if record['query'] else None
+            top_query = max(record['query'], key=record['query'].get) if record['query'] else None
             top_source = max(record['source'], key=record['source'].get) if record['source'] else None
             arranged_data['device_category'] = top_device_category
             arranged_data['query'] = top_query

@@ -65,7 +65,7 @@ async def get_gpt_report(
         )
         logger.info(f"Prompt for GPT: {prompt_for_issues}")
 
-        return {"status": "success", "prompt": prompt_for_issues}
+        return {"status": "success", "prompt": "prompt_for_issues"}
 
     except Exception as e:
         logger.error(f"Error: {e}")
