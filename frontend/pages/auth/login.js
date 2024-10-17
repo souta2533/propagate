@@ -38,10 +38,10 @@ export default function Login() {
       const property = data.session.user.user_metadata.property;
       const pagePath = "/";
 
-      //router.push({
-      //  pathname: "/dashboard",
+      router.push({
+        pathname: "/dashboard",
       //  query: { property },
-      //});
+      });
     }
 
     if (res.ok) {
