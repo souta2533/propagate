@@ -139,7 +139,7 @@ def data_by_date(analytics_data, search_console_data, url_depth=1):
                 "engaged_sessions": 0,
                 "city": defaultdict(int),       # Analytics Dataから取得
                 "device_category": defaultdict(int),
-                "query": defaultdict(int),
+                "query": defaultdict(lambda: defaultdict(int)),
                 "click": 0,                    
                 "impression": 0,
                 "ctr": 0,
@@ -206,7 +206,7 @@ def data_by_date(analytics_data, search_console_data, url_depth=1):
                 "engaged_sessions": 0,
                 "city": defaultdict(int),       # Analytics Dataから取得
                 "device_category": defaultdict(int),
-                "query": defaultdict(int),
+                "query": defaultdict(lambda: defaultdict(int)),
                 "click": 0,                    
                 "impression": 0,
                 "ctr": 0,
@@ -224,7 +224,8 @@ def data_by_date(analytics_data, search_console_data, url_depth=1):
         # カテゴリ項目のカウント
         query = entry.get('query')
         if query:
-            data_by_date[base_url][date]['query'][query] += 1
+            data_by_date[base_url][date]['query'][query]['click'] += entry.get('clicks', 0)
+            data_by_date[base_url][date]['query'][query]['impression'] += entry.get('impressions', 0)
         
         country = entry.get('country')
         if country:
@@ -246,7 +247,7 @@ def data_by_date(analytics_data, search_console_data, url_depth=1):
             if 'country' in data:
                 data_by_date[base_url][date]['country'] = get_top_n(data['country'])
             if 'query' in data:
-                data_by_date[base_url][date]['query'] = get_top_n(data['query'])
+                data_by_date[base_url][date]['query'] = get_top_n(data['query']['click'])
     
     # 日付をキーに持つ構造から、base_url 内に date フィールドを含む形式に変換
     transformed_data = transform_data_by_date(data_by_date)
@@ -844,7 +845,7 @@ def arrange_by_url(data, type="default"):
 
             # device_category, query, sourceを統計分析可能な形に変換
             top_device_category = max(record['device_category'], key=record['device_category'].get) if record['device_category'] else None
-            top_query = max(record['query'], key=record['query'].get) if record['query'] else None
+            top_query = max(record['query']['click'], key=record['query'].get) if record['query'] else None
             top_source = max(record['source'], key=record['source'].get) if record['source'] else None
             arranged_data['device_category'] = top_device_category
             arranged_data['query'] = top_query
@@ -898,7 +899,7 @@ def initialize_missing_data(data_by_date, start_date, end_date):
             "engaged_sessions": 0,
             "city": defaultdict(int),       # Analytics Dataから取得
             "device_category": defaultdict(int),
-            "query": defaultdict(int),
+            "query": defaultdict(lambda: defaultdict(int)),
             "click": 0,                    
             "impression": 0,
             "ctr": 0,
