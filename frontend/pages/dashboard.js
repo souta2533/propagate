@@ -8,6 +8,7 @@ import { useDataByDay } from "../hooks/useGetDataByDay";
 import { useAnalyticsData } from "../hooks/useAnalyticsData";
 import { useSearchConsoleData } from "../hooks/useSearchConsoleData";
 import { useAggregatedData } from "../hooks/useAggregatedData";
+import { useGPTReports } from "../hooks/useAIData";
 import Button from "@mui/material/Button";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
@@ -302,6 +303,7 @@ const Dashboard = () => {
   const [propertyIds, setPropertyIds] = useState([]);
   const [searchConsoleData, setSearchConsoleData] = useState([]);
   const [dataByDay, setDataByDay] = useState([]);
+  const [gptReports, setGPTReports] = useState([]);
 
   // Anlyticsデータの取得
   const {
@@ -510,6 +512,34 @@ const Dashboard = () => {
       setAggregatedData7(fetchedAggregatedData7);
     }
   };
+
+  // GPTからの解析結果を取得
+  const {
+    data: fetchedGPTReports,
+    error: gptReportError,
+    isLoading: gptReportLoading,
+    refetch: refetchGPTReports,
+  } = useGPTReports(session, propertyIds, startDate, endDate);
+
+  useEffect(() => {
+    if (
+      !session ||
+      !propertyIds.length ||
+      !startDate ||
+      !endDate ||
+      gptReportLoading
+    )
+    return;
+    if (gptReportError) {
+      console.error("Error fetching GPT report:", gptReportError);
+      refetchGPTReports(session, propertyIds, startDate, endDate);
+    }
+
+    if (fetchedGPTReports) {
+      console.log("Fetched GPT Reports: ", fetchedGPTReports);
+      setGPTReports(fetchedGPTReports);
+    }
+  })
 
   // フォーム送信時の処理
   const handleSubmit = (e) => {

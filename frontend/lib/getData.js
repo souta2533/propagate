@@ -113,3 +113,33 @@ export const fetchAggregatedDataFromDetail = async (jwtToken, propertyId, startD
         return null;
     }
 }
+
+// GPTの解析結果（レポート）を取得
+export const fetchGPTReport = async (jwtToken, propertyId, startDate, endDate) => {
+    try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+        const queryParams = new URLSearchParams({
+            propertyId: propertyId,
+            startDate: startDate,
+            endDate: endDate,
+        }).toString();
+
+        const response = await fetch(`${apiUrl}/fetch-gpt-report?${queryParams}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${jwtToken}`,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error("GPT report fetch failed");
+        }
+
+        const gptReport = await response.json();
+        return gptReport && gptReport.prompt ? gptReport.prompt : null;
+    } catch (error) {
+        console.error("Error fetching GPT report: ", error);
+        return null;
+    }
+}
