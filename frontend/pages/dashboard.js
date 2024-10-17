@@ -20,7 +20,9 @@ import PieChart from "../components/graph/PieChart";
 import PercentageTable from "../components/graph/PercentageTable";
 import Table from "../components/graph/Table";
 import Table2 from "../components/graph/Table2";
+import ChatComponent from '../components/ChatComponent';
 import "../styles/dashboard.css";
+
 
 const styles1 = {
   control: (provided) => ({
@@ -110,6 +112,17 @@ const styles2 = {
 };
 
 const Dashboard = () => {
+
+  // PieChartのサンプルデータ
+  const SampleData = [
+    ["desktop", 500],
+    ["mobile", 300],
+    ["tablet", 150],
+    ["smart tv", 50],
+    ["other device", 20],
+  ];
+
+
   // サンプルメトリクスデータ
   const sampleMetrics = [
     {
@@ -1228,7 +1241,6 @@ const Dashboard = () => {
             <div className="middle-chart">
               <Table2 data={sourceData} dataKeys="流入数" />
             </div>
-            <div className="middle-content-bottom"></div>
           </div>
           <div className="dashboard-middle-content">
             <div className="middle-content-text">
@@ -1253,7 +1265,10 @@ const Dashboard = () => {
               </p>
             </div>
             <div className="bottom-chart">
+              <PieChart data={SampleData} />
+              {/*
               <PieChart data={deviceData} />
+              */}
             </div>
           </div>
           <div className="dashboard-bottom-center">
@@ -1277,6 +1292,12 @@ const Dashboard = () => {
             <div className="bottom-chart"></div>
           </div>
         </div>
+
+        <div>
+          <ChatComponent/>
+        </div>
+
+
       </main>
       {/*<Sidebar className="sidebar" />*/}
     </div>

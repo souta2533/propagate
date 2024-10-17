@@ -298,7 +298,6 @@
   font-size: 1.5vw;
   font-weight: 500;
   color: #222222;
-  margin-bottom: 0.5vw;
 }
 
 .middle-subtitle {
@@ -306,7 +305,10 @@
   font-size: 1vw;
   font-weight: 400;
   color: #6b7280;
-  margin-bottom: 1vw;
+}
+
+.middle-chart {
+  margin-bottom: 0.5vw;
 }
 
 .dashboard-bottom {
@@ -587,7 +589,7 @@
   /* メインコンテンツ */
   .dashboard-main {
     height: auto;
-    padding: 3vw;
+    padding: 3vw 5vw 3vw 5vw;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -609,9 +611,9 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 160vw;
+    height: auto;
     margin-bottom: 2vw;
-    gap: 2vw;
+    gap: 5vw;
     border-radius: 15px;
   }
 
@@ -626,7 +628,7 @@
   .dashboard-top-right {
     width: 100%;
     padding: 3vw;
-    height: 50vw;
+    height: 70vw;
     background-color: #ffffff;
     box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
@@ -767,8 +769,9 @@
 
   .dashboard-middle-content {
     width: 100%;
-    height: 50vw;
-    padding: 0 3vw 3vw 3vw;
+    height: 90vw;
+    padding: 0 3vw 2vw 3vw;
+    margin-top: 3vw;
     box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
     background-color: #ffffff;
     border-radius: 15px;
@@ -781,25 +784,31 @@
     color: #333333;
     background-color: #ffffff;
     font-size: 1.25vw;
-    padding-top: 3vw;
+    padding-top: 5vw;
+    padding-bottom: 5vw;
     font-weight: 600;
     text-align: left;
     z-index: 10;
   }
 
   .middle-title {
-    font-size: 3.5vw;
+    font-size: 4.5vw;
     font-weight: 500;
     color: #444444;
     margin-bottom: 0.25vw;
+    padding-bottom: 1vw;
   }
 
   .middle-subtitle {
     position: relative;
-    font-size: 2.4vw;
+    font-size: 3vw;
     font-weight: 400;
     color: #6b7280;
     margin-bottom: 0.5vw;
+  }
+
+  .middle-chart {
+    margin-bottom: 1vw;
   }
 
 
@@ -814,33 +823,40 @@
   .dashboard-bottom {
     display: flex;
     flex-direction: column;
-    height: 150vw;
+    height: auto;
     margin-bottom: 1vw;
     gap: 2vw;
   }
 
-  .dashboard-bottom-center {
-    width: 100%;
-    height: 50vw;
-    background-color: #ffffff;
-    border-radius: 15px;
-    padding: 0 3vw 3vw 3vw;
-    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
-  }
-
   .dashboard-bottom-left {
     width: 100%;
-    height: 50vw;
+    height: 80vw;
     padding: 0 3vw 3vw 3vw;
+    margin-top: 3vw; 
     background-color: #ffffff;
     border-radius: 10px;
     box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
   }
 
+  .dashboard-bottom-center {
+    width: 100%;
+    height: 80vw;
+    background-color: #ffffff;
+    border-radius: 15px;
+    padding: 0 3vw 3vw 3vw;
+    margin-top: 3vw;
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .bottom-gragh {
+    margin-bottom: 3vw;
+  }
+
   .dashboard-bottom-right {
     width: 100%;
-    height: 50vw;
+    height: 80vw;
     padding: 0 3vw 3vw 3vw;
+    margin-top: 3vw;
     background-color: #ffffff;
     border-radius: 10px;
     box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
@@ -851,27 +867,24 @@
     top: 0;
     color: #333333;
     background-color: #ffffff;
-    font-size: 4vw;
+    font-size: 1.25vw;
+    padding-top: 4%;
+    padding-bottom: 3vw;
     font-weight: 600;
     text-align: left;
     z-index: 10;
   }
 
-  .bottom-chart {
-    width: 100%;
-    height: 80%;
-  }
-
   .bottom-title {
-    font-size: 3.5vw;
+    font-size: 4.5vw;
     font-weight: 500;
     color: #444444;
-    padding-top: 2vw;
     margin-bottom: 0.25vw;
+    padding-bottom: 1.5vw;
   }
 
   .bottom-subtitle {
-    font-size: 2.4vw;
+    font-size: 3vw;
     font-weight: 400;
     color: #6b7280;
     margin-bottom: 0.5vw;
