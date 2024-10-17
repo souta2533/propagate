@@ -1,11 +1,19 @@
 .percentage-table {
   width: 100%;
   background-color: #fff;
-  padding: 0;
+  padding: 10px;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  max-height: 20vw;
 }
+
+@media (max-width: 768px) {
+  .percentage-table {
+    max-height: 52vw;
+  }
+}  
 
 /*.table-title {
   font-size: 20px;
@@ -59,3 +67,12 @@
   font-weight: bold;
   justify-self: end;
 }
+
+@media (max-width: 768px) {
+  .bar {
+    height: 2.0vw;
+  }
+  .bar-fill {
+    height: 2.0vw;
+  }
+} 

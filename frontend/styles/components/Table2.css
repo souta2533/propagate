@@ -1,0 +1,14 @@
+/* デフォルトのbarのスタイル */
+.responsive-bar {
+    height: 0.5vw;
+    border-radius: 10vw;
+    background-color: #25DFBB;
+  }
+  
+/* 画面幅が768px以下のときにbarを太くする */
+@media (max-width: 768px) {
+    .responsive-bar {
+      height: 1.2vw;
+    }
+}
+  

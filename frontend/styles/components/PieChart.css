@@ -1,0 +1,28 @@
+.chart-container {
+    width: 15vw;
+    height: 15vw;
+}
+  
+@media (max-width: 768px) {
+    .chart-container {
+      width: 30vw;
+      height: 30vw;
+    }
+}  
+
+.legend-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* デフォルトでは2列 */
+    justify-content: center;
+    margin-left: 2vw;
+    gap: 1vw 3vw;
+}
+  
+@media (min-width: 768px) {
+    .legend-grid {
+      grid-template-columns: 1fr;
+      justify-content: center;
+      margin-left: 0;
+      gap: 0;
+    }
+}

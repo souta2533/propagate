@@ -40,7 +40,7 @@ export default function Login() {
 
       router.push({
         pathname: "/dashboard",
-        //query: { property },
+        //  query: { property },
       });
     }
 
