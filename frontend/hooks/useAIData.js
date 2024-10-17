@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchGPTReport } from "../lib/getData";
+import { fetchLLMReport } from "../lib/getData";
 
 
-// GPTからの解析結果を取得
-const fetchGPTReports = async (session, propertyIds, startDate, endDate) => {
+// LLMからの解析結果を取得
+const fetchLLMReports = async (session, propertyIds, startDate, endDate) => {
     if (!session || !propertyIds || !startDate || !endDate) {
         console.warn("Session or propertyIds is null");
         return;
@@ -20,7 +20,7 @@ const fetchGPTReports = async (session, propertyIds, startDate, endDate) => {
     for (const property of propertyIds) {
         const propertyId = property.properties_id;
         try {
-            const report = await fetchGPTReport(
+            const report = await fetchLLMReport(
                 jwtToken, 
                 propertyId,
                 startDate,
@@ -31,18 +31,18 @@ const fetchGPTReports = async (session, propertyIds, startDate, endDate) => {
                 reportByPropertyId[propertyId] = report;
             }
         } catch (error) {   
-            console.error("Error fetching GPT report:", error);
+            console.error("Error fetching LLM report:", error);
         }
     }
 
     return reportByPropertyId;
 };
 
-export const useGPTReports = (session, propertyIds, startDate, endDate) => {
+export const useLLMReports = (session, propertyIds, startDate, endDate) => {
     return useQuery({
-        queryKey: ["GPTReports"],
+        queryKey: ["LLMReports"],
         queryFn: () =>
-            fetchGPTReports(session, propertyIds, startDate, endDate),
+            fetchLLMReports(session, propertyIds, startDate, endDate),
         enabled:
             !!session &&
             !!propertyIds &&

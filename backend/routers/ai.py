@@ -8,6 +8,7 @@ from db.db_operations import AnalyticsDataTable
 from utils.data_process import arrange_by_url, transform_for_statistic_analysis
 from utils.prompt import Prompt
 from statistics_analysis.analysis import StatisticsAnalysisData
+from inference.report  import get_report
 
 
 router = APIRouter()
@@ -16,7 +17,7 @@ security = HTTPBearer()     # JWT認証用のセキュリティ設定
 logger = getLogger(__name__)
 
 # ChatGPTからレポートを受け取るエンドポイント
-@router.get("/fetch-gpt-report")
+@router.get("/fetch-llm-report")
 async def get_gpt_report(
     propertyId: str,
     startDate: str,
@@ -47,7 +48,7 @@ async def get_gpt_report(
         statistics_analysis = StatisticsAnalysisData(supabase)
 
         # 統計解析を実行
-        logger.info(f"Data for analysis: {df}")
+        # logger.info(f"Data for analysis: {df}")
         result = statistics_analysis.perform_analysis(data_by_day=df)
 
         if result is None:
@@ -63,9 +64,14 @@ async def get_gpt_report(
             },
             result_of_analysis=result
         )
-        logger.info(f"Prompt for GPT: {prompt_for_issues}")
+        
+        # logger.info(f"Prompt for GPT: {prompt_for_issues}")
 
-        return {"status": "success", "prompt": "prompt_for_issues"}
+        # LLMから統計解析の結果を取得
+        report = get_report(prompt_for_issues)
+        logger.info(f"Report from LLM: {report}")
+
+        return {"status": "success", "report": report}
 
     except Exception as e:
         logger.error(f"Error: {e}")

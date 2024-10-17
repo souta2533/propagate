@@ -835,7 +835,7 @@ def arrange_by_url(data, type="default"):
             base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
 
             arranged_data['base_url'] = base_url
-            logger.info(f"Record: {record}")    
+            # logger.info(f"Record: {record}")    
 
             # 数値項目の計算
             arranged_data['PV'] += record.get('PV') if record.get('PV') is not None else 0

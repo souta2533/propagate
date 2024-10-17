@@ -8,7 +8,7 @@ import { useDataByDay } from "../hooks/useGetDataByDay";
 import { useAnalyticsData } from "../hooks/useAnalyticsData";
 import { useSearchConsoleData } from "../hooks/useSearchConsoleData";
 import { useAggregatedData } from "../hooks/useAggregatedData";
-import { useGPTReports } from "../hooks/useAIData";
+import { useLLMReports } from "../hooks/useAIData";
 import Button from "@mui/material/Button";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
@@ -303,7 +303,7 @@ const Dashboard = () => {
   const [propertyIds, setPropertyIds] = useState([]);
   const [searchConsoleData, setSearchConsoleData] = useState([]);
   const [dataByDay, setDataByDay] = useState([]);
-  const [gptReports, setGPTReports] = useState([]);
+  const [llmReports, setLLMReports] = useState([]);
 
   // Anlyticsデータの取得
   const {
@@ -513,13 +513,13 @@ const Dashboard = () => {
     }
   };
 
-  // GPTからの解析結果を取得
+  // LLMからの解析結果を取得
   const {
-    data: fetchedGPTReports,
-    error: gptReportError,
-    isLoading: gptReportLoading,
-    refetch: refetchGPTReports,
-  } = useGPTReports(session, propertyIds, startDate, endDate);
+    data: fetchedLLMReports,
+    error: llmReportError,
+    isLoading: llmReportLoading,
+    refetch: refetchLLMReports,
+  } = useLLMReports(session, propertyIds, startDate, endDate);
 
   useEffect(() => {
     if (
@@ -527,17 +527,17 @@ const Dashboard = () => {
       !propertyIds.length ||
       !startDate ||
       !endDate ||
-      gptReportLoading
+      llmReportLoading
     )
     return;
-    if (gptReportError) {
-      console.error("Error fetching GPT report:", gptReportError);
-      refetchGPTReports(session, propertyIds, startDate, endDate);
+    if (llmReportError) {
+      console.error("Error fetching LLM report:", llmReportError);
+      refetchLLMReports(session, propertyIds, startDate, endDate);
     }
 
-    if (fetchedGPTReports) {
-      console.log("Fetched GPT Reports: ", fetchedGPTReports);
-      setGPTReports(fetchedGPTReports);
+    if (fetchedLLMReports) {
+      console.log("Fetched LLM Reports: ", fetchedLLMReports);
+      setLLMReports(fetchedLLMReports);
     }
   })
 

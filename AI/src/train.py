@@ -9,6 +9,7 @@ from functools import partial
 import numpy as np
 import os
 from sklearn.model_selection import train_test_split
+import torch
 from transformers import AutoTokenizer, Trainer, TrainingArguments
 
 from AI.src.models import load_model
@@ -19,7 +20,7 @@ from AI.src.ai_utils.save import save_model
 def argument_parser():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--model", type=str, default="", help='Model Name')
+    parser.add_argument("--model", type=str, default="elyza/ELYZA-japanese-Llama-2-7b-instruct", help='Model Name')
     parser.add_argument("--batch_size", type=int, default=8)
     parser.add_argument("--epochs", type=int, default=100)
     parser.add_argument("--lr", type=float, default=1e-5)
@@ -49,6 +50,8 @@ def eval(eval_pred, tokenizer):
     return result
 
 def main(args):
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
     # tokenizer: テキストをモデルが扱いやすい形式に変換
     tokenizer = AutoTokenizer.from_pretrained(args.model)
 
@@ -57,6 +60,7 @@ def main(args):
 
     # Modelのロード
     model = load_model(args.model)
+    model.to(device)
     
     # Datasetのロード(path -> Json)
     data = load_dataset(args.data_path)

@@ -114,8 +114,8 @@ export const fetchAggregatedDataFromDetail = async (jwtToken, propertyId, startD
     }
 }
 
-// GPTの解析結果（レポート）を取得
-export const fetchGPTReport = async (jwtToken, propertyId, startDate, endDate) => {
+// LLMの解析結果（レポート）を取得
+export const fetchLLMReport = async (jwtToken, propertyId, startDate, endDate) => {
     try {
         const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
         const queryParams = new URLSearchParams({
@@ -124,7 +124,7 @@ export const fetchGPTReport = async (jwtToken, propertyId, startDate, endDate) =
             endDate: endDate,
         }).toString();
 
-        const response = await fetch(`${apiUrl}/fetch-gpt-report?${queryParams}`, {
+        const response = await fetch(`${apiUrl}/fetch-llm-report?${queryParams}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -133,13 +133,13 @@ export const fetchGPTReport = async (jwtToken, propertyId, startDate, endDate) =
         });
 
         if (!response.ok) {
-            throw new Error("GPT report fetch failed");
+            throw new Error("LLM report fetch failed");
         }
 
-        const gptReport = await response.json();
-        return gptReport && gptReport.prompt ? gptReport.prompt : null;
+        const llmReport = await response.json();
+        return llmReport && llmReport.report ? llmReport.report : null;
     } catch (error) {
-        console.error("Error fetching GPT report: ", error);
+        console.error("Error fetching LLM report: ", error);
         return null;
     }
 }

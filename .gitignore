@@ -26,10 +26,13 @@ yarn-error.log*
 
 backend/analytics_result.json
 backend/static/
+backend/inference/__pycache__/
+backend/routers/__pycache__/
 AI/static
 
 AI/src/statistics_analysis/__pycache__/
 AI/src/prompts/__pycache__/
+AI/src/inference/__pycache__/
 AI/src/gpt/__pycache__/
 AI/src/__pycache__/
 AI/models/
