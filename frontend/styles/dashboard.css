@@ -279,7 +279,7 @@
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
   background-color: #ffffff;
   border-radius: 15px;
-  overflow-y: auto;
+  overflow: hidden; /* カード内でのスクロールをしない*/
 }
 
 .middle-content-text {
@@ -307,10 +307,6 @@
   font-weight: 400;
   color: #6b7280;
   margin-bottom: 1vw;
-}
-
-.middle-chart {
-  height: 20vw;
 }
 
 .dashboard-bottom {
@@ -359,9 +355,8 @@
 }
 
 .bottom-chart {
-  width: 100%;
-  height: 80%;
   display: flex;
+  height: 70%;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -777,7 +772,7 @@
     box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
     background-color: #ffffff;
     border-radius: 15px;
-    overflow-y: auto;
+    overflow: hidden; /* カード内でのスクロールをしない*/
   }
 
   .middle-content-text {
@@ -807,9 +802,6 @@
     margin-bottom: 0.5vw;
   }
 
-  .middle-chart {
-    height: 20vw;
-  }
 
   .middle-content-bottom {
     position: sticky;

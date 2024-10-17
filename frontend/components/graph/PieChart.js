@@ -70,7 +70,7 @@ const PieChart = ({ data }) => {
                 {/* ラベル */}
                 <span style={{ fontSize: "12px" }}>{labels[index]}</span>
                 {/* パーセンテージ（大きく、グレーに） */}
-                <span style={{ fontSize: "20px", color: "gray" }}>
+                <span style={{ fontSize: "20px", color: "black" }}>
                   {percentage}%
                 </span>
               </div>
@@ -99,11 +99,11 @@ const PieChart = ({ data }) => {
         {/* 円グラフのコンテナ */}
         <div
           style={{
-            width: "200px",
-            height: "200px",
+            width: "15vw",
+            height: "15vw",
             "@media (max-width: 768px)": {
-              width: "150px",
-              height: "150px",
+              width: "10vw",
+              height: "10vw",
             },
           }}
         >

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import MUIDataTable from "mui-datatables";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import "../../styles/components/sourceTable.css";
@@ -58,6 +58,26 @@ const getMuiTheme = () =>
   });
 
 const Table2 = ({ data }) => {
+  const [tableHeight, setTableHeight] = useState("20vw");
+
+  // 画面サイズに応じて高さを設定
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setTableHeight("35vw"); // 小さい画面の場合の高さ
+      } else {
+        setTableHeight("17vw"); // 大きい画面の場合の高さ
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    handleResize(); // 初期サイズ設定
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   if (!Array.isArray(data) || data.length === 0) {
     return null;
   }
@@ -159,8 +179,7 @@ const Table2 = ({ data }) => {
     sort: true,
     pagination: false,
     fixedHeader: true, // ヘッダー行を固定
-    fixedSelectColumn: true, // 固定する列がある場合に使用
-    tableBodyMaxHeight: "300px", // テーブル本体の最大高さを指定
+    tableBodyMaxHeight: tableHeight, // 動的に高さを設定
     textLabels: {
       body: {
         noMatch: "データが見つかりません",
