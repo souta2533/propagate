@@ -1,12 +1,44 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Pie } from "react-chartjs-2";
+import '../../styles/components/PieChart.css';
 
 const PieChart = ({ data }) => {
+  const [legendSize, setLegendSize] = useState("1vw");
+
+  useEffect(() => {
+    const updateLegendSize = () => {
+      if (window.innerWidth <= 768) {  // スマホサイズ
+        setLegendSize("3vw");
+      } else {  // デスクトップ・タブレットサイズ
+        setLegendSize("1vw");
+      }
+    };
+
+    // 初期化
+    updateLegendSize();
+    // ウィンドウリサイズ時にサイズを更新
+    window.addEventListener("resize", updateLegendSize);
+
+    return () => {
+      window.removeEventListener("resize", updateLegendSize);
+    };
+  }, []);
+
   if (!data || data.length === 0) {
     return null;
   }
 
-  const labels = data.map((item) => {
+  // 上位3つのデータとそれ以外を "その他" としてまとめる
+  const top3 = data.slice(0, 3);
+  const others = data.slice(3);
+  // その他を表示する場合
+  // const othersTotal = others.length > 0 ? others.reduce((acc, item) => acc + item[1], 0) : 0;
+
+  const othersTotal = others.reduce((acc, item) => acc + item[1], 0);
+
+  const filteredData = [...top3, ["others", othersTotal]];
+
+  const labels = filteredData.map((item) => {
     switch (item[0]) {
       case "desktop":
         return "デスクトップ";
@@ -16,11 +48,13 @@ const PieChart = ({ data }) => {
         return "モバイル";
       case "smart tv":
         return "スマートテレビ";
+      case "others":
+        return "その他";
       default:
-        return item[0]; // その他はそのまま
+        return item[0];
     }
   });
-  const values = data.map((item) => item[1]);
+  const values = filteredData.map((item) => item[1]);
   const totalValue = values.reduce((acc, value) => acc + value, 0);
 
   const chartData = {
@@ -28,7 +62,7 @@ const PieChart = ({ data }) => {
     datasets: [
       {
         data: values,
-        backgroundColor: ["#25DFBB", "#00C49F", "#4154A7", "#AA70A7"],
+        backgroundColor: ["#25DFBB", "#00C49F", "#4154A7", "#AA70A7", "#FF6384"],
         borderColor: ["#ffffff"],
         borderWidth: 1,
       },
@@ -43,19 +77,29 @@ const PieChart = ({ data }) => {
         enabled: true,
       },
       legend: {
-        display: false, // カスタム凡例を使用するため、デフォルトの凡例を無効化
+        display: false,
       },
     },
   };
 
-  // カスタムHTML凡例を生成
   const customLegend = () => {
     return (
-      <div style={{ display: "flex", flexDirection: "column" }}>
-        {data.map((item, index) => {
+      <div className="legend-grid">
+        {filteredData.map((item, index) => {
+
           const percentage = ((item[1] / totalValue) * 100).toFixed(1);
+          // その他を表示する場合
+          // const percentage = totalValue > 0 ? ((item[1] / totalValue) * 100).toFixed(1) : 0;
+
           return (
-            <div key={index} style={{ marginBottom: "5px", display: "flex" }}>
+            <div
+              key={index}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginBottom: legendSize,  // vwの値を使用
+              }}
+            >
               {/* カスタムの色付き丸アイコン */}
               <div
                 style={{
@@ -68,9 +112,9 @@ const PieChart = ({ data }) => {
               ></div>
               <div style={{ display: "flex", flexDirection: "column" }}>
                 {/* ラベル */}
-                <span style={{ fontSize: "12px" }}>{labels[index]}</span>
-                {/* パーセンテージ（大きく、グレーに） */}
-                <span style={{ fontSize: "20px", color: "black" }}>
+                <span style={{ fontSize: `calc(${legendSize})` }}>{labels[index]}</span>
+                {/* パーセンテージ */}
+                <span style={{ fontSize: `calc(${legendSize} * 1.5)` , color: "black" }}>
                   {percentage}%
                 </span>
               </div>
@@ -89,34 +133,15 @@ const PieChart = ({ data }) => {
         alignItems: "center",
       }}
     >
+      <div className="chart-container">
+        <Pie data={chartData} options={options} />
+      </div>
       <div
         style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
+          marginLeft: "2vw",
         }}
       >
-        {/* 円グラフのコンテナ */}
-        <div
-          style={{
-            width: "15vw",
-            height: "15vw",
-            "@media (max-width: 768px)": {
-              width: "10vw",
-              height: "10vw",
-            },
-          }}
-        >
-          <Pie data={chartData} options={options} />
-        </div>
-        {/* カスタム凡例を右側に表示 */}
-        <div
-          style={{
-            marginLeft: "10px",
-          }}
-        >
-          {customLegend()}
-        </div>
+        {customLegend()}
       </div>
     </div>
   );
