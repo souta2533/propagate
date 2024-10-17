@@ -1,3 +1,4 @@
+from aiocache import cached, Cache
 import datetime
 from postgrest.exceptions import APIError 
 from supabase import Client  
@@ -450,9 +451,12 @@ class AnalyticsDataTable:
         except APIError as e:
             logging.error(f"Error to save Search Console Data: {e}")
     
+    @cached(ttl=1800, cache=Cache.MEMORY)
     async def fetch_data(self, property_id, start_date, end_date, jwt_token):
         """
             指定された期間のデータ(AnalyticsDataとSearchConsoleData)を取得
+            ttl=1800はキャッシュの有効期限を秒単位で設定しています（ここでは30分）
+            cache=Cache.MEMORYはメモリ内でキャッシュを行うことを指定しています
         """
         all_data = []
         offset = 0

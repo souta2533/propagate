@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 from urllib.parse import urlparse, unquote
 from logging import getLogger
+from operator import itemgetter
 
 
 logger = getLogger(__name__)
@@ -138,7 +139,7 @@ def data_by_date(analytics_data, search_console_data, url_depth=1):
                 "engaged_sessions": 0,
                 "city": defaultdict(int),       # Analytics Dataから取得
                 "device_category": defaultdict(int),
-                "query": defaultdict(int),
+                "query": defaultdict(lambda: defaultdict(int)),
                 "click": 0,                    
                 "impression": 0,
                 "ctr": 0,
@@ -205,7 +206,7 @@ def data_by_date(analytics_data, search_console_data, url_depth=1):
                 "engaged_sessions": 0,
                 "city": defaultdict(int),       # Analytics Dataから取得
                 "device_category": defaultdict(int),
-                "query": defaultdict(int),
+                "query": defaultdict(lambda: defaultdict(int)),
                 "click": 0,                    
                 "impression": 0,
                 "ctr": 0,
@@ -223,7 +224,8 @@ def data_by_date(analytics_data, search_console_data, url_depth=1):
         # カテゴリ項目のカウント
         query = entry.get('query')
         if query:
-            data_by_date[base_url][date]['query'][query] += 1
+            data_by_date[base_url][date]['query'][query]['click'] += entry.get('clicks', 0)
+            data_by_date[base_url][date]['query'][query]['impression'] += entry.get('impressions', 0)
         
         country = entry.get('country')
         if country:
@@ -245,7 +247,7 @@ def data_by_date(analytics_data, search_console_data, url_depth=1):
             if 'country' in data:
                 data_by_date[base_url][date]['country'] = get_top_n(data['country'])
             if 'query' in data:
-                data_by_date[base_url][date]['query'] = get_top_n(data['query'])
+                data_by_date[base_url][date]['query'] = get_top_n(data['query']['click'])
     
     # 日付をキーに持つ構造から、base_url 内に date フィールドを含む形式に変換
     transformed_data = transform_data_by_date(data_by_date)
@@ -654,6 +656,9 @@ def transform_for_statistic_analysis(data_by_data):
         Returns:
         - transformed_data: 統計解析に使用するためのリスト形式のデータ
     """
+    if data_by_data is None:
+        return None
+    
     transformed_data = []
 
     for base_url, entries in data_by_data.items():
@@ -661,7 +666,7 @@ def transform_for_statistic_analysis(data_by_data):
             # device_category, queryを統計分析可能な形に変換
             top_device_category = max(entry['device_category'], key=entry['device_category'].get) if entry['device_category'] else None
             top_query = max(entry['query'], key=entry['query'].get) if entry['query'] else None
-            top_source = max(entry['session_source'], key=entry['session_source'].get) if entry['session_source'] else None
+            top_source = max(entry['source'], key=entry['source'].get) if entry['source'] else None
 
             transformed_data.append({
                 'base_url': base_url,
@@ -788,23 +793,96 @@ def aggregate_by_base_url(data):
 
     return base_url_aggregates
 
-def arrange_by_url(data):
+def arrange_by_url(data, type="default"):
     """
         DBから取得したデータをURLごとのデータ構造に変更する関数
     """
     if data is None:
         return None
     
-    arranged_data = defaultdict(list)
+    if type == "default":
+        arranged_data = defaultdict(list)
 
-    for record in data:
-        url = record.get('url', None) 
-        if url is None:
-            continue
+        for record in data:
+            url = record.get('url', None) 
+            if url is None:
+                continue
 
-        arranged_data[url].append(record)
+            arranged_data[url].append(record)
 
-    return arranged_data
+        return arranged_data
+    
+    elif type == "analysis":
+        """
+            全てのPathを含めて集計
+        """
+        transformed_data = []
+
+        for record in data:
+            arranged_data = {
+                'base_url': "",
+                'PV': 0,
+                'CV': 0,
+                'CVR': 0.0,
+                'UU': 0,
+                'click': 0,
+                'impression': 0,
+                'device_category': "",
+                'query': "",
+            }
+            url = record.get('url', None)
+            parsed_url = urlparse(url)
+            base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+
+            arranged_data['base_url'] = base_url
+            # logger.info(f"Record: {record}")    
+
+            # 数値項目の計算
+            arranged_data['PV'] += record.get('PV') if record.get('PV') is not None else 0
+            arranged_data['CV'] += record.get('CV') if record.get('CV') is not None else 0
+            arranged_data['UU'] += record.get('UU') if record.get('UU') is not None else 0
+            arranged_data['click'] += record.get('click') if record.get('click') is not None else 0
+            arranged_data['impression'] += record.get('impression') if record.get('impression') is not None else 0
+
+            # device_category, query, sourceを統計分析可能な形に変換
+            top_device_category = max(record['device_category'], key=record['device_category'].get) if record['device_category'] else None
+            top_query = max(record['query'], key=record['query'].get) if record['query'] else None
+            top_source = max(record['source'], key=record['source'].get) if record['source'] else None
+            arranged_data['device_category'] = top_device_category
+            arranged_data['query'] = top_query
+            arranged_data['source'] = top_source
+
+            # カテゴリ項目のカウント
+            # device_categories = record.get('device_category') if record.get('device_category') is not None else {}
+            # if device_categories is not None:
+            #     for device_category, v in device_categories.items():
+            #         arranged_data['device_category'][device_category] += v
+
+            # queries = record.get('query') if record.get('query') is not None else {}
+            # if queries is not None:
+            #     for query, v in queries.items():
+            #         arranged_data['query'][query] += v
+
+            # CVRの計算 (UU > 0 の場合のみ)
+            if arranged_data['UU'] > 0:
+                arranged_data['CVR'] = arranged_data['CV'] / arranged_data['UU']
+            else:
+                arranged_data['CVR'] = 0.0
+
+            # # device_categoryの上位5つを抽出
+            # top_device_categories = dict(sorted(arranged_data['device_category'].items(), key=itemgetter(1), reverse=True)[:5])
+
+            # # queryの上位5つを抽出
+            # top_queries = dict(sorted(arranged_data['query'].items(), key=itemgetter(1), reverse=True)[:5])
+
+            # # 上位5つのみを反映
+            # arranged_data['device_category'] = top_device_categories
+            # arranged_data['query'] = top_queries
+
+            transformed_data.append(arranged_data)
+
+        return transformed_data
+
 
 def initialize_missing_data(data_by_date, start_date, end_date):
     """
@@ -822,7 +900,7 @@ def initialize_missing_data(data_by_date, start_date, end_date):
             "engaged_sessions": 0,
             "city": defaultdict(int),       # Analytics Dataから取得
             "device_category": defaultdict(int),
-            "query": defaultdict(int),
+            "query": defaultdict(lambda: defaultdict(int)),
             "click": 0,                    
             "impression": 0,
             "ctr": 0,

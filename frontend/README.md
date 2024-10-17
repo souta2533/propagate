@@ -38,4 +38,5 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 
 実行方法
 Backend : uvicorn main:app --reload
+          uvicorn main:app --reload --port 7999 
 Front   : npm run dev

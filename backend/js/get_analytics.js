@@ -52,7 +52,6 @@ function flattenDateMap(initialDateMap) {
 }
 
 async function handler(req, res) {
-//   console.log("handler");
   // accountId: 各WebサイトのGoogle AnalyticsのアカウントID（Googleアカウントの1つ下位層），propertyId: 各WebサイトのGoogle AnalyticsのプロパティID（各Webサイト）
   const { accessToken, refreshToken, accountId, propertyId, startDate, endDate } = req.body;
 

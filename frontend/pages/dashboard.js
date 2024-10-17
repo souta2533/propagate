@@ -25,9 +25,8 @@ import PieChart from "../components/graph/PieChart";
 import PercentageTable from "../components/graph/PercentageTable";
 import Table from "../components/graph/Table";
 import Table2 from "../components/graph/Table2";
-import ChatComponent from '../components/ChatComponent';
+import ChatComponent from "../components/ChatComponent";
 import "../styles/dashboard.css";
-
 
 const styles1 = {
   control: (provided) => ({
@@ -117,7 +116,6 @@ const styles2 = {
 };
 
 const Dashboard = () => {
-
   // PieChartのサンプルデータ
   const SampleData = [
     ["desktop", 500],
@@ -126,7 +124,6 @@ const Dashboard = () => {
     ["smart tv", 50],
     ["other device", 20],
   ];
-
 
   // サンプルメトリクスデータ
   const sampleMetrics = [
@@ -379,6 +376,7 @@ const Dashboard = () => {
   const [propertyIds, setPropertyIds] = useState([]);
   const [searchConsoleData, setSearchConsoleData] = useState([]);
   const [dataByDay, setDataByDay] = useState([]);
+  const [llmReports, setLLMReports] = useState([]);
 
   // Anlyticsデータの取得
   const {
@@ -765,6 +763,34 @@ const Dashboard = () => {
       console.warn("pagePathOptions is empty or undefined");
     }
   };
+
+  // LLMからの解析結果を取得
+  const {
+    data: fetchedLLMReports,
+    error: llmReportError,
+    isLoading: llmReportLoading,
+    refetch: refetchLLMReports,
+  } = useLLMReports(session, propertyIds, startDate, endDate);
+
+  useEffect(() => {
+    if (
+      !session ||
+      !propertyIds.length ||
+      !startDate ||
+      !endDate ||
+      llmReportLoading
+    )
+      return;
+    if (llmReportError) {
+      console.error("Error fetching LLM report:", llmReportError);
+      refetchLLMReports(session, propertyIds, startDate, endDate);
+    }
+
+    if (fetchedLLMReports) {
+      console.log("Fetched LLM Reports: ", fetchedLLMReports);
+      setLLMReports(fetchedLLMReports);
+    }
+  });
 
   // フォーム送信時の処理
   const handleSubmit = (e) => {
@@ -1576,10 +1602,8 @@ const Dashboard = () => {
         </div>
 
         <div>
-          <ChatComponent/>
+          <ChatComponent />
         </div>
-
-
       </main>
       {/*<Sidebar className="sidebar" />*/}
     </div>
