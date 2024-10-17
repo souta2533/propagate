@@ -38,7 +38,7 @@ const getMuiTheme = () =>
           root: {
             fontWeight: "bold",
             fontSize: "10px",
-            padding: "10px",
+            padding: "5px",
             backgroundColor: "#f9f9f9",
             position: "sticky",
             top: 0,
@@ -60,8 +60,8 @@ const Table = ({ data }) => {
   // 画面サイズに応じて高さを設定
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 768) {
-        setTableHeight("35vw"); // 小さい画面の場合の高さ
+      if (window.innerWidth <= 768) {
+        setTableHeight("58vw"); // 小さい画面の場合の高さ
       } else {
         setTableHeight("17vw"); // 大きい画面の場合の高さ
       }

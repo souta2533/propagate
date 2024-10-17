@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import MUIDataTable from "mui-datatables";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import "../../styles/components/sourceTable.css";
+import "../../styles/components/Table2.css";
 
 const getMuiTheme = () =>
   createTheme({
@@ -63,8 +64,8 @@ const Table2 = ({ data }) => {
   // 画面サイズに応じて高さを設定
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 768) {
-        setTableHeight("35vw"); // 小さい画面の場合の高さ
+      if (window.innerWidth <= 768) {
+        setTableHeight("58vw"); // 小さい画面の場合の高さ
       } else {
         setTableHeight("17vw"); // 大きい画面の場合の高さ
       }
@@ -124,7 +125,6 @@ const Table2 = ({ data }) => {
               flexDirection: "row",
               alignItems: "center",
               width: "100%",
-              height: "0.5vw",
             }}
           >
             <span style={{ marginRight: "16px" }}>
@@ -140,14 +140,12 @@ const Table2 = ({ data }) => {
               <div
                 style={{
                   width: `${(value / totalCount) * 100}%`,
-                  backgroundColor: "#25DFBB",
-                  height: "0.5vw",
-                  borderRadius: "10vw",
                 }}
+                className="responsive-bar"
               ></div>
             </div>
           </div>
-        ),
+        ),        
         setCellProps: () => ({
           style: {
             width: "80%",
