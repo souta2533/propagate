@@ -191,49 +191,49 @@ const Dashboard = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  //defaultでグラフデータをセット
-  useEffect(() => {
-    if (!router.isReady) return;
+  ////defaultでグラフデータをセット
+  //useEffect(() => {
+  //  if (!router.isReady) return;
+  //
+  //  const { url, path } = router.query;
+  //
+  //  if (url) setUrl(url);
+  //  if (path) setPagePath(path);
+  //
+  //  if (!path) {
+  //    const defaultPath = "/";
+  //    setPagePath(defaultPath);
+  //    const prevPagePath = { label: defaultPath, value: url };
+  //    setSelectedPagePath(prevPagePath);
+  //
+  //    router.push(
+  //      {
+  //        pathname: router.pathname,
+  //        query: { ...router.query, path: defaultPath },
+  //      },
+  //      undefined,
+  //      { shallow: true }
+  //    );
+  //  }
+  //}, [router.isReady, router.query]);
 
-    const { url, path } = router.query;
-
-    if (url) setUrl(url);
-    if (path) setPagePath(path);
-
-    if (!path) {
-      const defaultPath = "/";
-      setPagePath(defaultPath);
-      const prevPagePath = { label: defaultPath, value: url };
-      setSelectedPagePath(prevPagePath);
-
-      router.push(
-        {
-          pathname: router.pathname,
-          query: { ...router.query, path: defaultPath },
-        },
-        undefined,
-        { shallow: true }
-      );
-    }
-  }, [router.isReady, router.query]);
-
-  //reloardした時に値を保持する
-  useEffect(() => {
-    if (router.isReady) {
-      const { url: queryUrl, pagePath: queryPagePath } = router.query;
-
-      if (queryUrl) {
-        setUrl(queryUrl);
-        const prevUrl = { label: queryUrl, value: queryUrl };
-        setSelectedUrl(prevUrl);
-      }
-      if (queryPagePath) {
-        setPagePath(queryPagePath);
-        const prevPagePath = { label: queryPagePath, value: queryPagePath };
-        setSelectedPagePath(prevPagePath);
-      }
-    }
-  }, [router.isReady, router.query]);
+  ////reloardした時に値を保持する
+  //useEffect(() => {
+  //  if (router.isReady) {
+  //    const { url: queryUrl, pagePath: queryPagePath } = router.query;
+  //
+  //    if (queryUrl) {
+  //      setUrl(queryUrl);
+  //      const prevUrl = { label: queryUrl, value: queryUrl };
+  //      setSelectedUrl(prevUrl);
+  //    }
+  //    if (queryPagePath) {
+  //      setPagePath(queryPagePath);
+  //      const prevPagePath = { label: queryPagePath, value: queryPagePath };
+  //      setSelectedPagePath(prevPagePath);
+  //    }
+  //  }
+  //}, [router.isReady, router.query]);
 
   //localStorageからURLリストを取得
   useEffect(() => {
@@ -322,18 +322,10 @@ const Dashboard = () => {
       console.log("Fetched Analytics Data: ", fetchedAnalyticsData);
       setAnalyticsData(fetchedAnalyticsData.allAnalytics);
       setPropertyIds(fetchedAnalyticsData.allProperties);
+      //setUrl(fetchedAggregatedData.initialFilteredProperties);
+      //console.log("FIRSTURL:", fetchedAggregatedData.initialFilteredProperties);
     }
   }, [session, analyticsError, analyticsLoading, refetchAnalyticsData]);
-
-  useEffect(() => {
-    if (propertyIds.length > 0) {
-      const firstUrl = propertyIds[2].url;
-      console.log("firstUrl:", firstUrl);
-      setUrl(firstUrl);
-      const firstSelectedUrl = { label: firstUrl, value: firstUrl };
-      setSelectedUrl(firstSelectedUrl);
-    }
-  }, [analyticsData]);
 
   // Search Consoleデータの取得
   const {

@@ -53,6 +53,7 @@ const fetchAnalyticsData = async (session) => {
     const initialFilteredProperties = allProperties.filter(
       (p) => p.account_id === accountIds[0]
     );
+    console.log("InisialProperties:", initialFilteredProperties);
   }
 
   // 4. GoogleAnalyticsDataのデータを取得
@@ -67,7 +68,7 @@ const fetchAnalyticsData = async (session) => {
     return;
   }
 
-  return { allAnalytics, allProperties };
+  return { allAnalytics, allProperties }; //, initialFilteredProperties };
 };
 
 export const useAnalyticsData = (session, setPropertyIds) => {
@@ -77,6 +78,7 @@ export const useAnalyticsData = (session, setPropertyIds) => {
     enabled: !!session,
     onSuccess: (data) => {
       setPropertyIds(data.allProperties);
+      setUrl(initialFilteredProperties);
     },
   });
 };
