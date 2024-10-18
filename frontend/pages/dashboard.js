@@ -1,7 +1,6 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { FaSearch } from "react-icons/fa";
-import { Settings, UserRoundPen, Mail, LogOut } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 import { useSessionData } from "../hooks/useSessionData";
 import { useDataByDay } from "../hooks/useGetDataByDay";
@@ -211,6 +210,15 @@ const Dashboard = () => {
   const [preAggregatedData7, setPreAggregatedData7] = useState({});
   const [preAggregatedData90, setPreAggregatedData90] = useState({});
   const [preTotalData, setPreTotalData] = useState({});
+  const [hasRunTotal, setHasRunTotal] = useState(false);
+  const [hasRunAgg, setHasRunAgg] = useState(false);
+  const [hasRunAgg7, setHasRunAgg7] = useState(false);
+  const [hasRunAgg90, setHasRunAgg90] = useState(false);
+  const [hasRunPreAgg, setHasRunPreAgg] = useState(false);
+  const [hasRunPreAgg7, setHasRunPreAgg7] = useState(false);
+  const [hasRunPreAgg90, setHasRunPreAgg90] = useState(false);
+
+  const [hasRunDataByDay, setHasRunDataByDay] = useState(false);
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////
   const [propertyId, setPropertyId] = useState(null);
   const [chartData, setChartData] = useState([]);
@@ -229,75 +237,13 @@ const Dashboard = () => {
     "ページ閲覧数(PV)",
     "セッション数(UU)",
   ]); // 選択中のメトリクス
-  const [inputValue, setInputValue] = useState(""); // ここで useState を使って定義
+  const [inputValue, setInputValue] = useState(""); // ここで useState を使って定義.........................................
 
   const [dataForDateRange, setDataForDateRange] = useState([]);
-  const [formattedAnalytics, setFormattedAnalytics] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-  const [registeredUrl, setRegisteredUrl] = useState(""); //URL追加ページで登録したURLを保持
   const router = useRouter();
 
-  const [sourceChartData, setSourceChartData] = useState([]);
-
-  //
-  //  useEffect(() => {
-  //    const timer = setTimeout(() => {
-  //      setLoading(false);
-  //    }, 8000);
-  //
-  //    return () => clearTimeout(timer);
-  //  }, []);
-
-  ////defaultでグラフデータをセット
-  //useEffect(() => {
-  //  if (!router.isReady) return;
-  //
-  //  const { url, path } = router.query;
-  //
-  //  if (url) setUrl(url);
-  //  if (path) setPagePath(path);
-  //
-  //  if (!path) {
-  //    const defaultPath = "/";
-  //    setPagePath(defaultPath);
-  //    const prevPagePath = { label: defaultPath, value: url };
-  //    setSelectedPagePath(prevPagePath);
-  //
-  //    router.push(
-  //      {
-  //        pathname: router.pathname,
-  //        query: { ...router.query, path: defaultPath },
-  //      },
-  //      undefined,
-  //      { shallow: true }
-  //    );
-  //  }
-  //}, [router.isReady, router.query]);
-
-  ////reloardした時に値を保持する
-  //useEffect(() => {
-  //  if (router.isReady) {
-  //    const { url: queryUrl, pagePath: queryPagePath } = router.query;
-  //
-  //    if (queryUrl) {
-  //      setUrl(queryUrl);
-  //      const prevUrl = { label: queryUrl, value: queryUrl };
-  //      setSelectedUrl(prevUrl);
-  //    }
-  //    if (queryPagePath) {
-  //      setPagePath(queryPagePath);
-  //      const prevPagePath = { label: queryPagePath, value: queryPagePath };
-  //      setSelectedPagePath(prevPagePath);
-  //    }
-  //  }
-  //}, [router.isReady, router.query]);
-
-  ////localStorageからURLリストを取得
-  //useEffect(() => {
-  //  const storedUrls = JSON.parse(localStorage.getItem("urlOptions")) || [];
-  //  setUrlOptions(storedUrls);
-  //}, []);
-
+  //............................................要変更
   const handleUrl = (inputValue) => {
     if (!inputValue) {
       alert("URLを入力してください");
@@ -316,16 +262,16 @@ const Dashboard = () => {
   };
 
   //URL選択時の処理
-  const handleUrlChange = (selectedOption) => {
-    if (!selectedOption) {
+  const handleUrlChange = (e) => {
+    if (!e) {
       alert("URLを選択してください");
       return;
     }
 
-    setSelectedUrl(selectedOption);
-    setUrl(selectedOption.value);
-    console.log("SelectedURL:", selectedOption.value);
-    const url = selectedOption.value;
+    setSelectedUrl(e);
+    setUrl(e.value);
+    console.log("SelectedURL:", e.value);
+    const url = e.value;
 
     const foundPropertyId = findPropertyIdByUrl(url);
     if (foundPropertyId) {
@@ -338,20 +284,19 @@ const Dashboard = () => {
     setSanitizedUrl(saniUrl);
   };
 
-  const handlePagePathChange = (selectedOption) => {
-    setSelectedPagePath(selectedOption);
-    setPagePath(selectedOption.value);
+  const handlePagePathChange = (e) => {
+    setSelectedPagePath(e);
+    setPagePath(e.value);
+    console.log(e);
     router.push(
       {
         pathname: router.pathname,
-        query: { ...router.query, pagePath: selectedOption.value },
+        query: { ...router.query, pagePath: e.value },
       },
       undefined,
       { shallow: true } // パスを変更せずにデータを更新
     );
-    console.log("Selected Page Path:", selectedOption);
-    const chartData = dataByDay[propertyId][selectedOption.value];
-    console.log("Chart Data:", chartData);
+    const chartData = dataByDay[propertyId][e.value];
     const filteredData = filterDataByDateRange(chartData, dateRange);
     setChartData(filteredData);
   };
@@ -464,10 +409,13 @@ const Dashboard = () => {
       refetchAggregatedData(session, propertyIds, startDate, endDate); // エラー時にリフェッチ
     }
 
-    if (fetchedAggregatedData) {
-      console.log("Aggregated Data: ", fetchedAggregatedData);
+    if (fetchedAggregatedData && !hasRunAgg) {
       setAggregatedData(fetchedAggregatedData);
-      setTotalData(fetchedAggregatedData);
+      setHasRunAgg(true);
+      if (!hasRunTotal) {
+        setTotalData(fetchedAggregatedData);
+        setHasRunTotal(true);
+      }
     }
   }, [
     session,
@@ -503,7 +451,10 @@ const Dashboard = () => {
 
     if (fetchedAggregatedData7) {
       console.log("Aggregated Data7: ", fetchedAggregatedData7);
-      setAggregatedData7(fetchedAggregatedData7);
+      if (!hasRunAgg7) {
+        setAggregatedData7(fetchedAggregatedData7);
+        setHasRunAgg7(true);
+      }
     }
     console.log("deback");
   }, [
@@ -538,11 +489,11 @@ const Dashboard = () => {
       refetchAggregatedData90(session, propertyIds, startDate90, endDate); // エラー時にリフェッチ
     }
 
-    if (fetchedAggregatedData90) {
+    if (fetchedAggregatedData90 && !hasRunAgg90) {
       console.log("Aggregated Data90: ", fetchedAggregatedData90);
       setAggregatedData90(fetchedAggregatedData90);
+      setHasRunAgg90(true);
     }
-    console.log("deback");
   }, [
     session,
     propertyIds,
@@ -575,10 +526,11 @@ const Dashboard = () => {
       refetchPreAggregatedData(session, propertyIds, preStartDate, preEndDate); // エラー時にリフェッチ
     }
 
-    if (fetchedPreAggregatedData) {
+    if (fetchedPreAggregatedData && !hasRunPreAgg) {
       console.log("PreAggregated Data: ", fetchedPreAggregatedData);
       setPreAggregatedData(fetchedPreAggregatedData);
       setPreTotalData(fetchedPreAggregatedData);
+      setHasRunPreAgg(true);
     }
   }, [
     session,
@@ -617,9 +569,10 @@ const Dashboard = () => {
       ); // エラー時にリフェッチ
     }
 
-    if (fetchedPreAggregatedData7) {
+    if (fetchedPreAggregatedData7 && !hasRunPreAgg7) {
       console.log("PreAggregated Data7: ", fetchedPreAggregatedData7);
       setPreAggregatedData7(fetchedPreAggregatedData7);
+      setHasRunPreAgg7(true);
     }
   }, [
     session,
@@ -663,9 +616,10 @@ const Dashboard = () => {
       ); // エラー時にリフェッチ
     }
 
-    if (fetchedPreAggregatedData90) {
+    if (fetchedPreAggregatedData90 && !hasRunPreAgg90) {
       console.log("PreAggregated Data90: ", fetchedPreAggregatedData90);
       setPreAggregatedData90(fetchedPreAggregatedData90);
+      setHasRunPreAgg90(true);
     }
   }, [
     session,
@@ -703,7 +657,6 @@ const Dashboard = () => {
           value: url,
         }));
         setUrlOptions(initialUrlsList);
-        //setSelectedUrl(initialUrlsList[0]);
         handleUrlChange(initialUrlsList[0]);
       } else {
         console.warn("initialFilteredProperties is undefined or null");
@@ -748,23 +701,20 @@ const Dashboard = () => {
   useEffect(() => {
     setPagePathOptions(pagePaths);
     handleFirstPagePath();
-  }, [pagePathList, preAggregatedData90]);
+  }, [pagePathList, preAggregatedData]);
 
   const handleFirstPagePath = () => {
     if (
       pagePathList &&
       Array.isArray(pagePathList) &&
       pagePathList.length > 0 &&
-      preAggregatedData90 &&
-      areaData &&
-      sanitizedUrl
+      preAggregatedData &&
+      areaData
     ) {
       const shortestUrl = pagePathList.reduce((shortest, current) => {
         return current.length < shortest.length ? current : shortest;
       }, pagePathList[0]);
-      console.log("Shortest:", shortestUrl);
       const shortestUrlOption = { value: shortestUrl, label: "/" };
-      console.log("ShotestOptions:", shortestUrlOption);
 
       handlePagePathChange(shortestUrlOption);
 
@@ -802,17 +752,6 @@ const Dashboard = () => {
     }
   });
 
-  // フォーム送信時の処理
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const foundPropertyId = findPropertyIdByUrl(url);
-    if (foundPropertyId) {
-      setPropertyId(foundPropertyId);
-    } else {
-      console.error("該当するプロパティが見つかりません");
-    }
-  };
-
   const findPropertyIdByUrl = (url) => {
     let propertyId = null;
 
@@ -832,96 +771,8 @@ const Dashboard = () => {
     setUrl(url);
     const saniUrl = url.replace(/\/+$/, "");
     setSanitizedUrl(saniUrl);
-    console.log("SANIUrl:", saniUrl);
     return propertyId;
   };
-
-  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////ここから
-  // 指定された日付範囲のデータを0で初期化して作成
-  const generateEmptyDataForDateRange = (startDate, endDate) => {
-    const data = [];
-    let currentDate = new Date(startDate);
-
-    while (currentDate <= endDate) {
-      data.push({
-        date: currentDate.toISOString().split("T")[0], // YYYY-MM-DD形式で日付を保持
-        PV: 0,
-        CV: 0,
-        CVR: 0,
-        UU: 0,
-      });
-      currentDate.setDate(currentDate.getDate() + 1); // 次の日付に進む
-    }
-
-    return data;
-  };
-
-  const ensureDataForDateRange = (data, startDate, endDate) => {
-    if (!Array.isArray(data) || data.length === 0) {
-      // データが存在しない場合、指定された範囲の日付のデータを0で初期化して作成
-      console.warn("Data is empty, generating empty data for the date range.");
-      return generateEmptyDataForDateRange(startDate, endDate);
-    }
-
-    // データが存在する場合も、存在しない日付のデータを0で埋める
-    const filledData = [];
-    let currentDate = new Date(startDate);
-
-    while (currentDate <= endDate) {
-      const formattedDate =
-        currentDate.getFullYear().toString() +
-        (currentDate.getMonth() + 1).toString().padStart(2, "0") +
-        currentDate.getDate().toString().padStart(2, "0");
-
-      // 該当する日付のデータがあるか確認
-      const existingData = data.find((item) => item.date === formattedDate);
-
-      if (existingData) {
-        filledData.push(existingData);
-      } else {
-        // データがなければ0で初期化されたデータを追加
-        filledData.push({
-          date: formattedDate,
-          PV: 0,
-          CV: 0,
-          CVR: 0,
-          UU: 0,
-        });
-      }
-
-      currentDate.setDate(currentDate.getDate() + 1); // 次の日付に進む
-    }
-
-    return filledData;
-  };
-
-  //Dachboardに表示するための加工したデータをformattedAnalyticsに格納
-  useEffect(() => {
-    if (!analyticsData || analyticsData.length === 0) {
-      //console.warn("analyticsDataが空です");
-      return;
-    }
-
-    const formattedAnalyticsData = analyticsData.map((entry) => {
-      // YYYYMMDD形式の日付をYYYY-MM-DDに変換
-      const formattedDate = `${entry.date.slice(0, 4)}-${entry.date.slice(
-        4,
-        6
-      )}-${entry.date.slice(6, 8)}`;
-      return {
-        properties_id: entry.property_id, // property_idをproperties_idに変換
-        date: formattedDate, // 表示を変更
-        screen_page_views: entry.screen_page_views || 0, // screen_page_viewsを使用
-        conversions: entry.conversions || 0, // conversionsを使用
-        sessions: entry.sessions || 0, // sessionsを使用};
-      };
-    });
-
-    setFormattedAnalytics(formattedAnalyticsData);
-    console.log("Formatted Analytics:", formattedAnalyticsData);
-  }, [analyticsData, totalData]); // analyticsDataが変更された時に実行
-
-  const parseDate = (dateStr) => new Date(dateStr);
 
   const filterDataByDateRange = (data, range) => {
     const now = new Date();
@@ -946,31 +797,6 @@ const Dashboard = () => {
         setStartDate(startDate);
         //console.log("StartDate:", startDate);
         break;
-      case "先月":
-        startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-        setStartDate(startDate);
-        //console.log("StartDate:", startDate);
-        now.setMonth(now.getMonth(), 0); // 先月の最後の日
-        break;
-      case "先々月":
-        startDate = new Date(now.getFullYear(), now.getMonth() - 2, 1);
-        setStartDate(startDate);
-        //console.log("StartDate:", startDate);
-        now.setMonth(now.getMonth() - 1, 0); // 先々月の最後の日
-        break;
-      case "1年間":
-        startDate = new Date(now);
-        startDate.setFullYear(now.getFullYear() - 1);
-        setStartDate(startDate);
-        //console.log("StartDate:", startDate);
-        break;
-      case "全期間":
-        //startDate = parseDate(data[data.length - 1].date); // データの最古の日付
-        startDate = new Date(now);
-        startDate.setFullYear(now.getFullYear() - 1);
-        setStartDate(startDate);
-        console.log("StartDate:", startDate);
-        break;
       default:
         console.log("DATA:", data);
         return data;
@@ -978,13 +804,13 @@ const Dashboard = () => {
 
     if (Array.isArray(data)) {
       const filteredData = fillMissingDates(data, startDate, now);
-      console.log("DatefilteredData :", filteredData);
+      console.log("filteredData :", filteredData);
       return filteredData;
     } else {
       console.error("データが配列ではありません: ", data);
       return generateZeroData();
     }
-  }; //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>589
+  };
 
   const fillMissingDates = (data, startDate, endDate) => {
     const result = [];
@@ -1014,7 +840,6 @@ const Dashboard = () => {
         }
       );
     }
-
     return result;
   };
 
@@ -1036,8 +861,6 @@ const Dashboard = () => {
     setSelectedOption(e.target.value);
     const filteredData = filterDataByDateRange(chartData, e.target.value);
     setChartData(filteredData);
-    console.log("filteredData:", filteredData);
-    console.log("selectedOption:", e.target.value);
   };
 
   useEffect(() => {
@@ -1077,108 +900,10 @@ const Dashboard = () => {
     }
 
     setPreTotalData(totalPreDateData);
-    console.log("TOTAL DATA: ", totalPreDateData);
+    console.log("PRE TOTAL DATA: ", totalPreDateData);
   }, [dateRange]);
 
-  const preFilterDataByDateRange = (data, dateRange) => {
-    const now = new Date();
-    let previousStartDate, previousEndDate;
-
-    switch (dateRange) {
-      case "過去7日間":
-        previousStartDate = new Date(now);
-        previousStartDate.setDate(previousStartDate.getDate() - 14);
-        console.log("preStart:", previousStartDate);
-        previousEndDate = new Date(now);
-        previousEndDate.setDate(previousEndDate.getDate() - 7);
-        console.log("preEnd:", previousEndDate);
-        break;
-
-      case "過去28日間":
-        previousStartDate = new Date(now);
-        previousStartDate.setDate(previousStartDate.getDate() - 60);
-        console.log("preStart:", previousStartDate);
-        previousEndDate = new Date(now);
-        previousEndDate.setDate(previousEndDate.getDate() - 30);
-        console.log("preEnd:", previousEndDate);
-        break;
-
-      case "過去90日間":
-        previousStartDate = new Date(now);
-        previousStartDate.setDate(previousStartDate.getDate() - 180);
-        console.log("preStart:", previousStartDate);
-        previousEndDate = new Date(now);
-        previousEndDate.setDate(previousEndDate.getDate() - 90);
-        console.log("preEnd:", previousEndDate);
-        break;
-      case "先月":
-        previousStartDate = new Date(now.getFullYear(), now.getMonth() - 1, 1); // 先月の1日
-        previousEndDate = new Date(now.getFullYear(), now.getMonth(), 0); // 先月の最後の日
-        console.log("preStart:", previousStartDate);
-        console.log("preEnd:", previousEndDate);
-        break;
-      case "先々月":
-        previousStartDate = new Date(now.getFullYear(), now.getMonth() - 2, 1); // 先々月の1日
-        previousEndDate = new Date(now.getFullYear(), now.getMonth() - 1, 0); // 先々月の最後の日
-        console.log("preStart:", previousStartDate);
-        console.log("preEnd:", previousEndDate);
-        break;
-      case "1年間":
-        previousStartDate = new Date(
-          now.getFullYear() - 1,
-          now.getMonth(),
-          now.getDate()
-        ); // 1年前
-        previousEndDate = now; // 今日まで
-        console.log("preStart:", previousStartDate);
-        console.log("preEnd:", previousEndDate);
-        break;
-      //case "全期間":
-      //previousStartDate = parseDate(data[data.length - 1].date); // データの最古の日付
-      //break;
-
-      default:
-        console.log("PreDATA:", data);
-        return data;
-    }
-    if (Array.isArray(data)) {
-      const preFilteredData = fillMissingDates(
-        data,
-        previousStartDate,
-        previousEndDate
-      );
-      console.log("PreviousData :", preFilteredData);
-      return preFilteredData;
-    } else {
-      console.error("データが配列ではありません: ", data);
-      return generateZeroData();
-    }
-  }; //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>597
-
-  const calculateCurrentAndPreviousData = (filteredData, previousData) => {
-    let totalPV = 0,
-      totalCV = 0,
-      totalUU = 0,
-      prePV = 0,
-      preCV = 0,
-      preUU = 0;
-
-    // ループ処理でPV, CV, UUを集計
-    if (Array.isArray(filteredData)) {
-      filteredData.forEach((data) => {
-        totalPV += data.PV || 0;
-        totalCV += data.CV || 0;
-        totalUU += data.UU || 0;
-      });
-      previousData.forEach((data) => {
-        prePV += data.PV || 0;
-        preCV += data.CV || 0;
-        preUU += data.SS || 0;
-      });
-    }
-
-    console.log("PagePath:", pagePath);
-
+  useEffect(() => {
     const nowData = {
       PV: totalData[propertyId]?.[pagePath]?.PV || 0,
       CV: totalData[propertyId]?.[pagePath]?.CV || 0,
@@ -1220,19 +945,7 @@ const Dashboard = () => {
             : "0%", // 前月の UU が 0 の場合も "0%" を表示
       },
     ]);
-  };
-  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////ここまで基本消さない
-
-  useEffect(() => {
-    if (propertyId) {
-      console.log("PROID:", propertyId);
-      const data = dataByDay[propertyId]?.[sanitizedUrl] || [];
-      const filtered = filterDataByDateRange(data, dateRange); //>>>>>>>>>>>>>>>>>>>>>>>>>>>>-300
-      const prefiltered = preFilterDataByDateRange(data, dateRange); //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>603
-      setFilteredData(filtered); //>>>>>>>>>-300
-      calculateCurrentAndPreviousData(filtered, prefiltered); //>>>>>>>>>>>>>>>646
-    }
-  }, [url, pagePath, dateRange, totalData]);
+  }, [dateRange, totalData, pagePath]);
 
   const handleMetricChange = (metricTitle) => {
     setSelectedMetrics((prevSelectedMetrics) => {
@@ -1247,11 +960,11 @@ const Dashboard = () => {
   };
 
   const renderContent = () => {
-    if (!filteredData || filteredData.length === 0) {
-      return <div>No data</div>;
+    if (!chartData || chartData.length === 0) {
+      return <div>データがありません</div>;
     }
     if (selectedMetrics.length === 0) {
-      return <div>メトリクスを選択してください</div>;
+      return <div>閲覧したいデータを選択してください</div>;
     }
 
     const dataKeys = selectedMetrics
@@ -1271,16 +984,12 @@ const Dashboard = () => {
       })
       .filter((key) => key !== ""); // 空のキーを除外
 
-    //console.log("Data Keys:", dataKeys); // デバッグ用ログ
-    //console.log("ChartData:", chartData);
-
     return <LineChart data={chartData} dataKeys={dataKeys} />;
   };
 
   function getQuery(searchData, searchId) {
     const queryData = searchData[searchId]?.[pagePath]?.query;
     const viewData = searchData[searchId]?.[pagePath]?.impression;
-    //console.log("QueryData: ", queryData);
 
     if (!queryData) {
       return [];
@@ -1296,7 +1005,6 @@ const Dashboard = () => {
 
   function getSourceData(data, id) {
     const sourceData = data[id]?.[pagePath]?.source;
-    //console.log("SourceData:", sourceData);
 
     if (!sourceData) {
       return [];
@@ -1336,42 +1044,6 @@ const Dashboard = () => {
 
   const areaData = getAreaData(totalData, propertyId);
 
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null);
-  const buttonRef = useRef(null);
-
-  const toggleDropdown = () => {
-    setIsDropdownOpen((prevState) => !prevState);
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target) &&
-        !buttonRef.current.contains(event.target)
-      ) {
-        setIsDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  const handleKeyDown = (e) => {
-    e.preventDefault();
-    if (url) {
-      console.log("Submitted URL:", url);
-      // dashboardにURLをクエリパラメータとして渡してリダイレクト
-      router.push(`/dashboard?url=${encodeURIComponent(url)}`);
-    } else {
-      alert("URLを追加してください。");
-    }
-  };
-
   return (
     <div className="dashboard-container">
       <div>
@@ -1395,12 +1067,6 @@ const Dashboard = () => {
             value={selectedUrl}
             onChange={(selectedOption) => {
               handleUrlChange(selectedOption);
-              const foundPropertyId = findPropertyIdByUrl(selectedOption.value);
-              if (foundPropertyId) {
-                setPropertyId(foundPropertyId);
-              } else {
-                console.error("該当するプロパティIDが見つかりませんs");
-              }
             }}
             options={urlOptions}
             placeholder={
@@ -1411,44 +1077,6 @@ const Dashboard = () => {
             }
             onCreateOption={handleUrl}
           />
-          {/*設定ボタン
-            <Button
-            variant="ghost"
-            startIcon={<Settings className="Icon" />}
-            className="header-button"
-            ref={buttonRef}
-            onClick={toggleDropdown}
-          >
-            <span className="sr-only"></span>
-          </Button>*/}
-          {isDropdownOpen && (
-            <div className="header-dropdown-menu">
-              <Button
-                variant="ghost"
-                onClick={() => router.push("/dashboard")}
-                className="menu-button"
-              >
-                <UserRoundPen className="icon" />
-                <div className="icon-text">プロフィール</div>
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={() => router.push("/setting/addAccount")}
-                className="menu-button"
-              >
-                <Mail className="icon" />
-                <div className="icon-text">アカウント追加</div>
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={() => router.push("/setting/logout")}
-                className="menu-button"
-              >
-                <LogOut className="icon" />
-                <div className="icon-text">ログアウト</div>
-              </Button>
-            </div>
-          )}
         </div>
       </header>
       <main className="dashboard-main">
@@ -1488,16 +1116,6 @@ const Dashboard = () => {
                 カスタム
               </ToggleButton>
             </ToggleButtonGroup>
-            {/*
-            <Select
-              className="custom-select"
-              styles={customStyles}
-              value={selectedOption}
-              onChange={handleDateRangeChange}
-              options={options}
-              placeholder="データ範囲選択"
-            />
-            */}
           </div>
         </div>
         <div className="dashboard-top">
@@ -1534,14 +1152,6 @@ const Dashboard = () => {
                   </div>
                 </CardContent>
               </Card>
-              {/*<div className="dashboard-details">
-                <button
-                  onClick={() => handelButtonClick(propertyId)}
-                  className="details-button"
-                >
-                  詳細
-                </button>
-              </div>*/}
             </div>
           </div>
           <div className="dashboard-top-right">
@@ -1584,7 +1194,7 @@ const Dashboard = () => {
             </div>
             <div className="bottom-chart">
               <PieChart data={SampleData} />
-              {/*
+              {/*/////////////////////////////////////////////////////////////////////////////要変更
               <PieChart data={deviceData} />
               */}
             </div>
@@ -1615,7 +1225,6 @@ const Dashboard = () => {
           <ChatComponent />
         </div>
       </main>
-      {/*<Sidebar className="sidebar" />*/}
     </div>
   );
 };

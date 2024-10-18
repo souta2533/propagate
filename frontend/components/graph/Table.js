@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import MUIDataTable from "mui-datatables";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import "../../styles/components/sourceTable.css";
 
 const getMuiTheme = () =>
   createTheme({
@@ -164,7 +163,7 @@ const Table = ({ data }) => {
     sort: true,
     pagination: false,
     fixedHeader: true,
-    fixedSelectColumn: true, 
+    fixedSelectColumn: true,
     tableBodyMaxHeight: tableHeight, // 動的に高さを設定
     textLabels: {
       body: {

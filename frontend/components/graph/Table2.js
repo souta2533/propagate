@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import MUIDataTable from "mui-datatables";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import "../../styles/components/sourceTable.css";
 import "../../styles/components/Table2.css";
 
 const getMuiTheme = () =>
@@ -145,7 +144,7 @@ const Table2 = ({ data }) => {
               ></div>
             </div>
           </div>
-        ),        
+        ),
         setCellProps: () => ({
           style: {
             width: "80%",
