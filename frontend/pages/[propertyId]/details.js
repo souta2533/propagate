@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+{
+  /*import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useSessionData } from "../../hooks/useSessionData";
@@ -606,7 +607,7 @@ export default function Details() {
             subtitle="上位7項目"
             className="Percentage-graph"
           />
-          <Table2 data={country} dataKey="流入者属性" />*/}
+          <Table2 data={country} dataKey="流入者属性" />
         </div>
       ); // 流入者属性
     } else if (selectedMetric === "RU") {
@@ -812,7 +813,6 @@ export default function Details() {
 const aggregatedResult = aggregateDevicesByDate(filteredData);
 console.log(JSON.stringify(aggregatedResult, null, 2));
 */
-
   /*
   const aggregateData = (data) => {
     const countryAggregation = {};
@@ -862,7 +862,7 @@ console.log(JSON.stringify(aggregatedResult, null, 2));
       queryAggregation,
       cityAggregation,
     };
-  };*/
+  };
 
   return (
     <div className="container">
@@ -980,4 +980,6 @@ console.log(JSON.stringify(aggregatedResult, null, 2));
       </div>
     </div>
   );
+}
+*/
 }

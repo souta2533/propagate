@@ -1,4 +1,5 @@
-import React from "react";
+{
+  /*import React from "react";
 import { useState } from "react";
 import { useRouter } from "next/router";
 import Button from "@mui/material/Button";
@@ -59,4 +60,5 @@ const addAccount = () => {
     </div>
   );
 };
-export default addAccount;
+export default addAccount;*/
+}

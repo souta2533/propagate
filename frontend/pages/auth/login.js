@@ -35,12 +35,9 @@ export default function Login() {
       alert("ログインに失敗しました。");
     } else {
       localStorage.setItem("supabaseSession", JSON.stringify(data.session));
-      const property = data.session.user.user_metadata.property;
-      const pagePath = "/";
 
       router.push({
         pathname: "/dashboard",
-        //  query: { property },
       });
     }
 

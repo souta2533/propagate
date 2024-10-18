@@ -409,6 +409,7 @@ const Dashboard = () => {
     propertyIds,
     searchConsoleError,
     searchConsoleLoading,
+    fetchedSearchConsoleData,
     refetchSearchConsoleData,
   ]);
 
@@ -439,7 +440,7 @@ const Dashboard = () => {
     } else {
       console.log("Data By Day is empty");
     }
-  }, [fetchedDataByDay]);
+  }, [fetchedDataByDay, dataByDayError, dataByDayLoading, refetchDataByDay]);
 
   // 集計データを取得
   const {
@@ -468,7 +469,15 @@ const Dashboard = () => {
       setAggregatedData(fetchedAggregatedData);
       setTotalData(fetchedAggregatedData);
     }
-  }, [aggregatedError, aggregatedLoading, refetchAggregatedData]);
+  }, [
+    session,
+    propertyIds,
+    startDate,
+    endDate,
+    aggregatedError,
+    aggregatedLoading,
+    refetchAggregatedData,
+  ]);
 
   // 集計データを取得
   const {
