@@ -116,15 +116,6 @@ const styles2 = {
 };
 
 const Dashboard = () => {
-  // PieChartのサンプルデータ
-  const SampleData = [
-    ["desktop", 500],
-    ["mobile", 300],
-    ["tablet", 150],
-    ["smart tv", 50],
-    ["other device", 20],
-  ];
-
   // サンプルメトリクスデータ
   const sampleMetrics = [
     {
@@ -429,83 +420,6 @@ const Dashboard = () => {
 
   // 集計データを取得
   const {
-    data: fetchedAggregatedData7,
-    error: aggregatedError7,
-    isLoading: aggregatedLoading7,
-    refetch: refetchAggregatedData7,
-  } = useAggregatedData7(session, propertyIds, startDate7, endDate);
-
-  useEffect(() => {
-    if (
-      !session ||
-      !propertyIds.length ||
-      !startDate7 ||
-      !endDate ||
-      aggregatedLoading7
-    )
-      return; // session, propertyIds, startDate
-    if (aggregatedError7) {
-      console.error("Error fetching aggregated data:", aggregatedError7);
-      refetchAggregatedData7(session, propertyIds, startDate7, endDate); // エラー時にリフェッチ
-    }
-
-    if (fetchedAggregatedData7) {
-      console.log("Aggregated Data7: ", fetchedAggregatedData7);
-      if (!hasRunAgg7) {
-        setAggregatedData7(fetchedAggregatedData7);
-        setHasRunAgg7(true);
-      }
-    }
-    console.log("deback");
-  }, [
-    session,
-    propertyIds,
-    startDate7,
-    endDate,
-    aggregatedError7,
-    aggregatedLoading7,
-    refetchAggregatedData7,
-  ]);
-
-  // 集計データを取得
-  const {
-    data: fetchedAggregatedData90,
-    error: aggregatedError90,
-    isLoading: aggregatedLoading90,
-    refetch: refetchAggregatedData90,
-  } = useAggregatedData90(session, propertyIds, startDate90, endDate);
-
-  useEffect(() => {
-    if (
-      !session ||
-      !propertyIds.length ||
-      !startDate90 ||
-      !endDate ||
-      aggregatedLoading90
-    )
-      return; // session, propertyIds, startDate
-    if (aggregatedError90) {
-      console.error("Error fetching aggregated data:", aggregatedError90);
-      refetchAggregatedData90(session, propertyIds, startDate90, endDate); // エラー時にリフェッチ
-    }
-
-    if (fetchedAggregatedData90 && !hasRunAgg90) {
-      console.log("Aggregated Data90: ", fetchedAggregatedData90);
-      setAggregatedData90(fetchedAggregatedData90);
-      setHasRunAgg90(true);
-    }
-  }, [
-    session,
-    propertyIds,
-    startDate90,
-    endDate,
-    aggregatedError90,
-    aggregatedLoading90,
-    refetchAggregatedData90,
-  ]);
-
-  // 集計データを取得
-  const {
     data: fetchedPreAggregatedData,
     error: preAggregatedError,
     isLoading: preAggregatedLoading,
@@ -540,95 +454,6 @@ const Dashboard = () => {
     preAggregatedError,
     preAggregatedLoading,
     refetchPreAggregatedData,
-  ]);
-
-  // 集計データを取得
-  const {
-    data: fetchedPreAggregatedData7,
-    error: preAggregatedError7,
-    isLoading: preAggregatedLoading7,
-    refetch: refetchPreAggregatedData7,
-  } = usePreAggregatedData7(session, propertyIds, preStartDate7, preEndDate7);
-
-  useEffect(() => {
-    if (
-      !session ||
-      !propertyIds.length ||
-      !preStartDate7 ||
-      !preEndDate7 ||
-      preAggregatedLoading7
-    )
-      return; // session, propertyIds, startDate
-    if (preAggregatedError7) {
-      console.error("Error fetching aggregated data:", preAggregatedError7);
-      refetchPreAggregatedData7(
-        session,
-        propertyIds,
-        preStartDate7,
-        preEndDate7
-      ); // エラー時にリフェッチ
-    }
-
-    if (fetchedPreAggregatedData7 && !hasRunPreAgg7) {
-      console.log("PreAggregated Data7: ", fetchedPreAggregatedData7);
-      setPreAggregatedData7(fetchedPreAggregatedData7);
-      setHasRunPreAgg7(true);
-    }
-  }, [
-    session,
-    propertyIds,
-    preStartDate7,
-    preEndDate7,
-    preAggregatedError7,
-    preAggregatedLoading7,
-    refetchPreAggregatedData7,
-  ]);
-
-  // 集計データを取得
-  const {
-    data: fetchedPreAggregatedData90,
-    error: preAggregatedError90,
-    isLoading: preAggregatedLoading90,
-    refetch: refetchPreAggregatedData90,
-  } = usePreAggregatedData90(
-    session,
-    propertyIds,
-    preStartDate90,
-    preEndDate90
-  );
-
-  useEffect(() => {
-    if (
-      !session ||
-      !propertyIds.length ||
-      !preStartDate90 ||
-      !preEndDate90 ||
-      preAggregatedLoading90
-    )
-      return; // session, propertyIds, startDate
-    if (preAggregatedError90) {
-      console.error("Error fetching aggregated data:", preAggregatedError90);
-      refetchPreAggregatedData90(
-        session,
-        propertyIds,
-        preStartDate90,
-        preEndDate90
-      ); // エラー時にリフェッチ
-    }
-
-    if (fetchedPreAggregatedData90 && !hasRunPreAgg90) {
-      console.log("PreAggregated Data90: ", fetchedPreAggregatedData90);
-      setPreAggregatedData90(fetchedPreAggregatedData90);
-      setHasRunPreAgg90(true);
-    }
-  }, [
-    session,
-    propertyIds,
-    preStartDate90,
-    preEndDate90,
-    preAggregatedError90,
-    preAggregatedLoading90,
-    refetchPreAggregatedData90,
   ]);
 
   // Analyticsデータの処理
@@ -779,6 +604,172 @@ const Dashboard = () => {
   }
 
   const areaData = getAreaData(totalData, propertyId);
+
+  // 集計データを取得
+  const {
+    data: fetchedAggregatedData7,
+    error: aggregatedError7,
+    isLoading: aggregatedLoading7,
+    refetch: refetchAggregatedData7,
+  } = useAggregatedData7(session, propertyIds, startDate7, endDate);
+
+  useEffect(() => {
+    if (
+      !session ||
+      !propertyIds.length ||
+      !startDate7 ||
+      !endDate ||
+      aggregatedLoading7
+    )
+      return; // session, propertyIds, startDate
+    if (aggregatedError7) {
+      console.error("Error fetching aggregated data:", aggregatedError7);
+      refetchAggregatedData7(session, propertyIds, startDate7, endDate); // エラー時にリフェッチ
+    }
+
+    if (fetchedAggregatedData7) {
+      console.log("Aggregated Data7: ", fetchedAggregatedData7);
+      if (!hasRunAgg7) {
+        setAggregatedData7(fetchedAggregatedData7);
+        setHasRunAgg7(true);
+      }
+    }
+    console.log("deback");
+  }, [
+    session,
+    propertyIds,
+    startDate7,
+    endDate,
+    aggregatedError7,
+    aggregatedLoading7,
+    refetchAggregatedData7,
+  ]);
+
+  // 集計データを取得
+  const {
+    data: fetchedAggregatedData90,
+    error: aggregatedError90,
+    isLoading: aggregatedLoading90,
+    refetch: refetchAggregatedData90,
+  } = useAggregatedData90(session, propertyIds, startDate90, endDate);
+
+  useEffect(() => {
+    if (
+      !session ||
+      !propertyIds.length ||
+      !startDate90 ||
+      !endDate ||
+      aggregatedLoading90
+    )
+      return; // session, propertyIds, startDate
+    if (aggregatedError90) {
+      console.error("Error fetching aggregated data:", aggregatedError90);
+      refetchAggregatedData90(session, propertyIds, startDate90, endDate); // エラー時にリフェッチ
+    }
+
+    if (fetchedAggregatedData90 && !hasRunAgg90) {
+      console.log("Aggregated Data90: ", fetchedAggregatedData90);
+      setAggregatedData90(fetchedAggregatedData90);
+      setHasRunAgg90(true);
+    }
+  }, [
+    session,
+    propertyIds,
+    startDate90,
+    endDate,
+    aggregatedError90,
+    aggregatedLoading90,
+    refetchAggregatedData90,
+  ]);
+
+  // 集計データを取得
+  const {
+    data: fetchedPreAggregatedData7,
+    error: preAggregatedError7,
+    isLoading: preAggregatedLoading7,
+    refetch: refetchPreAggregatedData7,
+  } = usePreAggregatedData7(session, propertyIds, preStartDate7, preEndDate7);
+
+  useEffect(() => {
+    if (
+      !session ||
+      !propertyIds.length ||
+      !preStartDate7 ||
+      !preEndDate7 ||
+      preAggregatedLoading7
+    )
+      return; // session, propertyIds, startDate
+    if (preAggregatedError7) {
+      console.error("Error fetching aggregated data:", preAggregatedError7);
+      refetchPreAggregatedData7(
+        session,
+        propertyIds,
+        preStartDate7,
+        preEndDate7
+      ); // エラー時にリフェッチ
+    }
+
+    if (fetchedPreAggregatedData7 && !hasRunPreAgg7) {
+      console.log("PreAggregated Data7: ", fetchedPreAggregatedData7);
+      setPreAggregatedData7(fetchedPreAggregatedData7);
+      setHasRunPreAgg7(true);
+    }
+  }, [
+    session,
+    propertyIds,
+    preStartDate7,
+    preEndDate7,
+    preAggregatedError7,
+    preAggregatedLoading7,
+    refetchPreAggregatedData7,
+  ]);
+
+  // 集計データを取得
+  const {
+    data: fetchedPreAggregatedData90,
+    error: preAggregatedError90,
+    isLoading: preAggregatedLoading90,
+    refetch: refetchPreAggregatedData90,
+  } = usePreAggregatedData90(
+    session,
+    propertyIds,
+    preStartDate90,
+    preEndDate90
+  );
+
+  useEffect(() => {
+    if (
+      !session ||
+      !propertyIds.length ||
+      !preStartDate90 ||
+      !preEndDate90 ||
+      preAggregatedLoading90
+    )
+      return; // session, propertyIds, startDate
+    if (preAggregatedError90) {
+      console.error("Error fetching aggregated data:", preAggregatedError90);
+      refetchPreAggregatedData90(
+        session,
+        propertyIds,
+        preStartDate90,
+        preEndDate90
+      ); // エラー時にリフェッチ
+    }
+
+    if (fetchedPreAggregatedData90 && !hasRunPreAgg90) {
+      console.log("PreAggregated Data90: ", fetchedPreAggregatedData90);
+      setPreAggregatedData90(fetchedPreAggregatedData90);
+      setHasRunPreAgg90(true);
+    }
+  }, [
+    session,
+    propertyIds,
+    preStartDate90,
+    preEndDate90,
+    preAggregatedError90,
+    preAggregatedLoading90,
+    refetchPreAggregatedData90,
+  ]);
 
   // LLMからの解析結果を取得
   const {
@@ -1111,9 +1102,9 @@ const Dashboard = () => {
               <ToggleButton value="過去90日間" aria-label="過去90日間">
                 過去90日間
               </ToggleButton>
-              <ToggleButton value="カスタム" aria-label="カスタム">
+              {/*<ToggleButton value="カスタム" aria-label="カスタム">
                 カスタム
-              </ToggleButton>
+              </ToggleButton>*/}
             </ToggleButtonGroup>
           </div>
         </div>
@@ -1184,18 +1175,24 @@ const Dashboard = () => {
           </div>
         </div>
         <div className="dashboard-bottom">
+          <div className="dashboard-bottom-right">
+            <div className="bottom-content-text">
+              <p className="bottom-title"></p>
+              <p className="bottom-subtitle">
+                Webサイトにアクセスしたユーザ情報
+              </p>
+            </div>
+            <div className="bottom-chart"></div>
+          </div>
           <div className="dashboard-bottom-left">
             <div className="bottom-content-text">
-              <p className="bottom-title">ディバイス</p>
+              <p className="bottom-title">流入元端末</p>
               <p className="bottom-subtitle">
                 ユーザーがWebサイトにアクセスする際に使用した機器の割合
               </p>
             </div>
             <div className="bottom-chart">
-              <PieChart data={SampleData} />
-              {/*/////////////////////////////////////////////////////////////////////////////要変更
               <PieChart data={deviceData} />
-              */}
             </div>
           </div>
           <div className="dashboard-bottom-center">
@@ -1208,15 +1205,6 @@ const Dashboard = () => {
             <div className="bottom-graph">
               <PercentageTable data={areaData} className="Percentage-graph" />
             </div>
-          </div>
-          <div className="dashboard-bottom-right">
-            <div className="bottom-content-text">
-              <p className="bottom-title">性別・男女</p>
-              <p className="bottom-subtitle">
-                Webサイトにアクセスしたユーザ情報
-              </p>
-            </div>
-            <div className="bottom-chart"></div>
           </div>
         </div>
 

@@ -248,6 +248,8 @@ def data_by_date(analytics_data, search_console_data, url_depth=1):
                 data_by_date[base_url][date]['country'] = get_top_n(data['country'])
             if 'query' in data:
                 data_by_date[base_url][date]['query'] = get_top_n(data['query']['click'])
+            if 'query' in data:
+                data_by_date[base_url][date]['query'] = get_top_n(data['query']['impression'])
     
     # 日付をキーに持つ構造から、base_url 内に date フィールドを含む形式に変換
     transformed_data = transform_data_by_date(data_by_date)

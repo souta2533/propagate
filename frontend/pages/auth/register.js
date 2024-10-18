@@ -11,7 +11,18 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [userId, setUserId] = useState(null);
   const router = useRouter();
+
+  // URLの形式を検証する関数
+  const isValidUrl = (string) => {
+    try {
+      const url = new URL(string);
+      return url.protocol === "http:" || url.protocol === "https:";
+    } catch (_) {
+      return false;
+    }
+  };
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -33,7 +44,7 @@ const Register = () => {
       setPassword("");
 
       // 登録したユーザー情報をバックエンドに送信(auth.uid(user.id))
-      const userId = data.user.id;
+      setUserId(data.user.id);
       const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
       const response = await fetch(`${apiUrl}/register-user`, {
         method: "POST",
@@ -50,13 +61,46 @@ const Register = () => {
         console.error("Failed to register user on the backend");
         return;
       }
-
-      // 登録後にダッシュボードへリダイレクト
-      router.push("/dashboard");
+      //正常に登録されたらURL追加画面に遷移する
+      setShowUrlRegister(true);
     }
   };
 
-  const handleUrlRegister = () => {};
+  const handleUrlRegister = async (event) => {
+    event.preventDefault();
+
+    // URL形式が正しいかどうかの検証
+    if (!isValidUrl(url)) {
+      alert("有効なURLを入力してください");
+      return;
+    }
+
+    if (!url) {
+      alert("登録するURLを入力してください");
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.from("PropertyTable").insert([
+        {
+          url: url,
+          user_id: userId,
+        },
+      ]);
+
+      if (error) {
+        console.log("Error inserting URL:", error);
+        alert("URL登録中にエラーが発生しました。:");
+      } else {
+        console.log("データが正常に挿入されました:", data);
+        alert("URLが正常に追加されました。");
+        router.push("/dashboard");
+      }
+    } catch (error) {
+      console.error("Exception occurred while inserting data:", error);
+      return;
+    }
+  };
 
   return (
     <div
@@ -96,11 +140,7 @@ const Register = () => {
                 required
               />
             </div>
-            <button
-              type="button"
-              className="register-button"
-              onClick={() => setShowUrlRegister(true)}
-            >
+            <button type="submit" className="register-button">
               新規登録
             </button>
           </form>
