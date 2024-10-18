@@ -708,8 +708,7 @@ const Dashboard = () => {
       pagePathList &&
       Array.isArray(pagePathList) &&
       pagePathList.length > 0 &&
-      preAggregatedData &&
-      areaData
+      preAggregatedData
     ) {
       const shortestUrl = pagePathList.reduce((shortest, current) => {
         return current.length < shortest.length ? current : shortest;
@@ -723,6 +722,63 @@ const Dashboard = () => {
       console.warn("pagePathOptions is empty or undefined");
     }
   };
+
+  function getQuery(searchData, searchId) {
+    const queryData = searchData[searchId]?.[pagePath]?.query;
+    const viewData = searchData[searchId]?.[pagePath]?.impression;
+
+    if (!queryData) {
+      return [];
+    }
+
+    const topQueries = Object.entries(queryData).sort((a, b) => b[1] - a[1]);
+    //console.log("TopQuery:", topQueries);
+    const Queries = topQueries.map((item) => [item[0], item[1], viewData]);
+    return Queries;
+  }
+
+  const topQueries = getQuery(totalData, propertyId);
+
+  function getSourceData(data, id) {
+    const sourceData = data[id]?.[pagePath]?.source;
+
+    if (!sourceData) {
+      return [];
+    }
+
+    const sortedEntries = Object.entries(sourceData).sort(
+      (a, b) => b[1] - a[1]
+    );
+    return sortedEntries;
+  }
+
+  const sourceData = getSourceData(totalData, propertyId);
+
+  function getDeviceData(data, id) {
+    const deviceData = data[id]?.[pagePath]?.device_category;
+    if (!deviceData) {
+      return [];
+    }
+
+    const sortedEntries = Object.entries(deviceData).sort(
+      (a, b) => b[1] - a[1]
+    );
+    return sortedEntries;
+  }
+
+  const deviceData = getDeviceData(totalData, propertyId);
+
+  function getAreaData(data, id) {
+    const areaData = data[id]?.[pagePath]?.city;
+    if (!areaData) {
+      return [];
+    }
+
+    const sortedEntries = Object.entries(areaData).sort((a, b) => b[1] - a[1]);
+    return sortedEntries;
+  }
+
+  const areaData = getAreaData(totalData, propertyId);
 
   // LLMからの解析結果を取得
   const {
@@ -986,63 +1042,6 @@ const Dashboard = () => {
 
     return <LineChart data={chartData} dataKeys={dataKeys} />;
   };
-
-  function getQuery(searchData, searchId) {
-    const queryData = searchData[searchId]?.[pagePath]?.query;
-    const viewData = searchData[searchId]?.[pagePath]?.impression;
-
-    if (!queryData) {
-      return [];
-    }
-
-    const topQueries = Object.entries(queryData).sort((a, b) => b[1] - a[1]);
-    //console.log("TopQuery:", topQueries);
-    const Queries = topQueries.map((item) => [item[0], item[1], viewData]);
-    return Queries;
-  }
-
-  const topQueries = getQuery(totalData, propertyId);
-
-  function getSourceData(data, id) {
-    const sourceData = data[id]?.[pagePath]?.source;
-
-    if (!sourceData) {
-      return [];
-    }
-
-    const sortedEntries = Object.entries(sourceData).sort(
-      (a, b) => b[1] - a[1]
-    );
-    return sortedEntries;
-  }
-
-  const sourceData = getSourceData(totalData, propertyId);
-
-  function getDeviceData(data, id) {
-    const deviceData = data[id]?.[pagePath]?.device_category;
-    if (!deviceData) {
-      return [];
-    }
-
-    const sortedEntries = Object.entries(deviceData).sort(
-      (a, b) => b[1] - a[1]
-    );
-    return sortedEntries;
-  }
-
-  const deviceData = getDeviceData(totalData, propertyId);
-
-  function getAreaData(data, id) {
-    const areaData = data[id]?.[pagePath]?.city;
-    if (!areaData) {
-      return [];
-    }
-
-    const sortedEntries = Object.entries(areaData).sort((a, b) => b[1] - a[1]);
-    return sortedEntries;
-  }
-
-  const areaData = getAreaData(totalData, propertyId);
 
   return (
     <div className="dashboard-container">
